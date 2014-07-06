@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file
+ * Main Key Drupal project file.
+ *
+ * This file holds the main Drupal hook functions,
+ * and API functions.
+ *
+ * @ingroup key
+ */
+
+/**
+ * @defgroup key Key: Provides an API for key storage and use
+ *
+ * Provides an API for two-way transfer of key using methods
+ * such as key->get_key() and key->set_key().
+ */
+
+define('KEY_MENU_PATH', 'admin/config/system/key');
+
+/**
+ * Implements hook_menu().
+ */
+function key_menu() {
+  $items = array();
+
+  $items[KEY_MENU_PATH] = array(
+    'title' => 'Key',
+    'description' => 'Manage key configurations.',
+    'page callback' => 'key_list',
+    'access arguments' => array('administer key'),
+    'file' => 'includes/key.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items[KEY_MENU_PATH . '/list'] = array(
+    'title' => 'List keys',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items[KEY_MENU_PATH . '/add'] = array(
+    'title' => 'Add key',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('key_config_form'),
+    'access arguments' => array('administer key'),
+    'file' => 'includes/key.admin.inc',
+    'type' => MENU_LOCAL_ACTION,
+  );
+  $items[KEY_MENU_PATH . '/edit/%key'] = array(
+    'title' => 'Edit key',
+    'title callback' => 'key_config_edit_title',
+    'title arguments' => array(5),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('key_config_form', 5),
+    'access arguments' => array('administer key'),
+    'file' => 'includes/key.admin.inc',
+  );
+//  $items[KEY_MENU_PATH . '/delete/%key'] = array(
+//    'title' => 'Delete key',
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => array('key_config_delete_confirm', 5),
+//    'access arguments' => array('administer key'),
+//    'file' => 'includes/key.admin.inc',
+//  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function key_permission() {
+  return array(
+    'administer key' => array(
+      'title' => t('Administer key settings'),
+      'description' => 'Change key settings (does not let them view key data).'
+    ),
+  );
+}
+
+
+/**
+ * Title callback for configuration edit page.
+ */
+function key_config_edit_title($config) {
+  return $config['label'];
+}

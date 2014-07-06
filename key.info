@@ -1,1 +1,6 @@
 name = Key
+description = Key module allows for storage and use of api keys.
+core = 7.x
+configure = admin/config/system/key
+
+dependencies[] = ctools
