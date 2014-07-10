@@ -38,30 +38,6 @@ function key_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  $items[KEY_MENU_PATH . '/add'] = array(
-    'title' => 'Add key',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('key_config_form'),
-    'access arguments' => array('administer key'),
-    'file' => 'includes/key.admin.inc',
-    'type' => MENU_LOCAL_ACTION,
-  );
-  $items[KEY_MENU_PATH . '/edit/%key'] = array(
-    'title' => 'Edit key',
-    'title callback' => 'key_config_edit_title',
-    'title arguments' => array(5),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('key_config_form', 5),
-    'access arguments' => array('administer key'),
-    'file' => 'includes/key.admin.inc',
-  );
-//  $items[KEY_MENU_PATH . '/delete/%key'] = array(
-//    'title' => 'Delete key',
-//    'page callback' => 'drupal_get_form',
-//    'page arguments' => array('key_config_delete_confirm', 5),
-//    'access arguments' => array('administer key'),
-//    'file' => 'includes/key.admin.inc',
-//  );
 
   return $items;
 }
@@ -84,4 +60,132 @@ function key_permission() {
  */
 function key_config_edit_title($config) {
   return $config['label'];
+}
+
+/**
+ * Implements hook_ctools_plugin_type().
+ *
+ * Tell ctools about our plugin types.
+ */
+function key_ctools_plugin_type() {
+  $plugins = array();
+  $plugins['key_providers'] = array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'process' => '_key_plugin_process',
+    'defaults' => array(
+      'title' => '',
+      'description' => '',
+      'key callback' => NULL,
+      'dependency callback' => NULL,
+      'dependency errors' => NULL,
+      'settings form' => NULL,
+    ),
+  );
+
+  return $plugins;
+}
+
+/**
+ * Fetch metadata on a specific key provider plugin.
+ *
+ * @param mixed $provider
+ *   Name of a key provider method. If no $provider is specified, this function
+ *   will return info about the default key provider.
+ *
+ * @return array
+ *   An array with information about the requested key provider.
+ */
+function key_get_key_provider($provider = NULL) {
+  // @TODO: Should provide the default key if none are provided.
+  if (empty($provider)) {
+    return;
+  }
+  ctools_include('plugins');
+  return ctools_get_plugins('key', 'key_providers', $provider);
+}
+
+/**
+ * Returns info for all encryption key providers.
+ *
+ * @param boolean $all
+ *   A flag indicating whether to include plugins with unmet dependencies.
+ *
+ * @param boolean $reset
+ *   A flag indicating whether to clear the plugin cache. Otherwise, this
+ *   function may return stale data if plugin properties have changed.
+ *
+ * @return array
+ *   An array of arrays with information about all available key providers.
+ */
+function key_get_key_providers($all = TRUE, $reset = FALSE) {
+  if ($reset) {
+    _key_clear_plugin_cache('key_providers');
+  }
+
+  ctools_include('plugins');
+  $providers = ctools_get_plugins('key', 'key_providers');
+
+  return $all ? $providers : array_filter($providers, '_key_plugin_is_valid');
+}
+
+/**
+ * Get the key from a key provider.
+ *
+ * @param mixed $provider
+ *   The key provider to retrieve the key for. Can be either the fully-loaded
+ *   provider (from encrypt_get_key_provider() or the name of the provider. If
+ *   NULL, it assumes the default key provider.
+ *
+ * @return string
+ *   The key.
+ */
+function key_get_key_from_key_provider($provider = NULL, $provider_settings = array()) {
+  if (!is_array($provider)) {
+    $provider = key_get_key_provider($provider);
+  }
+  $key_function = ctools_plugin_get_function($provider, 'key callback');
+  $key = call_user_func($key_function, $provider_settings);
+  return $key;
+}
+
+/**
+ * Additional processing for plugins.
+ */
+function _key_plugin_process(&$plugin, $info) {
+  // Calculate dependencies and attach any errors.
+  if ($plugin['dependency callback'] && $dep_function = ctools_plugin_get_function($plugin, 'dependency callback')) {
+    $plugin['dependency errors'] = call_user_func($dep_function);
+  }
+}
+
+/**
+ * Helper function to determine if a plugin has unmet dependencies. Most
+ * helpful in conjunction with array_filter().
+ *
+ * @param $plugin array
+ *   The plugin to check.
+ *
+ * @return boolean
+ *   Whether or not the plugin is valid (has no unmet dependencies).
+ */
+function _key_plugin_is_valid($plugin) {
+  if (isset($plugin['dependency errors']) && !empty($plugin['dependency errors'])) {
+    return FALSE;
+  }
+  else {
+    return TRUE;
+  }
+}
+
+/**
+ * Helper function to clear key plugin caches.
+ */
+function _key_clear_plugin_cache($type = NULL) {
+  if ($type) {
+    cache_clear_all("plugins:key:$type", 'cache');
+  }
+  else {
+    cache_clear_all('plugins:key:', 'cache', TRUE);
+  }
 }
