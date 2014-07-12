@@ -19,28 +19,6 @@
 
 define('KEY_MENU_PATH', 'admin/config/system/key');
 
-/**
- * Implements hook_menu().
- */
-function key_menu() {
-  $items = array();
-
-  $items[KEY_MENU_PATH] = array(
-    'title' => 'Key',
-    'description' => 'Manage key configurations.',
-    'page callback' => 'key_list',
-    'access arguments' => array('administer key'),
-    'file' => 'includes/key.admin.inc',
-    'type' => MENU_NORMAL_ITEM,
-  );
-  $items[KEY_MENU_PATH . '/list'] = array(
-    'title' => 'List keys',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
-
-  return $items;
-}
 
 /**
  * Implements hook_permission().
@@ -52,14 +30,6 @@ function key_permission() {
       'description' => 'Change key settings (does not let them view key data).'
     ),
   );
-}
-
-
-/**
- * Title callback for configuration edit page.
- */
-function key_config_edit_title($config) {
-  return $config['label'];
 }
 
 /**
@@ -97,7 +67,6 @@ function key_ctools_plugin_type() {
  *   An array with information about the requested key provider.
  */
 function key_get_key_provider($provider = NULL) {
-  // @TODO: Should provide the default key if none are provided.
   if (empty($provider)) {
     return;
   }
