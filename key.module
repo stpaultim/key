@@ -17,9 +17,6 @@
  * such as key->get_key() and key->set_key().
  */
 
-define('KEY_MENU_PATH', 'admin/config/system/key');
-
-
 /**
  * Implements hook_permission().
  */

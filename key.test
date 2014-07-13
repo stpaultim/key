@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Tests for key.module
+ */
+
+/**
+ *  Test to see if we can retrieve a key.
+ */
+class KeyTest extends DrupalWebTestCase {
+  protected $big_user;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Basic key retrieval test.',
+      'description' => 'Test to make sure an the module can return a key provider.',
+      'group' => 'Key',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('key');
+    $this->big_user = $this->drupalCreateUser(array('administer themes'));
+  }
+
+  /**
+   * Ensure that a key provider is returned.
+   */
+  function testGetKeyProvider() {
+    $this->drupalLogin($this->big_user);
+    // Get a key.
+    $key = key_get_key_provider('drupal_private_key');
+    $this->assertTrue(isset($key), t('The key provider key exists.'));
+  }
+}
