@@ -44,14 +44,21 @@ function key_menu() {
 
 function key_list() {
   $keys = key_get_key_providers(TRUE, TRUE);
-  dpm($keys);
-  return $keys;
+  $key_list = array();
+  foreach ($keys as $key_name => $key_value) {
+    $key_list[$key_name] = $key_value['title'];
+  }
+
+  dpm($key_list);
+
+  return $key_list;
 }
 
 function key_get($keyname) {
-  $key = key_get_key_provider($keyname);
+  $key_provider = key_get_key_provider($keyname);
 //  $key =drupal_get_private_key();
-  dpm($keyname);
+  $key = key_get_key_from_key_provider($key_provider);
+
   return $key;
 }
 
@@ -65,6 +72,19 @@ function key_permission() {
       'description' => 'Change key settings (does not let them view key data).'
     ),
   );
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ *
+ * It simply tells panels where to find the .inc files that define various
+ * args, contexts, content_types. In this case the subdirectories of
+ * ctools_plugin_example/panels are used.
+ */
+function key_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'key' && !empty($plugin)) {
+    return "plugins/$plugin";
+  }
 }
 
 /**
@@ -106,15 +126,12 @@ function key_get_key_provider($provider = NULL) {
     watchdog_array('Key', 'Provider was not provided.', $provider);
     return FALSE;
   }
-  $key = key_get_key_from_key_provider($provider);
-dpm($key);
-  return $key;
+
   ctools_include('plugins');
   $return = ctools_get_plugins('key', 'key_providers', $provider);
   watchdog_array('Key', 'key', $return);
+  dpm($return);
   return $return;
-
-
 }
 
 /**
@@ -154,11 +171,11 @@ function key_get_key_providers($all = TRUE, $reset = FALSE) {
  */
 function key_get_key_from_key_provider($provider = NULL, $provider_settings = array()) {
 //  if (!is_array($provider)) {
-//    $provider = key_get_key_provider($provider);
+//    $provider = encrypt_get_key_provider($provider);
 //  }
   $key_function = ctools_plugin_get_function($provider, 'key callback');
-  dpm($key_function);
   $key = call_user_func($key_function, $provider_settings);
+  dpm('The key is: ' .$key);
   return $key;
 }
 
