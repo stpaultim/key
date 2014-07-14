@@ -18,11 +18,49 @@
  */
 
 /**
+ * Implements hook_menu().
+ * @TODO: This is just for testing, remove when committing.
+ */
+function key_menu() {
+  $items = array();
+
+  $items['key/list'] = array(
+    'title' => 'List of keys',
+    'description' => 'List keys.',
+    'page callback' => 'key_list',
+    'access arguments' => array('administer keys'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['key/get/%'] = array(
+    'title' => 'Get key',
+    'description' => 'Get keys.',
+    'page callback' => 'key_get',
+    'page arguments' => array(2),
+    'access arguments' => array('administer keys'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+function key_list() {
+  $keys = key_get_key_providers(TRUE, TRUE);
+  dpm($keys);
+  return $keys;
+}
+
+function key_get($keyname) {
+  $key = key_get_key_provider($keyname);
+//  $key =drupal_get_private_key();
+  dpm($keyname);
+  return $key;
+}
+
+/**
  * Implements hook_permission().
  */
 function key_permission() {
   return array(
-    'administer key' => array(
+    'administer keys' => array(
       'title' => t('Administer key settings'),
       'description' => 'Change key settings (does not let them view key data).'
     ),
@@ -65,10 +103,18 @@ function key_ctools_plugin_type() {
  */
 function key_get_key_provider($provider = NULL) {
   if (empty($provider)) {
-    return;
+    watchdog_array('Key', 'Provider was not provided.', $provider);
+    return FALSE;
   }
+  $key = key_get_key_from_key_provider($provider);
+dpm($key);
+  return $key;
   ctools_include('plugins');
-  return ctools_get_plugins('key', 'key_providers', $provider);
+  $return = ctools_get_plugins('key', 'key_providers', $provider);
+  watchdog_array('Key', 'key', $return);
+  return $return;
+
+
 }
 
 /**
@@ -91,7 +137,7 @@ function key_get_key_providers($all = TRUE, $reset = FALSE) {
 
   ctools_include('plugins');
   $providers = ctools_get_plugins('key', 'key_providers');
-
+  watchdog_array('Key', 'providers list', $providers);
   return $all ? $providers : array_filter($providers, '_key_plugin_is_valid');
 }
 
@@ -107,10 +153,11 @@ function key_get_key_providers($all = TRUE, $reset = FALSE) {
  *   The key.
  */
 function key_get_key_from_key_provider($provider = NULL, $provider_settings = array()) {
-  if (!is_array($provider)) {
-    $provider = key_get_key_provider($provider);
-  }
+//  if (!is_array($provider)) {
+//    $provider = key_get_key_provider($provider);
+//  }
   $key_function = ctools_plugin_get_function($provider, 'key callback');
+  dpm($key_function);
   $key = call_user_func($key_function, $provider_settings);
   return $key;
 }

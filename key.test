@@ -33,4 +33,14 @@ class KeyTest extends DrupalWebTestCase {
     $key = key_get_key_provider('drupal_private_key');
     $this->assertTrue(isset($key), t('The key provider key exists.'));
   }
+
+  /**
+   * Ensure that a list of key providers is returned.
+   */
+  function testGetKeyProviders() {
+    $this->drupalLogin($this->big_user);
+    // Get a list of keys.
+    $keys = key_get_key_providers();
+    $this->assertTrue(isset($keys), t('The key provider key list exists.'));
+  }
 }
