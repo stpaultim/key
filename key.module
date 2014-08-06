@@ -28,7 +28,7 @@ function key_menu() {
     'title' => 'List of keys',
     'description' => 'List keys.',
     'page callback' => 'key_list',
-    'access arguments' => array('administer keys'),
+    'access arguments' => array('administer site configuration'),
     'type' => MENU_NORMAL_ITEM,
   );
   $items['key/get/%'] = array(
@@ -36,7 +36,7 @@ function key_menu() {
     'description' => 'Get keys.',
     'page callback' => 'key_get',
     'page arguments' => array(2),
-    'access arguments' => array('administer keys'),
+    'access arguments' => array('administer site configuration'),
     'type' => MENU_NORMAL_ITEM,
   );
   return $items;
@@ -60,18 +60,6 @@ function key_get($keyname) {
   $key = key_get_key_from_key_provider($key_provider);
 
   return $key;
-}
-
-/**
- * Implements hook_permission().
- */
-function key_permission() {
-  return array(
-    'administer keys' => array(
-      'title' => t('Administer key settings'),
-      'description' => 'Change key settings (does not let them view key data).'
-    ),
-  );
 }
 
 /**
