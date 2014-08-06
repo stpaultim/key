@@ -141,6 +141,7 @@ function key_get_key_providers($all = TRUE, $reset = FALSE) {
   ctools_include('plugins');
   $providers = ctools_get_plugins('key', 'key_providers');
   watchdog('Key', 'providers list', $providers);
+
   return $all ? $providers : array_filter($providers, '_key_plugin_is_valid');
 }
 
@@ -156,12 +157,12 @@ function key_get_key_providers($all = TRUE, $reset = FALSE) {
  *   The key.
  */
 function key_get_key_from_key_provider($provider = NULL, $provider_settings = array()) {
-//  if (!is_array($provider)) {
-//    $provider = encrypt_get_key_provider($provider);
-//  }
+  if (!is_array($provider)) {
+    $provider = encrypt_get_key_provider($provider);
+  }
   $key_function = ctools_plugin_get_function($provider, 'key callback');
   $key = call_user_func($key_function, $provider_settings);
-  dpm('The key is: ' .$key);
+
   return $key;
 }
 
