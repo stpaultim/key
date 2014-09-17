@@ -1,0 +1,78 @@
+<?php
+
+/**
+ * @file
+ * Key Provider File sub module Drupal project file.
+ *
+ * This file holds the ctools functions.
+ *
+ * @ingroup key
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ *
+ * Tell ctools where to find plugins for this module.
+ */
+function key_provider_file_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'key_provider_file' && !empty($plugin)) {
+    return "plugins/$plugin";
+  }
+}
+
+
+/**
+ * Implements hook_ctools_plugin_type().
+ *
+ * Tell ctools about our plugin types.
+ */
+function key_provider_file_ctools_plugin_type() {
+  $plugins = array();
+
+  $plugins['key_providers'] = array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'process' => '_key_provider_file_plugin_process',
+    'defaults' => array(
+      'title' => '',
+      'description' => '',
+      'key callback' => NULL,
+      'dependency callback' => NULL,
+      'dependency errors' => NULL,
+      'settings form' => NULL,
+    ),
+  );
+
+  return $plugins;
+}
+
+/**
+ * Additional processing for plugins.
+ */
+function _key_provider_file_plugin_process(&$plugin, $info) {
+  // Calculate dependencies and attach any errors.
+  if ($plugin['dependency callback'] && $dep_function = ctools_plugin_get_function($plugin, 'dependency callback')) {
+    $plugin['dependency errors'] = call_user_func($dep_function);
+  }
+}
+
+
+/**
+ * Helper function to determine if a plugin has unmet dependencies. 
+ * 
+ * Most helpful in conjunction with array_filter().
+ *
+ * @param array $plugin
+ *   The plugin to check.
+ *
+ * @return bool
+ *   Whether or not the plugin is valid (has no unmet dependencies).
+ */
+function _key_provider_file_plugin_is_valid($plugin) {
+  if (isset($plugin['dependency errors']) && !empty($plugin['dependency errors'])) {
+    return FALSE;
+  }
+  else {
+    return TRUE;
+  }
+}
