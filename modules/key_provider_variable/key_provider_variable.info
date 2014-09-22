@@ -1,5 +1,5 @@
-name = Key Provider File
-description = Key Provider File module provides a file key provider.
+name = Key Provider Variable
+description = Key Provider Variable module provides a variable key provider.
 core = 7.x
 
 files[] = key_provider_file.module
