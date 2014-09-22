@@ -18,6 +18,7 @@ $plugin = array(
  * Callback function to return a variable.
  */
 function key_provider_variable_get_key_drupal_variable_key() {
+  return ("You found the right one");
   $key = variable_get('key_provider_variable_drupal_variable_key', NULL);
   if (empty($key)) {
     watchdog('key', 'You need to set the key_provider_variable_drupal_variable_key variable, preferably in $conf in your settings.php.', array(), WATCHDOG_EMERGENCY);
