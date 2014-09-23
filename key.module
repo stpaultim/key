@@ -38,13 +38,6 @@ function key_menu() {
     'access arguments' => array('administer site configuration'),
     'type' => MENU_NORMAL_ITEM,
   );
-  $items['key/provider/list'] = array(
-    'title' => 'List of key providers',
-    'description' => 'List key providers.',
-    'page callback' => 'key_get_all_key_provider_plugin_modules_list',
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM,
-  );
   return $items;
 }
 
@@ -55,8 +48,6 @@ function key_list() {
     $key_list[$key_name] = $key_value['title'];
   }
 
-  $info = array();
-
   dpm($key_list);
 
   return $key_list;
@@ -66,7 +57,6 @@ function key_get($keyname) {
   $key_provider = key_get_key_provider($keyname);
 //  $key =drupal_get_private_key();
   $key = key_get_key_from_key_provider($key_provider);
-
 
   return $key;
 }
@@ -215,29 +205,4 @@ function _key_clear_plugin_cache($type = NULL) {
   else {
     cache_clear_all('plugins:key:', 'cache', TRUE);
   }
-}
-
-/**
- * Provides a formatted list of modules that implement a key_provider ctools plugin for development.
- */
-function key_get_all_key_provider_plugin_modules_list() {
-  $providers = key_get_all_key_provider_plugin_modules();
-  $result = '<ul><li>' . implode("</li><li>", $providers) . '</li></ul>';
-
-  return $result;
-}
-
-/**
- * Provides an array of names of modules that implement a key_provider ctools plugin.
- */
-function key_get_all_key_provider_plugin_modules() {
-  ctools_include('plugins');
-  $all_info = ctools_plugin_get_plugin_type_info();
-  $key_provider_modules = array();
-  foreach ($all_info as $module => $plugin) {
-    if (!empty($plugin['key_providers'])) {
-      $key_provider_modules[] = $module;
-    }
-  }
-  return $key_provider_modules;
 }
