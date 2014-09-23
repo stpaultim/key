@@ -98,6 +98,72 @@ function key_ctools_plugin_type() {
 }
 
 /**
+ * Implements hook_element_info().
+ */
+function key_element_info() {
+  $elements['key'] = array(
+    '#default_value' => '',
+    '#input' => TRUE,
+    '#process' => array('key_element_process'),
+    '#value_callback' => 'key_element_value',
+    '#element_validate' => array(''),
+    '#theme' => array(''),
+    '#theme_wrappers' => array('form_element'),
+    '#title_display' => 'invisible',
+    '#tree' => TRUE,
+  );
+
+  return $elements;
+}
+
+/**
+ * Process callback function for key element.
+ */
+function key_element_process($element, $form_state, $complete_form) {
+  $element['key']['key'] = array(
+    '#type' => 'textfield',
+    '#size' => 50,
+    '#required' => $element['#required'],
+    '#title' => $element['#title'],
+    '#theme_wrappers' => array('form_element'),
+  );
+
+  if (isset($element['#default_value']['key']['key'])) {
+    $element['key']['key']['#default_value'] = $element['#default_value']['key']['key'];
+  }
+
+  $element['key']['provider'] = array(
+    '#type' => 'select',
+    '#empty_option' => '',
+    '#options' => array(
+      'variable' => 'Variable',
+      'file' => 'File',
+    ),
+    '#required' => $element['#required'],
+    '#title' => t('Key provider'),
+    '#theme_wrappers' => array('form_element'),
+  );
+
+  if (isset($element['#default_value']['key']['provider'])) {
+    $element['key']['provider']['#default_value'] = $element['#default_value']['key']['provider'];
+  }
+
+  return $element;
+}
+
+/**
+ * Value callback for key element.
+ */
+function key_element_value($element, $input = FALSE, &$form_state) {
+}
+
+/**
+ * Validate callback for key element.
+ */
+function key_element_validate($element, &$form_state) {
+}
+
+/**
  * Fetch metadata on a specific key provider plugin.
  *
  * @param mixed $provider
