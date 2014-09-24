@@ -120,9 +120,7 @@ function key_element_info() {
  * Process callback function for key element.
  */
 function key_element_process($element, $form_state, $complete_form) {
-
   $providers = key_get_key_providers();
-  dpm($providers);
   $provider_options = array();
 
   if (!empty($providers)) {
@@ -138,7 +136,7 @@ function key_element_process($element, $form_state, $complete_form) {
     '#suffix' => '</div>',
   );
 
-  $element['key']['key'] = array(
+  $element['key'] = array(
     '#type' => 'textfield',
     '#size' => 50,
     '#required' => $element['#required'],
@@ -146,11 +144,11 @@ function key_element_process($element, $form_state, $complete_form) {
     '#theme_wrappers' => array('form_element'),
   );
 
-  if (isset($element['#default_value']['key']['key'])) {
-    $element['key']['key']['#default_value'] = $element['#default_value']['key']['key'];
+  if (isset($element['#default_value']['key'])) {
+    $element['key']['#default_value'] = $element['#default_value']['key'];
   }
 
-  $element['key']['provider'] = array(
+  $element['provider'] = array(
     '#type' => 'select',
     '#empty_option' => '',
     '#options' => $provider_options,
@@ -164,8 +162,8 @@ function key_element_process($element, $form_state, $complete_form) {
     ),
   );
 
-  if (isset($element['#default_value']['key']['provider'])) {
-    $element['key']['provider']['#default_value'] = $element['#default_value']['key']['provider'];
+  if (isset($element['#default_value']['provider'])) {
+    $element['provider']['#default_value'] = $element['#default_value']['provider'];
   }
 
   return $element;
@@ -183,6 +181,7 @@ function key_key_providers_additional_settings_ajax($form, $form_state) {
  * Value callback for key element.
  */
 function key_element_value($element, $input = FALSE, &$form_state) {
+
 }
 
 /**
