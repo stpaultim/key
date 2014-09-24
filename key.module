@@ -106,7 +106,7 @@ function key_element_info() {
     '#input' => TRUE,
     '#process' => array('key_element_process'),
     '#value_callback' => 'key_element_value',
-//    '#element_validate' => array(''),
+    '#element_validate' => array(),
     '#theme' => array(''),
     '#theme_wrappers' => array('form_element'),
     '#title_display' => 'invisible',
@@ -122,19 +122,13 @@ function key_element_info() {
 function key_element_process($element, $form_state, $complete_form) {
   $providers = key_get_key_providers();
   $provider_options = array();
+  $field_name = $element['#name'];
 
   if (!empty($providers)) {
     foreach($providers as $name => $provider) {
       $provider_options[$name] = $provider['title'];
     }
   }
-
-
-  $element['provider_settings']['key_settings_wrapper'] = array(
-    '#type' => 'container',
-    '#prefix' => '<div id="key-key-providers-additional-settings"><h1>GOES HERE!</h1>',
-    '#suffix' => '</div>',
-  );
 
   $element['key'] = array(
     '#type' => 'textfield',
@@ -157,13 +151,41 @@ function key_element_process($element, $form_state, $complete_form) {
     '#theme_wrappers' => array('form_element'),
     '#ajax' => array(
       'method' => 'replace',
-      'callback' => 'key_key_providers_additional_settings_ajax',
-      'wrapper' => 'key-key-providers-additional-settings',
+      'callback' => 'key_provider_additional_settings_ajax',
+      'wrapper' => 'key-provider-additional-settings',
     ),
   );
 
   if (isset($element['#default_value']['provider'])) {
     $element['provider']['#default_value'] = $element['#default_value']['provider'];
+  }
+
+  $element['provider_settings_wrapper'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div id="key-provider-additional-settings">',
+    '#suffix' => '</div>',
+  );
+
+  if (isset($form_state['values'][$field_name]['provider'])) {
+    $provider = $form_state['values'][$field_name]['provider'];
+  }
+  elseif (isset($element['#default_value']['provider'])) {
+    $provider = $element['#default_value']['provider'];
+  }
+  else {
+    $provider = NULL;
+  }
+
+  if ($provider) {
+    if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'settings form')) {
+      $element['provider_settings_wrapper']['provider_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Additional Key Provider Settings'),
+        '#tree' => TRUE,
+      );
+
+      $element['provider_settings_wrapper']['provider_settings'] += call_user_func($provider_settings_form);
+    }
   }
 
   return $element;
@@ -173,8 +195,8 @@ function key_element_process($element, $form_state, $complete_form) {
 /**
  * Callback for AJAX form re-rendering.
  */
-function key_key_providers_additional_settings_ajax($form, $form_state) {
-  return $form['provider_settings']['key_settings_wrapper'];
+function key_provider_additional_settings_ajax($form, $form_state) {
+  return $form['provider_settings_wrapper'];
 }
 
 /**
