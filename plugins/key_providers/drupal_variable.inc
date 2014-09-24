@@ -6,7 +6,7 @@
  */
 
 $plugin = array(
-  'title' => t('Drupal key_drupal_variable_key variable'),
+  'title' => t('Drupal variable'),
   'description' => t('Use a variable called key_drupal_variable_key, preferably set in your settings.php $conf array.'),
   'key callback' => 'key_get_key_drupal_variable_key',
   'settings form' => NULL,

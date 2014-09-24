@@ -106,7 +106,7 @@ function key_element_info() {
     '#input' => TRUE,
     '#process' => array('key_element_process'),
     '#value_callback' => 'key_element_value',
-    '#element_validate' => array(''),
+//    '#element_validate' => array(''),
     '#theme' => array(''),
     '#theme_wrappers' => array('form_element'),
     '#title_display' => 'invisible',
@@ -120,6 +120,24 @@ function key_element_info() {
  * Process callback function for key element.
  */
 function key_element_process($element, $form_state, $complete_form) {
+
+  $providers = key_get_key_providers();
+  dpm($providers);
+  $provider_options = array();
+
+  if (!empty($providers)) {
+    foreach($providers as $name => $provider) {
+      $provider_options[$name] = $provider['title'];
+    }
+  }
+
+
+  $element['provider_settings']['key_settings_wrapper'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div id="key-key-providers-additional-settings"><h1>GOES HERE!</h1>',
+    '#suffix' => '</div>',
+  );
+
   $element['key']['key'] = array(
     '#type' => 'textfield',
     '#size' => 50,
@@ -135,13 +153,15 @@ function key_element_process($element, $form_state, $complete_form) {
   $element['key']['provider'] = array(
     '#type' => 'select',
     '#empty_option' => '',
-    '#options' => array(
-      'variable' => 'Variable',
-      'file' => 'File',
-    ),
+    '#options' => $provider_options,
     '#required' => $element['#required'],
     '#title' => t('Key provider'),
     '#theme_wrappers' => array('form_element'),
+    '#ajax' => array(
+      'method' => 'replace',
+      'callback' => 'key_key_providers_additional_settings_ajax',
+      'wrapper' => 'key-key-providers-additional-settings',
+    ),
   );
 
   if (isset($element['#default_value']['key']['provider'])) {
@@ -149,6 +169,14 @@ function key_element_process($element, $form_state, $complete_form) {
   }
 
   return $element;
+}
+
+
+/**
+ * Callback for AJAX form re-rendering.
+ */
+function key_key_providers_additional_settings_ajax($form, $form_state) {
+  return $form['provider_settings']['key_settings_wrapper'];
 }
 
 /**
