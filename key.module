@@ -120,7 +120,7 @@ function key_element_info() {
  * Process callback function for key element.
  */
 function key_element_process($element, $form_state, $complete_form) {
-  $element['key']['key'] = array(
+  $element['key'] = array(
     '#type' => 'textfield',
     '#size' => 50,
     '#required' => $element['#required'],
@@ -128,11 +128,11 @@ function key_element_process($element, $form_state, $complete_form) {
     '#theme_wrappers' => array('form_element'),
   );
 
-  if (isset($element['#default_value']['key']['key'])) {
-    $element['key']['key']['#default_value'] = $element['#default_value']['key']['key'];
+  if (isset($element['#default_value']['key'])) {
+    $element['key']['#default_value'] = $element['#default_value']['key'];
   }
 
-  $element['key']['provider'] = array(
+  $element['provider'] = array(
     '#type' => 'select',
     '#empty_option' => '',
     '#options' => array(
@@ -144,8 +144,8 @@ function key_element_process($element, $form_state, $complete_form) {
     '#theme_wrappers' => array('form_element'),
   );
 
-  if (isset($element['#default_value']['key']['provider'])) {
-    $element['key']['provider']['#default_value'] = $element['#default_value']['key']['provider'];
+  if (isset($element['#default_value']['provider'])) {
+    $element['provider']['#default_value'] = $element['#default_value']['provider'];
   }
 
   return $element;
@@ -155,6 +155,7 @@ function key_element_process($element, $form_state, $complete_form) {
  * Value callback for key element.
  */
 function key_element_value($element, $input = FALSE, &$form_state) {
+
 }
 
 /**
