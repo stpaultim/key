@@ -153,6 +153,7 @@ function key_element_process($element, $form_state, $complete_form) {
       'method' => 'replace',
       'callback' => 'key_provider_additional_settings_ajax',
       'wrapper' => 'key-provider-additional-settings',
+      'effect' => 'slide',
     ),
   );
 
