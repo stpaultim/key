@@ -188,12 +188,16 @@ function key_element_process($element, $form_state, $complete_form) {
   return $element;
 }
 
-
 /**
  * Callback for AJAX form re-rendering.
  */
 function key_provider_additional_settings_ajax($form, $form_state) {
-  return $form['key_devel_settings']['key_devel_key']['provider_settings_wrapper'];
+  $parents = $form_state['triggering_element']['#parents'];
+  array_pop($parents);
+  array_push($parents, 'provider_settings_wrapper');
+  $wrapper = drupal_array_get_nested_value($form, $parents);
+
+  return $wrapper;
 }
 
 /**
