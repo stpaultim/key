@@ -166,11 +166,8 @@ function key_element_process($element, $form_state, $complete_form) {
     '#suffix' => '</div>',
   );
 
-  if (isset($form_state['values'][$field_name]['provider'])) {
-    $provider = $form_state['values'][$field_name]['provider'];
-  }
-  elseif (isset($element['#default_value']['provider'])) {
-    $provider = $element['#default_value']['provider'];
+  if (isset($element['#value']['provider'])) {
+    $provider = $element['#value']['provider'];
   }
   else {
     $provider = NULL;
@@ -196,7 +193,7 @@ function key_element_process($element, $form_state, $complete_form) {
  * Callback for AJAX form re-rendering.
  */
 function key_provider_additional_settings_ajax($form, $form_state) {
-  return $form['provider_settings_wrapper'];
+  return $form['key_devel_settings']['key_devel_key']['provider_settings_wrapper'];
 }
 
 /**
