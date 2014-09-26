@@ -123,6 +123,7 @@ function key_element_process($element, $form_state, $complete_form) {
   $providers = key_get_key_providers();
   $provider_options = array();
   $field_name = $element['#name'];
+  $wrapper_id = str_replace('_', '-', $field_name) . '-wrapper';
 
   if (!empty($providers)) {
     foreach($providers as $name => $provider) {
@@ -133,7 +134,7 @@ function key_element_process($element, $form_state, $complete_form) {
   $element['key_field'] = array(
     '#type' => 'container',
     '#tree' => TRUE,
-    '#prefix' => '<div id="key-field-wrapper">',
+    '#prefix' => '<div id="' . $wrapper_id . '">',
     '#suffix' => '</div>',
   );
 
@@ -158,7 +159,7 @@ function key_element_process($element, $form_state, $complete_form) {
     '#ajax' => array(
       'method' => 'replace',
       'callback' => 'key_provider_additional_settings_ajax',
-      'wrapper' => 'key-field-wrapper',
+      'wrapper' => $wrapper_id,
     ),
   );
 
