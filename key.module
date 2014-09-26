@@ -185,7 +185,13 @@ function key_element_process($element, $form_state, $complete_form) {
         '#tree' => TRUE,
       );
 
-      $element['key_field']['provider_settings'] += call_user_func($provider_settings_form);
+      if (isset($element['#default_value']['key_field']['provider_settings'])) {
+        $provider_settings_defaults = $element['#default_value']['key_field']['provider_settings'];
+      }
+      else {
+        $provider_settings_defaults = array();
+      }
+      $element['key_field']['provider_settings'] += call_user_func($provider_settings_form, $provider_settings_defaults);
     }
   }
 

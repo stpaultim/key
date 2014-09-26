@@ -19,7 +19,7 @@ function key_get_drupal_private_key() {
   return drupal_get_private_key();
 }
 
-function key_drupal_private_key_settings_form() {
+function key_drupal_private_key_settings_form($defaults) {
   $form = array();
 
   $form['field_one'] = array(
