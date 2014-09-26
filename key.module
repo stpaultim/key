@@ -165,6 +165,9 @@ function key_element_process($element, $form_state, $complete_form) {
   if (isset($element['#default_value']['key_field']['provider'])) {
     $element['key_field']['provider']['#default_value'] = $element['#default_value']['key_field']['provider'];
   }
+  elseif (array_key_exists('drupal_variable', $provider_options)) {
+    $element['key_field']['provider']['#default_value'] = 'drupal_variable';
+  }
 
   if (isset($element['#value']['key_field']['provider'])) {
     $provider = $element['#value']['key_field']['provider'];
