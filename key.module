@@ -119,11 +119,15 @@ function key_element_info() {
 /**
  * Process callback function for key element.
  */
-function key_element_process($element, $form_state, $complete_form) {
+function key_element_process(&$element, $form_state, $complete_form) {
+  $field_name = $element['#array_parents'][count($element['#array_parents']) - 1];
+  $wrapper_id = str_replace('_', '-', $field_name) . '-wrapper';
+
+  $element['#prefix'] = '<div id="' . $wrapper_id . '">';
+  $element['#suffix'] = '</div>';
+
   $providers = key_get_key_providers();
   $provider_options = array();
-  $field_name = $element['#name'];
-  $wrapper_id = str_replace('_', '-', $field_name) . '-wrapper';
 
   if (!empty($providers)) {
     foreach($providers as $name => $provider) {
@@ -131,14 +135,7 @@ function key_element_process($element, $form_state, $complete_form) {
     }
   }
 
-  $element['key_field'] = array(
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#prefix' => '<div id="' . $wrapper_id . '">',
-    '#suffix' => '</div>',
-  );
-
-  $element['key_field']['key'] = array(
+  $element['key'] = array(
     '#type' => 'textfield',
     '#size' => 50,
     '#required' => $element['#required'],
@@ -146,11 +143,11 @@ function key_element_process($element, $form_state, $complete_form) {
     '#theme_wrappers' => array('form_element'),
   );
 
-  if (isset($element['#default_value']['key_field']['key'])) {
-    $element['key_field']['key']['#default_value'] = $element['#default_value']['key_field']['key'];
+  if (isset($element['#default_value']['key'])) {
+    $element['key']['#default_value'] = $element['#default_value']['key'];
   }
 
-  $element['key_field']['provider'] = array(
+  $element['provider'] = array(
     '#type' => 'select',
     '#options' => $provider_options,
     '#required' => $element['#required'],
@@ -163,15 +160,15 @@ function key_element_process($element, $form_state, $complete_form) {
     ),
   );
 
-  if (isset($element['#default_value']['key_field']['provider'])) {
-    $element['key_field']['provider']['#default_value'] = $element['#default_value']['key_field']['provider'];
+  if (isset($element['#default_value']['provider'])) {
+    $element['provider']['#default_value'] = $element['#default_value']['provider'];
   }
   elseif (array_key_exists('drupal_variable', $provider_options)) {
-    $element['key_field']['provider']['#default_value'] = 'drupal_variable';
+    $element['provider']['#default_value'] = 'drupal_variable';
   }
 
-  if (isset($element['#value']['key_field']['provider'])) {
-    $provider = $element['#value']['key_field']['provider'];
+  if (isset($element['#value']['provider'])) {
+    $provider = $element['#value']['provider'];
   }
   else {
     $provider = NULL;
@@ -179,19 +176,19 @@ function key_element_process($element, $form_state, $complete_form) {
 
   if ($provider) {
     if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'settings form')) {
-      $element['key_field']['provider_settings'] = array(
+      $element['provider_settings'] = array(
         '#type' => 'fieldset',
         '#title' => t('Additional Key Provider Settings'),
         '#tree' => TRUE,
       );
 
-      if (isset($element['#default_value']['key_field']['provider_settings'])) {
-        $provider_settings_defaults = $element['#default_value']['key_field']['provider_settings'];
+      if (isset($element['#default_value']['provider_settings'])) {
+        $provider_settings_defaults = $element['#default_value']['provider_settings'];
       }
       else {
         $provider_settings_defaults = array();
       }
-      $element['key_field']['provider_settings'] += call_user_func($provider_settings_form, $provider_settings_defaults);
+      $element['provider_settings'] += call_user_func($provider_settings_form, $provider_settings_defaults);
     }
   }
 
@@ -203,7 +200,10 @@ function key_element_process($element, $form_state, $complete_form) {
  */
 function key_provider_additional_settings_ajax($form, $form_state) {
   $parents = $form_state['triggering_element']['#array_parents'];
-  array_pop($parents);
+  $last_parent = array_pop($parents);
+  if ($last_parent != 'provider') {
+    array_push($parents, $last_parent);
+  }
   $wrapper = drupal_array_get_nested_value($form, $parents);
 
   return $wrapper;
