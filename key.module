@@ -106,8 +106,7 @@ function key_element_info() {
     '#input' => TRUE,
     '#process' => array('key_element_process'),
     '#value_callback' => 'key_element_value',
-    '#element_validate' => array(),
-    '#theme' => array(''),
+    '#element_validate' => array('key_element_element_validate'),
     '#theme_wrappers' => array('form_element'),
     '#title_display' => 'invisible',
     '#tree' => TRUE,
@@ -138,7 +137,7 @@ function key_element_process(&$element, $form_state, $complete_form) {
   $element['key'] = array(
     '#type' => 'textfield',
     '#size' => 50,
-    '#required' => $element['#required'],
+    '#required' => FALSE,
     '#title' => $element['#title'],
     '#theme_wrappers' => array('form_element'),
   );
@@ -199,11 +198,7 @@ function key_element_process(&$element, $form_state, $complete_form) {
  * Callback for AJAX form re-rendering.
  */
 function key_provider_additional_settings_ajax($form, $form_state) {
-  $parents = $form_state['triggering_element']['#array_parents'];
-  $last_parent = array_pop($parents);
-  if ($last_parent != 'provider') {
-    array_push($parents, $last_parent);
-  }
+  $parents = _key_element_parents_cleanup($form_state['triggering_element']['#array_parents'], 'provider');
   $wrapper = drupal_array_get_nested_value($form, $parents);
 
   return $wrapper;
@@ -213,13 +208,16 @@ function key_provider_additional_settings_ajax($form, $form_state) {
  * Value callback for key element.
  */
 function key_element_value($element, $input = FALSE, &$form_state) {
-
 }
 
 /**
- * Validate callback for key element.
+ * Element validate callback for key element.
  */
-function key_element_validate($element, &$form_state) {
+function key_element_element_validate(&$element, &$form_state) {
+  $parents = $element['#array_parents'];
+
+  // Remove the key, so it doesn't get saved with the rest of the input.
+  _key_remove_nested_array_element($form_state['values'], $parents, 'key');
 }
 
 /**
@@ -330,4 +328,31 @@ function _key_clear_plugin_cache($type = NULL) {
   else {
     cache_clear_all('plugins:key:', 'cache', TRUE);
   }
+}
+
+/**
+ * Helper function to clean up a parents array.
+ */
+function _key_element_parents_cleanup($parents, $remove_last) {
+  $last_parent_index = count($parents) - 1;
+  foreach ((array) $remove_last as $remove_last_element) {
+    if ($parents[$last_parent_index] == $remove_last_element) {
+      unset($parents[$last_parent_index]);
+    }
+  }
+
+  return $parents;
+}
+
+/**
+ * Helper function to remove an arbitrarily-nested array element.
+ */
+function _key_remove_nested_array_element(&$array, $parents, $element) {
+  $ref = &$array;
+  foreach ($parents as $parent) {
+    if (is_array($ref) && array_key_exists($parent, $ref)) {
+      $ref = &$ref[$parent];
+    }
+  }
+  unset($ref[$element]);
 }
