@@ -108,7 +108,6 @@ function key_element_info() {
     '#value_callback' => 'key_element_value',
     '#element_validate' => array('key_element_element_validate'),
     '#theme_wrappers' => array('form_element'),
-    '#title_display' => 'invisible',
     '#tree' => TRUE,
   );
 
@@ -138,7 +137,7 @@ function key_element_process(&$element, $form_state, $complete_form) {
     '#type' => 'textfield',
     '#size' => 50,
     '#required' => FALSE,
-    '#title' => $element['#title'],
+    '#title' => t('Key'),
     '#theme_wrappers' => array('form_element'),
   );
 
@@ -150,7 +149,7 @@ function key_element_process(&$element, $form_state, $complete_form) {
     '#type' => 'select',
     '#options' => $provider_options,
     '#required' => $element['#required'],
-    '#title' => t('Key provider'),
+    '#title' => t('Storage method'),
     '#theme_wrappers' => array('form_element'),
     '#ajax' => array(
       'method' => 'replace',
@@ -161,8 +160,6 @@ function key_element_process(&$element, $form_state, $complete_form) {
 
   if (isset($element['#default_value']['provider'])) {
     $provider = $element['#default_value']['provider'];
-    $element['provider']['#default_value'] = $provider;
-    $element['key']['#default_value'] = key_get_key_from_key_provider($provider);
   }
   elseif (array_key_exists('drupal_variable', $provider_options)) {
     $element['provider']['#default_value'] = 'drupal_variable';
@@ -176,11 +173,17 @@ function key_element_process(&$element, $form_state, $complete_form) {
   }
 
   if ($provider) {
+    $element['provider']['#default_value'] = $provider;
+    $provider_settings = (isset($element['#default_value']['provider_settings'])) ? $element['#default_value']['provider_settings'] : array();
+    $element['key']['#default_value'] = key_get_key_from_key_provider($provider, $provider_settings);
+
     if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'settings form')) {
       $element['provider_settings'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Additional Key Provider Settings'),
+        '#title' => t('Storage method settings'),
         '#tree' => TRUE,
+        '#collapsible' => TRUE,
+        '#collapsed' => FALSE,
       );
 
       if (isset($element['#default_value']['provider_settings'])) {
@@ -265,7 +268,6 @@ function key_get_key_providers($all = TRUE, $reset = FALSE) {
 
   ctools_include('plugins');
   $providers = ctools_get_plugins('key', 'key_providers');
-  watchdog('Key', 'providers list', $providers);
 
   return $all ? $providers : array_filter($providers, '_key_plugin_is_valid');
 }
