@@ -27,7 +27,6 @@ function key_drupal_private_key_settings_form($defaults) {
     '#title' => t('A miscellaneous text file!'),
     '#description' => t('This is some different description text so we can work with this stuff.'),
     '#default_value' => isset($defaults['field_one']) ? $defaults['field_one'] : '',
-//    '#element_validate' => array('encrypt_file_key_path_validate'),
     '#required' => TRUE,
   );
   $form['field_two'] = array(
