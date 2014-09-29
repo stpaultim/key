@@ -184,7 +184,7 @@ function key_get_key_provider($provider = NULL) {
 }
 
 /**
- * Returns info for all encryption key providers.
+ * Returns info for all key providers.
  *
  * @param boolean $all
  *   A flag indicating whether to include plugins with unmet dependencies.
@@ -212,7 +212,7 @@ function key_get_key_providers($all = TRUE, $reset = FALSE) {
  *
  * @param mixed $provider
  *   The key provider to retrieve the key for. Can be either the fully-loaded
- *   provider (from encrypt_get_key_provider() or the name of the provider. If
+ *   provider (from key_get_key_provider() or the name of the provider. If
  *   NULL, it assumes the default key provider.
  *
  * @return string
@@ -220,7 +220,7 @@ function key_get_key_providers($all = TRUE, $reset = FALSE) {
  */
 function key_get_key_from_key_provider($provider = NULL, $provider_settings = array()) {
   if (!is_array($provider)) {
-    $provider = encrypt_get_key_provider($provider);
+    $provider = key_get_key_provider($provider);
   }
   $key_function = ctools_plugin_get_function($provider, 'key callback');
   $key = call_user_func($key_function, $provider_settings);
