@@ -16,43 +16,6 @@
  * Provides an API for defining and using key providers.
  */
 
-/**
- * Implements hook_menu().
- * @TODO: This is just for testing, remove when committing.
- */
-function key_menu() {
-  $items = array();
-
-  $items['key/list'] = array(
-    'title' => 'List of keys',
-    'description' => 'List keys.',
-    'page callback' => 'key_list',
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM,
-  );
-  $items['key/get/%'] = array(
-    'title' => 'Get key',
-    'description' => 'Get keys.',
-    'page callback' => 'key_get',
-    'page arguments' => array(2),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM,
-  );
-  return $items;
-}
-
-function key_list() {
-  $keys = key_get_key_providers(TRUE, TRUE);
-  $key_list = array();
-  foreach ($keys as $key_name => $key_value) {
-    $key_list[$key_name] = $key_value['title'];
-  }
-
-  dpm($key_list);
-
-  return $key_list;
-}
-
 function key_get($keyname) {
   $key_provider = key_get_key_provider($keyname);
 //  $key =drupal_get_private_key();
@@ -91,6 +54,7 @@ function key_ctools_plugin_type() {
       'dependency callback' => NULL,
       'dependency errors' => NULL,
       'settings form' => NULL,
+      'key options' => array(),
     ),
   );
 
@@ -109,7 +73,7 @@ function key_element_info() {
     '#element_validate' => array('key_element_element_validate'),
     '#theme_wrappers' => array('form_element'),
     '#tree' => TRUE,
-    '#extras' => array(), // #extras because #options is what Drupal uses for select lists.
+    '#key_options' => array(), // #extras because #options is what Drupal uses for select lists.
   );
 
   return $elements;
@@ -119,6 +83,8 @@ function key_element_info() {
  * Process callback function for key element.
  */
 function key_element_process(&$element, $form_state, $complete_form) {
+  ctools_include('object-cache');
+  ctools_object_cache_set('key_options', 'key_options', $element['#key_options']); 
   $field_name = $element['#array_parents'][count($element['#array_parents']) - 1];
   $wrapper_id = str_replace('_', '-', $field_name) . '-wrapper';
 
