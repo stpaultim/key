@@ -73,7 +73,8 @@ function key_element_info() {
     '#element_validate' => array('key_element_element_validate'),
     '#theme_wrappers' => array('form_element'),
     '#tree' => TRUE,
-    '#key_options' => array(), // #extras because #options is what Drupal uses for select lists.
+    '#key_form_options' => array(),
+    '#key_name_callback' => NULL,
   );
 
   return $elements;
@@ -83,8 +84,9 @@ function key_element_info() {
  * Process callback function for key element.
  */
 function key_element_process(&$element, $form_state, $complete_form) {
+  $key_name = call_user_func($element['#key_name_callback']);
   ctools_include('object-cache');
-  ctools_object_cache_set('key_options', 'key_options', $element['#key_options']); 
+  ctools_object_cache_set('key_name', 'key_name', $key_name); 
   $field_name = $element['#array_parents'][count($element['#array_parents']) - 1];
   $wrapper_id = str_replace('_', '-', $field_name) . '-wrapper';
 
@@ -342,8 +344,8 @@ function _key_process_provider_field(&$element, $wrapper_id) {
       $element['provider_settings'] += call_user_func($provider_settings_form, $provider_settings_defaults);
     }
   }
-  elseif (array_key_exists('drupal_variable', $provider_options)) {
-    $element['provider']['#default_value'] = 'drupal_variable';
+  elseif (array_key_exists('variable', $provider_options)) {
+    $element['provider']['#default_value'] = 'variable';
   }
 
   return;
