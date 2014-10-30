@@ -68,13 +68,18 @@ function key_element_info() {
   $elements['key'] = array(
     '#default_value' => '',
     '#input' => TRUE,
-    '#process' => array('key_element_process'),
+    '#process' => array('key_element_process', 'form_process_fieldset'),
     '#value_callback' => 'key_element_value',
     '#element_validate' => array('key_element_element_validate'),
-    '#theme_wrappers' => array('form_element'),
+//    '#theme_wrappers' => array('form_element'),
     '#tree' => TRUE,
     '#key_form_options' => array(),
     '#key_name_callback' => NULL,
+
+    '#theme_wrappers' => array('key_fieldset'),
+    '#pre_render' => array('form_pre_render_fieldset'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
   );
 
   return $elements;
@@ -349,4 +354,35 @@ function _key_process_provider_field(&$element, $wrapper_id) {
   }
 
   return;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function key_theme() {
+  return array(
+    'key_fieldset' => array(
+      'render element' => 'element',
+    ),
+  );
+}
+
+function theme_key_fieldset($variables) {
+  $element = $variables['element'];
+  element_set_attributes($element, array('id'));
+  _form_set_class($element, array('form-wrapper'));
+
+  $output = '<fieldset' . drupal_attributes($element['#attributes']) . '>';
+  if (!empty($element['#title'])) {
+    // Always wrap fieldset legends in a SPAN for CSS positioning.
+    $output .= '<legend><span class="fieldset-legend">' . $element['#title'] . '</span></legend>';
+  }
+  $output .= '<div class="fieldset-wrapper">';
+  if (!empty($element['#description'])) {
+    $output .= '<div class="fieldset-description">' . $element['#description'] . '</div>';
+  }
+  $output .= $element['#children'];
+  $output .= '</div>';
+  $output .= "</fieldset>\n";
+  return $output;
 }
