@@ -1,0 +1,7 @@
+name = Key UI
+description = Provides administrative functionality for managing keys.
+core = 7.x
+
+files[] = key_ui.admin.inc
+
+dependencies[] = key
