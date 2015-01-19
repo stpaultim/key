@@ -50,6 +50,15 @@ function key_ctools_plugin_type() {
     ),
   );
 
+  $plugins['key_usage'] = array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'defaults' => array(
+      'enable callback' => NULL,
+      'disable callback' => NULL,
+    ),
+  );
+
   return $plugins;
 }
 
