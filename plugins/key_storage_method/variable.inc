@@ -55,10 +55,16 @@ function key_storage_method_variable_instructions() {
 function key_storage_method_variable_status($settings) {
   $key = key_storage_method_variable_get_key($settings);
   if (!empty($key)) {
-    $status = t('Key found');
+    $status = array(
+      'valid' => KEY_STATUS_VALID,
+      'message' => t('Valid'),
+    );
   }
   else {
-    $status = t('Key not found');
+    $status = array(
+      'valid' => KEY_STATUS_NOT_VALID,
+      'message' => t('Not valid'),
+    );
   }
 
   return $status;

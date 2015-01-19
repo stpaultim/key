@@ -5,6 +5,9 @@
  * Provides the ability to manage keys, which can be used by other modules.
  */
 
+define('KEY_STATUS_VALID', 1);
+define('KEY_STATUS_NOT_VALID', 0);
+
 /**
  * Implements hook_permission().
  */

@@ -22,6 +22,12 @@ function key_storage_method_file_get_key($settings) {
     return NULL;
   }
   $file = $settings['location'];
+
+  // Make sure the file exists and is readable.
+  if (!is_file($file) || !is_readable($file)) {
+    return NULL;
+  }
+
   switch ($settings['method']) {
     case 'file_contents':
       $key = file_get_contents($file);
@@ -79,10 +85,16 @@ function key_storage_method_file_instructions() {
 function key_storage_method_file_status($settings) {
   $key = key_storage_method_file_get_key($settings);
   if (!empty($key)) {
-    $status = t('Key found');
+    $status = array(
+      'valid' => KEY_STATUS_VALID,
+      'message' => t('Valid'),
+    );
   }
   else {
-    $status = t('Key not found');
+    $status = array(
+      'valid' => KEY_STATUS_NOT_VALID,
+      'message' => t('Not valid'),
+    );
   }
 
   return $status;

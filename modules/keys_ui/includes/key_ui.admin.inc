@@ -49,7 +49,7 @@ function key_ui_key_configs_list() {
     $row[] = array('data' => $storage_method['title']);
 
     // Set the status column.
-    $row[] = array('data' => $status);
+    $row[] = array('data' => $status['message']);
 
     // Set the edit column.
     $row[] = array('data' => l(t('edit'), KEY_MENU_PATH . '/edit/' . $config_url_string));
