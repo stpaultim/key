@@ -11,6 +11,7 @@ $plugin = array(
   'key get callback' => 'key_storage_method_file_get_key',
   'settings form' => 'key_storage_method_file_settings_form',
   'instructions' => 'key_storage_method_file_instructions',
+  'status callback' => 'key_storage_method_file_status',
 );
 
 /**
@@ -73,4 +74,16 @@ function key_storage_method_file_instructions() {
       '#markup' => t('Enter the key in a file at the specified location. Be sure the file is readable by the user the web server runs under.'),
     )
   );
+}
+
+function key_storage_method_file_status($settings) {
+  $key = key_storage_method_file_get_key($settings);
+  if (!empty($key)) {
+    $status = t('Key found');
+  }
+  else {
+    $status = t('Key not found');
+  }
+
+  return $status;
 }

@@ -13,6 +13,7 @@ $plugin = array(
   'key get callback' => 'key_storage_method_variable_get_key',
   'settings form' => 'key_storage_method_variable_settings_form',
   'instructions' => 'key_storage_method_variable_instructions',
+  'status callback' => 'key_storage_method_variable_status',
 );
 
 /**
@@ -49,6 +50,18 @@ function key_storage_method_variable_instructions() {
       '#markup' => t('Define the specified key in the $conf array in the site’s settings.php file. For example, if the text entered for the variable name in the storage method settings is “foobar” and the key is “12345”, add this line to settings.php: %code', array('%code' => "\$conf['key_foobar'] = '12345';")),
     )
   );
+}
+
+function key_storage_method_variable_status($settings) {
+  $key = key_storage_method_variable_get_key($settings);
+  if (!empty($key)) {
+    $status = t('Key found');
+  }
+  else {
+    $status = t('Key not found');
+  }
+
+  return $status;
 }
 
 /**

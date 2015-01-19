@@ -10,12 +10,11 @@
  */
 function key_ui_key_configs_list() {
   $configs = key_get_configs();
-  $storage_methods = key_get_storage_methods();
 
   $header = array(
     t('Name'),
     t('Storage Method'),
-    t('Created'),
+    t('Status'),
     array('data' => t('Operations'), 'colspan' => '2'),
   );
   $rows = array();
@@ -24,8 +23,16 @@ function key_ui_key_configs_list() {
     $label = $config['label'];
     $name = $config['name'];
     $description = $config['description'];
-    $storage_method = $config['storage_method'];
-    $created = format_date($config['created'], 'short');
+    $storage_method = key_get_storage_method($config['storage_method']);
+
+    // Get the function to get the status of the key.
+    $status_function = ctools_plugin_get_function($storage_method, 'status callback');
+
+    // If there are any settings, use them.
+    $storage_settings = isset($config['storage_settings']) ? $config['storage_settings'] : array();
+
+    // Get the status of the key.
+    $status = call_user_func($status_function, $storage_settings);
 
     $config_url_string = str_replace('_', '-', $name);
 
@@ -39,10 +46,10 @@ function key_ui_key_configs_list() {
     $row = array(theme('key_ui_key_configs_list_description', $variables));
 
     // Set the storage method column.
-    $row[] = array('data' => $storage_methods[$storage_method]['title']);
+    $row[] = array('data' => $storage_method['title']);
 
-    // Set the created column.
-    $row[] = array('data' => $created);
+    // Set the status column.
+    $row[] = array('data' => $status);
 
     // Set the edit column.
     $row[] = array('data' => l(t('edit'), KEY_MENU_PATH . '/edit/' . $config_url_string));

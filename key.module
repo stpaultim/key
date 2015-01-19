@@ -47,6 +47,7 @@ function key_ctools_plugin_type() {
       'dependency errors' => NULL,
       'settings form' => NULL,
       'instructions' => NULL,
+      'status callback' => NULL,
     ),
   );
 
