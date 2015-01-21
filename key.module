@@ -131,6 +131,69 @@ function key_get_storage_method($method, $reset = FALSE) {
 }
 
 /**
+ * Gets information about all key usages.
+ *
+ * @param bool $all
+ *   A flag indicating whether to include plugins with unmet dependencies.
+ * @param bool $reset
+ *   A flag indicating whether to clear the plugin cache. Otherwise, stale
+ *   data may be returned if plugin properties have changed.
+ *
+ * @return array
+ *   Information about all key usages.
+ */
+function key_get_usages($all = TRUE, $reset = FALSE) {
+  if ($reset) {
+    _key_clear_plugin_cache('key_usage');
+  }
+
+  ctools_include('plugins');
+  $usages = ctools_get_plugins('key', 'key_usage');
+
+  return $all ? $usages : array_filter($usages, '_key_plugin_is_valid');
+}
+
+/**
+ * Gets all key usages as options, for use in forms.
+ *
+ * @param bool $all
+ *   A flag indicating whether to include plugins with unmet dependencies.
+ * @param bool $reset
+ *   A flag indicating whether to clear the plugin cache. Otherwise, stale
+ *   data may be returned if plugin properties have changed.
+ *
+ * @return array
+ *   An array of usages, with names for keys and labels for values.
+ */
+function key_get_usages_as_options($all = TRUE, $reset = FALSE) {
+  $providers = key_get_usages($all, $reset);
+  $options = array();
+
+  foreach($providers as $name => $provider) {
+    $options[$name] = $provider['title'];
+  }
+
+  return $options;
+}
+
+/**
+ * Gets information about a specific key usage.
+ *
+ * @param string usage
+ *   The name of the usage to get.
+ * @param bool $reset
+ *   A flag indicating whether to clear the plugin cache. Otherwise, stale
+ *   data may be returned if plugin properties have changed.
+ *
+ * @return array
+ *   A key usage.
+ */
+function key_get_usage($usage, $reset = FALSE) {
+  ctools_include('plugins');
+  return ctools_get_plugins('key', 'key_usage', $usage);
+}
+
+/**
  * Gets information about all key configurations.
  *
  * @param bool $reset
