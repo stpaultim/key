@@ -234,6 +234,7 @@ function key_get_configs_as_options($reset = FALSE) {
 
   if (!isset($options) || $reset) {
     $configs = key_get_configs($reset);
+    $options = array();
     foreach($configs as $name => $config) {
       $options[$name] = $config['label'];
     }
