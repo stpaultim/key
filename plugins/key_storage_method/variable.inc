@@ -11,7 +11,9 @@ $plugin = array(
   'title' => t('Variable'),
   'description' => t('Use a variable, either from the database or from the $conf array in settings.php.'),
   'key get callback' => 'key_storage_method_variable_get_key',
+  'key set callback' => 'key_storage_method_variable_set_key',
   'settings form' => 'key_storage_method_variable_settings_form',
+  'key form' => 'key_storage_method_variable_key_form',
   'instructions' => 'key_storage_method_variable_instructions',
   'status callback' => 'key_storage_method_variable_status',
 );
@@ -29,6 +31,22 @@ function key_storage_method_variable_get_key($settings) {
   return $key;
 }
 
+/**
+ * Callback function to set a key from a variable.
+ */
+function key_storage_method_variable_set_key($settings, $key) {
+  if (empty($settings['variable_name'])) {
+    return NULL;
+  }
+  $variable_name = KEY_STORAGE_METHOD_VARIABLE_PREFIX . $settings['variable_name'];
+  if (empty($key)) {
+    variable_del($variable_name);
+  }
+  else {
+    variable_set($variable_name, $key);
+  }
+}
+
 function key_storage_method_variable_settings_form($defaults) {
   $form = array();
 
@@ -44,10 +62,23 @@ function key_storage_method_variable_settings_form($defaults) {
   return $form;
 }
 
+function key_storage_method_variable_key_form($defaults) {
+  $form = array();
+
+  $form['key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Key value'),
+    '#description' => t('Enter the key to save it to the database. If it’s defined in the settings.php file, as described in the instructions, this field should be left blank.'),
+    '#default_value' => isset($defaults['key']) ? $defaults['key'] : '',
+  );
+
+  return $form;
+}
+
 function key_storage_method_variable_instructions() {
   return array(
     'instructions' => array(
-      '#markup' => t('Define the specified key in the $conf array in the site’s settings.php file. For example, if the text entered for the variable name in the storage method settings is “foobar” and the key is “12345”, add this line to settings.php: %code', array('%code' => "\$conf['key_foobar'] = '12345';")),
+      '#markup' => t('To set the key in the site’s settings.php file, leave the key value blank on this form and define the specified key in the $conf array in settings.php. For example, if the text entered for the variable name in the storage method settings is “foobar” and the key is “12345”, add this line to settings.php: %code', array('%code' => "\$conf['key_foobar'] = '12345';")),
     )
   );
 }

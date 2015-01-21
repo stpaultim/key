@@ -155,6 +155,15 @@ function key_ui_key_config_form($form, &$form_state, $config = NULL) {
     $form['storage_extras']['storage_settings']['#type'] = 'fieldset';
     $form['storage_extras']['storage_settings'] += call_user_func($storage_settings_form, $config['storage_settings']);
   }
+
+  $form['storage_extras']['storage_key'] = array(
+    '#type' => 'container',
+  );
+  if ($storage_method && $storage_key_form = ctools_plugin_get_function($storage_methods[$storage_method], 'key form')) {
+    $key = !empty($config['name']) ? key_get_key($config['name']) : '';
+    $form['storage_extras']['storage_key'] += call_user_func($storage_key_form, array('key' => $key));
+  }
+
   $form['storage_extras']['storage_instructions'] = array(
     '#type' => 'container',
     '#title' => t('Instructions'),
@@ -221,6 +230,13 @@ function key_ui_key_config_form_submit($form, &$form_state) {
 //    }
 //  }
 
+  if (empty($form_state['values']['storage_method'])) {
+    return NULL;
+  }
+  else {
+    $storage_method = key_get_storage_method($form_state['values']['storage_method']);
+  }
+
   $fields = array(
     'name' => (string) $form_state['values']['name'],
     'label' => (string) $form_state['values']['label'],
@@ -231,6 +247,11 @@ function key_ui_key_config_form_submit($form, &$form_state) {
   );
 
   key_save_config($fields);
+
+  // Set the key if the storage method supports it and a key was submitted.
+  if (isset($form_state['values']['key']) && $key_set_callback = ctools_plugin_get_function($storage_method, 'key set callback')) {
+    call_user_func($key_set_callback, $form_state['values']['storage_settings'], $form_state['values']['key']);
+  }
 
   $form_state['redirect'] = KEY_MENU_PATH . '/list';
 }
