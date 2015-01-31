@@ -246,12 +246,9 @@ function key_ui_key_config_form_submit($form, &$form_state) {
     'created' => (string) $form_state['values']['created'],
   );
 
-  key_save_config($fields);
+  $key = isset($form_state['values']['key']) ? $form_state['values']['key'] : NULL;
 
-  // Set the key if the storage method supports it and a key was submitted.
-  if (isset($form_state['values']['key']) && $key_set_callback = ctools_plugin_get_function($storage_method, 'key set callback')) {
-    call_user_func($key_set_callback, $form_state['values']['storage_settings'], $form_state['values']['key']);
-  }
+  key_save_config($fields, $key);
 
   $form_state['redirect'] = KEY_MENU_PATH . '/list';
 }
