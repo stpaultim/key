@@ -219,22 +219,15 @@ function key_ui_storage_extras_ajax($form, $form_state) {
  * Form submission handler for key_ui_key_config_form().
  */
 function key_ui_key_config_form_submit($form, &$form_state) {
-//  $method = encrypt_get_encryption_method($form_state['values']['storage_method']);
-//
-//  foreach (array($method, $key_provider) as $plugin) {
-//    if ($submit_callback = ctools_plugin_get_function($plugin, 'submit callback')) {
-//      // Create a copy so that the plugin callback cannot change the
-//      // form state.
-//      $form_state_copy = $form_state;
-//      call_user_func($submit_callback, $form, $form_state_copy);
-//    }
-//  }
+  $method = key_get_storage_method($form_state['values']['storage_method']);
 
-  if (empty($form_state['values']['storage_method'])) {
-    return NULL;
-  }
-  else {
-    $storage_method = key_get_storage_method($form_state['values']['storage_method']);
+  foreach (array($method) as $plugin) {
+    if ($submit_callback = ctools_plugin_get_function($plugin, 'submit callback')) {
+      // Create a copy so that the plugin callback cannot change the
+      // form state.
+      $form_state_copy = $form_state;
+      call_user_func($submit_callback, $form, $form_state_copy);
+    }
   }
 
   $fields = array(
