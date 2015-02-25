@@ -459,3 +459,20 @@ function _key_plugin_is_valid($plugin) {
     return TRUE;
   }
 }
+
+/**
+ * Implements hook_features_api().
+ *
+ * Define the components that we want to make exportable, in this case
+ * Key configurations.
+ */
+function key_features_api() {
+  return array(
+    'key_config' => array(
+      'name' => 'Keys',
+      'file' => drupal_get_path('module', 'key') . '/includes/key.features.inc',
+      'default_hook' => 'key_default_configs',
+      'feature_source' => TRUE,
+    ),
+  );
+}
