@@ -370,12 +370,12 @@ function key_save_config($fields, $key = FALSE, $overwrite = TRUE, $messages = T
     switch ($merge_status) {
       case MergeQuery::STATUS_INSERT:
         drupal_set_message(t('The key %label has been added.', $t_args));
-        watchdog('encrypt', 'Added key %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), KEY_MENU_PATH . '/list'));
+        watchdog('key', 'Added key %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), KEY_MENU_PATH . '/list'));
         break;
 
       case MergeQuery::STATUS_UPDATE:
         drupal_set_message(t('The key %label has been updated.', $t_args));
-        watchdog('encrypt', 'Updated key %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), KEY_MENU_PATH . '/list'));
+        watchdog('key', 'Updated key %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), KEY_MENU_PATH . '/list'));
         break;
     }
   }
