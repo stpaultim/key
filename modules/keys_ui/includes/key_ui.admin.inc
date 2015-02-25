@@ -285,7 +285,7 @@ function key_ui_key_config_delete_confirm_submit($form, &$form_state) {
 
   $t_args = array('%label' => $form_state['values']['label']);
   drupal_set_message(t('The key %label has been deleted.', $t_args));
-  watchdog('encrypt', 'Deleted key %label.', $t_args, WATCHDOG_NOTICE);
+  watchdog('key', 'Deleted key %label.', $t_args, WATCHDOG_NOTICE);
 
   $form_state['redirect'] = KEY_MENU_PATH;
 }
