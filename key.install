@@ -94,27 +94,3 @@ function key_install() {
 
   key_save_config($fields, $key, FALSE, FALSE);
 }
-
-/**
- * Implements hook_enable().
- */
-function key_enable() {
-  $usages = key_get_usages();
-  foreach ($usages as $usage) {
-    if ($enable_callback = ctools_plugin_get_function($usage, 'enable callback')) {
-      call_user_func($enable_callback);
-    }
-  }
-}
-
-/**
- * Implements hook_disable().
- */
-function key_disable() {
-  $usages = key_get_usages();
-  foreach ($usages as $usage) {
-    if ($disable_callback = ctools_plugin_get_function($usage, 'disable callback')) {
-      call_user_func($disable_callback);
-    }
-  }
-}

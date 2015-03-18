@@ -21,6 +21,14 @@ function key_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+  $items[KEY_MENU_PATH . '/usage'] = array(
+    'title' => 'Key usage',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('key_ui_key_usage_form'),
+    'access arguments' => array('administer keys'),
+    'file' => 'includes/key_ui.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
   $items[KEY_MENU_PATH . '/add'] = array(
     'title' => 'Add key',
     'page callback' => 'drupal_get_form',

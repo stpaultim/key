@@ -305,3 +305,93 @@ function theme_key_ui_key_configs_list_description($variables) {
 
   return $output;
 }
+
+/**
+ * Menu callback; displays the list of key usages.
+ */
+function key_ui_key_usage_form($form, &$form_state) {
+  // Clear the plugin cache on the first page load, but not on AJAX refreshes.
+  if (!isset($form_state['values'])) {
+    _key_clear_plugin_cache();
+  }
+
+  $usages = key_get_usages(FALSE);
+  $usage_defaults = variable_get('key_usage', array());
+  $usage_default_values = array();
+
+  foreach ($usage_defaults as $key => $value) {
+    if ($value) {
+      array_push($usage_default_values, $key);
+    }
+  }
+
+  foreach ($usages as $key => $usage) {
+    if (!in_array($key, $usage_default_values) && $usage['always_enabled']) {
+      array_push($usage_default_values, $key);
+    }
+  }
+
+  // Get all valid key usages as options.
+  $usage_options = key_get_usages_as_options(FALSE);
+
+  $form['usages'] = array(
+    '#type' => 'checkboxes',
+    '#options' => $usage_options,
+    '#default_value' => $usage_default_values,
+  );
+
+  // Disable checkboxes for usages that should always be enabled.
+  foreach ($usages as $key => $usage) {
+    if ($usage['always_enabled']) {
+      $form['usages'][$key]['#disabled'] = TRUE;
+    }
+  }
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+/**
+ * Form submission handler for key_ui_key_usage_form().
+ */
+function key_ui_key_usage_form_submit($form, &$form_state) {
+  if (!isset($form_state['values']['usages'])) {
+    return;
+  }
+
+  $usages = key_get_usages(FALSE);
+
+  $original_values = variable_get('key_usage', array());
+
+  $values = array();
+  foreach ($form_state['values']['usages'] as $key => $value) {
+    if ($value) {
+      $values[$key] = 1;
+    }
+  }
+
+  foreach ($usages as $key => $usage) {
+    // If the usage was previously enabled and is now disabled.
+    if (array_key_exists($key, $original_values) && !array_key_exists($key, $values)) {
+      if ($disable_callback = ctools_plugin_get_function($usage, 'disable callback')) {
+        call_user_func($disable_callback);
+      }
+    }
+
+    // If the usage was previously disabled and is now enabled.
+    if (!array_key_exists($key, $original_values) && array_key_exists($key, $values)) {
+      if ($enable_callback = ctools_plugin_get_function($usage, 'enable callback')) {
+        call_user_func($enable_callback);
+      }
+    }
+  }
+
+  variable_set('key_usage', $values);
+}

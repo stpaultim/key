@@ -59,8 +59,10 @@ function key_ctools_plugin_type() {
     'cache' => TRUE,
     'cache table' => 'cache',
     'defaults' => array(
+      'title' => NULL,
       'enable callback' => NULL,
       'disable callback' => NULL,
+      'always_enabled' => FALSE,
     ),
   );
 
@@ -191,6 +193,30 @@ function key_get_usages_as_options($all = TRUE, $reset = FALSE) {
 function key_get_usage($usage, $reset = FALSE) {
   ctools_include('plugins');
   return ctools_get_plugins('key', 'key_usage', $usage);
+}
+
+/**
+ * Check if a usage is currently enabled.
+ *
+ * @param string $usage_name
+ *   The name of the usage to check.
+ *
+ * @return bool
+ *   Whether or not the usage is enabled.
+ */
+function key_usage_enabled($usage_name) {
+  $enabled_usages = variable_get('key_usage', array());
+
+  if (array_key_exists($usage_name, $enabled_usages)) {
+    return true;
+  }
+
+  $usage = key_get_usage($usage_name);
+  if ($usage['always_enabled']) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
