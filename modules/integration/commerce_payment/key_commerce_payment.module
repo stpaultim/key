@@ -1,27 +1,10 @@
 <?php
 
 /**
- * Implements hook_ctools_plugin_type().
- */
-function key_commerce_payment_ctools_plugin_type() {
-  $plugins['key_commerce_payment_integration'] = array(
-    'cache' => TRUE,
-    'cache table' => 'cache',
-    'process' => '_key_plugin_process',
-    'defaults' => array(
-      'title' => '',
-      'key_fields' => array(),
-    ),
-  );
-
-  return $plugins;
-}
-
-/**
  * Implements hook_ctools_plugin_directory().
  */
 function key_commerce_payment_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'key_commerce_payment' && !empty($plugin)) {
+  if ($module == 'key' && !empty($plugin)) {
     return "plugins/$plugin";
   }
 }
@@ -30,7 +13,7 @@ function key_commerce_payment_ctools_plugin_directory($module, $plugin) {
  * Implements hook_commerce_payment_method_info_alter() on behalf of Key.
  */
 function key_commerce_payment_method_info_alter(&$payment_methods) {
-  $integrations = key_commerce_payment_get_integrations();
+  $integrations = key_get_integrations('commerce_payment', FALSE);
 
   foreach ($payment_methods as $method_id => &$method) {
     // If the key integration exists.
@@ -72,27 +55,13 @@ function key_commerce_payment_submit_form_submit($payment_method, $pane_form, $p
 }
 
 /**
- * Loads CTools plugins of type 'key_commerce_payment_integration'.
- */
-function key_commerce_payment_get_integrations($reset = FALSE) {
-  if ($reset) {
-    cache_clear_all("plugins:key_commerce_payment:key_commerce_payment_integration", 'cache');
-  }
-
-  ctools_include('plugins');
-  $integrations = ctools_get_plugins('key_commerce_payment', 'key_commerce_payment_integration');
-
-  return $integrations;
-}
-
-/**
  * Implements hook_form_FORM_ID_alter().
  */
 function key_commerce_payment_form_rules_ui_edit_element_alter(&$form, &$form_state, $form_id) {
   if (isset($form['parameter']['payment_method']['settings']['payment_method'])) {
     $key_configs_as_options = key_get_configs_as_options();
 
-    foreach (key_commerce_payment_get_integrations() as $integration) {
+    foreach (key_get_integrations('commerce_payment', FALSE) as $integration) {
       if ($form['parameter']['payment_method']['settings']['payment_method']['method_id']['#value'] == $integration['name']) {
         $settings_form = &$form['parameter']['payment_method']['settings']['payment_method']['settings'];
 
