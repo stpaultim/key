@@ -156,6 +156,14 @@ function key_get_integrations($type = NULL, $enabled = FALSE, $reset = FALSE) {
   ctools_include('plugins');
   $integrations = ctools_get_plugins('key', 'key_integration');
 
+  if ($type || $enabled) {
+    foreach ($integrations as $index => $integration) {
+      if ($type && $integration['type'] != $type) {
+        unset($integrations[$index]);
+      }
+    }
+  }
+
   return $integrations;
 }
 
