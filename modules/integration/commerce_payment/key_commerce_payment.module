@@ -16,10 +16,11 @@ function key_commerce_payment_method_info_alter(&$payment_methods) {
   $integrations = key_get_integrations('commerce_payment', FALSE);
 
   foreach ($payment_methods as $method_id => &$method) {
+    $integration_id = 'commerce_payment_' . $method_id;
     // If the key integration exists.
-    if (array_key_exists($method_id, $integrations)) {
+    if (array_key_exists($integration_id, $integrations)) {
       // Store it with the payment_method.
-      $method['key_integration'] = $integrations[$method_id];
+      $method['key_integration'] = $integrations[$integration_id];
 
       // Determine the original 'submit_form_submit' callback and store it.
       if (isset($method['callbacks']['submit_form_submit'])) {
@@ -62,7 +63,7 @@ function key_commerce_payment_form_rules_ui_edit_element_alter(&$form, &$form_st
     $key_configs_as_options = key_get_configs_as_options();
 
     foreach (key_get_integrations('commerce_payment', FALSE) as $integration) {
-      if ($form['parameter']['payment_method']['settings']['payment_method']['method_id']['#value'] == $integration['name']) {
+      if ($form['parameter']['payment_method']['settings']['payment_method']['method_id']['#value'] == str_replace('commerce_payment_', '', $integration['name'])) {
         $settings_form = &$form['parameter']['payment_method']['settings']['payment_method']['settings'];
 
         foreach ($integration['key_fields'] as $key_field) {
