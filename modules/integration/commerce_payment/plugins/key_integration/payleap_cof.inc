@@ -7,5 +7,6 @@
 
 $plugin = array(
   'title' => t('PayLeap Card on File'),
+  'type' => 'commerce_payment',
   'key_fields' => array('tran_key'),
 );

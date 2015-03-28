@@ -7,5 +7,6 @@
 
 $plugin = array(
   'title' => t('Authorize.net'),
+  'type' => 'commerce_payment',
   'key_fields' => array('tran_key'),
 );
