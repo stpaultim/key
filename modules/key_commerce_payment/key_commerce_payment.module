@@ -1,0 +1,106 @@
+<?php
+
+/**
+ * Implements hook_ctools_plugin_type().
+ */
+function key_commerce_payment_ctools_plugin_type() {
+  $plugins['key_commerce_payment_integration'] = array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'process' => '_key_plugin_process',
+    'defaults' => array(
+      'title' => '',
+      'key_fields' => array(),
+    ),
+  );
+
+  return $plugins;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function key_commerce_payment_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'key_commerce_payment' && !empty($plugin)) {
+    return "plugins/$plugin";
+  }
+}
+
+/**
+ * Implements hook_commerce_payment_method_info_alter() on behalf of Key.
+ */
+function key_commerce_payment_method_info_alter(&$payment_methods) {
+  $integrations = key_commerce_payment_get_integrations();
+
+  foreach ($payment_methods as $method_id => &$method) {
+    // If the key integration exists.
+    if (array_key_exists($method_id, $integrations)) {
+      // Store it with the payment_method.
+      $method['key_integration'] = $integrations[$method_id];
+
+      // Determine the original 'submit_form_submit' callback and store it.
+      if (isset($method['callbacks']['submit_form_submit'])) {
+        $method['original_callbacks']['submit_form_submit'] = $method['callbacks']['submit_form_submit'];
+      }
+      else {
+        $method['original_callbacks']['submit_form_submit'] = (!empty($method['base']) ? $method['base'] : $method_id) . '_submit_form_submit';
+      }
+
+      // Define the replacement 'submit_form_submit' callback.
+      $method['callbacks']['submit_form_submit'] = 'key_commerce_payment_submit_form_submit';
+    }
+  }
+}
+
+/**
+ * Callback form submit function for integrated payment methods.
+ */
+function key_commerce_payment_submit_form_submit($payment_method, $pane_form, $pane_values, $order, $charge) {
+  if (isset($payment_method['key_integration']['key_fields'])) {
+    foreach ($payment_method['key_integration']['key_fields'] as $field) {
+      if (isset($payment_method['settings'][$field]) && $key_config = key_get_config($payment_method['settings'][$field])) {
+        $payment_method['settings'][$field] = key_get_key($payment_method['settings'][$field]);
+      }
+    }
+  }
+
+  // If there is an original submit callback, call it.
+  if (isset($payment_method['original_callbacks']['submit_form_submit'])) {
+    dd($payment_method);
+    return call_user_func($payment_method['original_callbacks']['submit_form_submit'], $payment_method, $pane_form, $pane_values, $order, $charge);
+  }
+}
+
+/**
+ * Loads CTools plugins of type 'key_commerce_payment_integration'.
+ */
+function key_commerce_payment_get_integrations($reset = FALSE) {
+  if ($reset) {
+    cache_clear_all("plugins:key_commerce_payment:key_commerce_payment_integration", 'cache');
+  }
+
+  ctools_include('plugins');
+  $integrations = ctools_get_plugins('key_commerce_payment', 'key_commerce_payment_integration');
+
+  return $integrations;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function key_commerce_payment_form_rules_ui_edit_element_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['parameter']['payment_method']['settings']['payment_method'])) {
+    $key_configs_as_options = key_get_configs_as_options();
+
+    foreach (key_commerce_payment_get_integrations() as $integration) {
+      if ($form['parameter']['payment_method']['settings']['payment_method']['method_id']['#value'] == $integration['name']) {
+        $settings_form = &$form['parameter']['payment_method']['settings']['payment_method']['settings'];
+
+        foreach ($integration['key_fields'] as $key_field) {
+          $settings_form[$key_field]['#type'] = 'select';
+          $settings_form[$key_field]['#options'] = $key_configs_as_options;
+        }
+      }
+    }
+  }
+}

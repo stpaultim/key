@@ -1,0 +1,7 @@
+name = Key Commerce Payment
+description = Provides integration between Key and Commerce Payment.
+package = Key management
+core = 7.x
+
+dependencies[] = key
+dependencies[] = commerce_payment
