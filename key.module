@@ -55,14 +55,16 @@ function key_ctools_plugin_type() {
     ),
   );
 
-  $plugins['key_usage'] = array(
+  $plugins['key_integration'] = array(
     'cache' => TRUE,
     'cache table' => 'cache',
     'defaults' => array(
-      'title' => NULL,
-      'enable callback' => NULL,
-      'disable callback' => NULL,
-      'always_enabled' => FALSE,
+      'title' => '',
+      'description' => '',
+      'type' => NULL,
+      'enabled' => FALSE,
+      'locked' => FALSE,
+      'key_fields' => array(),
     ),
   );
 
@@ -133,90 +135,45 @@ function key_get_storage_method($method, $reset = FALSE) {
 }
 
 /**
- * Gets information about all key usages.
+ * Gets information about key integrations.
  *
- * @param bool $all
- *   A flag indicating whether to include plugins with unmet dependencies.
+ * @param string $type
+ *   A type of integration.
+ * @param bool $enabled
+ *   A flag indicating whether to return only integrations that are enabled.
  * @param bool $reset
  *   A flag indicating whether to clear the plugin cache. Otherwise, stale
  *   data may be returned if plugin properties have changed.
  *
  * @return array
- *   Information about all key usages.
+ *   Information about key implementations.
  */
-function key_get_usages($all = TRUE, $reset = FALSE) {
+function key_get_integrations($type = NULL, $enabled = FALSE, $reset = FALSE) {
   if ($reset) {
-    _key_clear_plugin_cache('key_usage');
+    _key_clear_plugin_cache('key_integration');
   }
 
   ctools_include('plugins');
-  $usages = ctools_get_plugins('key', 'key_usage');
+  $integrations = ctools_get_plugins('key', 'key_integration');
 
-  return $all ? $usages : array_filter($usages, '_key_plugin_is_valid');
+  return $integrations;
 }
 
 /**
- * Gets all key usages as options, for use in forms.
+ * Gets information about a specific key integration.
  *
- * @param bool $all
- *   A flag indicating whether to include plugins with unmet dependencies.
+ * @param string $integration
+ *   The name of the integration to get.
  * @param bool $reset
  *   A flag indicating whether to clear the plugin cache. Otherwise, stale
  *   data may be returned if plugin properties have changed.
  *
  * @return array
- *   An array of usages, with names for keys and labels for values.
+ *   A key integration.
  */
-function key_get_usages_as_options($all = TRUE, $reset = FALSE) {
-  $providers = key_get_usages($all, $reset);
-  $options = array();
-
-  foreach($providers as $name => $provider) {
-    $options[$name] = $provider['title'];
-  }
-
-  return $options;
-}
-
-/**
- * Gets information about a specific key usage.
- *
- * @param string usage
- *   The name of the usage to get.
- * @param bool $reset
- *   A flag indicating whether to clear the plugin cache. Otherwise, stale
- *   data may be returned if plugin properties have changed.
- *
- * @return array
- *   A key usage.
- */
-function key_get_usage($usage, $reset = FALSE) {
+function key_get_integration($integration, $reset = FALSE) {
   ctools_include('plugins');
-  return ctools_get_plugins('key', 'key_usage', $usage);
-}
-
-/**
- * Check if a usage is currently enabled.
- *
- * @param string $usage_name
- *   The name of the usage to check.
- *
- * @return bool
- *   Whether or not the usage is enabled.
- */
-function key_usage_enabled($usage_name) {
-  $enabled_usages = variable_get('key_usage', array());
-
-  if (array_key_exists($usage_name, $enabled_usages)) {
-    return true;
-  }
-
-  $usage = key_get_usage($usage_name);
-  if ($usage['always_enabled']) {
-    return true;
-  }
-
-  return false;
+  return ctools_get_plugins('key', 'key_integration', $integration);
 }
 
 /**
