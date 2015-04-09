@@ -535,6 +535,9 @@ function _key_plugin_is_valid($plugin) {
   }
 }
 
+/**
+ * Callback function to process key integration plugins.
+ */
 function _key_integration_plugin_process(&$plugin, $info) {
   $integrations = db_query("SELECT * FROM {key_integration} ORDER BY name ASC")->fetchAllAssoc('name', PDO::FETCH_ASSOC);
 
