@@ -7,6 +7,10 @@
 
 $plugin = array(
   'title' => t('PayLeap Direct Processing'),
+  'description' => t('Integration with the PayLeap Direct Processing payment method.'),
   'type' => 'commerce_payment',
-  'key_fields' => array('tran_key'),
+  'settings' => array(
+    'method_id' => 'payleap_direct',
+    'key_fields' => array('tran_key'),
+  ),
 );

@@ -7,6 +7,10 @@
 
 $plugin = array(
   'title' => t('PayPal WPP'),
+  'description' => t('Integration with the PayPal WPP payment method.'),
   'type' => 'commerce_payment',
-  'key_fields' => array('api_password'),
+  'settings' => array(
+    'method_id' => 'paypal_wpp',
+    'key_fields' => array('api_password'),
+  ),
 );

@@ -7,6 +7,10 @@
 
 $plugin = array(
   'title' => t('Stripe'),
+  'description' => t('Integration with the Stripe payment method.'),
   'type' => 'commerce_payment',
-  'key_fields' => array('secret_key'),
+  'settings' => array(
+    'method_id' => 'commerce_stripe',
+    'key_fields' => array('secret_key'),
+  ),
 );

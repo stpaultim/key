@@ -7,6 +7,10 @@
 
 $plugin = array(
   'title' => t('CyberSource SOAP API - CC'),
+  'description' => t('Integration with the CyberSource SOAP API - CC payment method.'),
   'type' => 'commerce_payment',
-  'key_fields' => array('transaction_key'),
+  'settings' => array(
+    'method_id' => 'cybersource_soap_cc',
+    'key_fields' => array('transaction_key'),
+  ),
 );

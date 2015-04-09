@@ -7,6 +7,10 @@
 
 $plugin = array(
   'title' => t('Authorize.net'),
+  'description' => t('Integration with the Authorize.net payment method.'),
   'type' => 'commerce_payment',
-  'key_fields' => array('tran_key'),
+  'settings' => array(
+    'method_id' => 'authnet_aim',
+    'key_fields' => array('tran_key'),
+  ),
 );
