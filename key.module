@@ -559,7 +559,7 @@ function key_features_api() {
   return array(
     'key_config' => array(
       'name' => 'Keys',
-      'file' => drupal_get_path('module', 'key') . '/includes/key.features.inc',
+      'file' => drupal_get_path('module', 'key') . '/includes/key_config.features.inc',
       'default_hook' => 'key_default_configs',
       'feature_source' => TRUE,
     ),
