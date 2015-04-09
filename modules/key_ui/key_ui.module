@@ -45,6 +45,14 @@ function key_ui_menu() {
     'access arguments' => array('administer keys'),
     'file' => 'includes/key_ui.admin.inc',
   );
+  $items[KEY_MENU_PATH . '/integration'] = array(
+    'title' => 'Integration',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('key_ui_key_integration_form'),
+    'access arguments' => array('administer keys'),
+    'file' => 'includes/key_ui.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
 
   return $items;
 }

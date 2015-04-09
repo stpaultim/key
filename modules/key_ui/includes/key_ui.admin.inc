@@ -305,3 +305,91 @@ function theme_key_ui_key_configs_list_description($variables) {
 
   return $output;
 }
+
+/**
+ * Menu callback; displays the list of key integrations.
+ */
+function key_ui_key_integration_form($form, &$form_state) {
+  // Clear the plugin cache on the first page load, but not on AJAX refreshes.
+  if (!isset($form_state['values'])) {
+    _key_clear_plugin_cache('key_integration');
+  }
+
+  $integrations = key_get_integrations();
+  $options = key_get_integrations_as_options();
+
+  if (empty($options)) {
+    $form['no_integrations'] = array(
+      '#markup' => t('There are no integrations.'),
+      '#prefix' => '<p>',
+      '#suffix' => '</p>',
+    );
+  }
+  else {
+    $form['enabled'] = array(
+      '#type' => 'checkboxes',
+      '#options' => $options,
+      '#default_value' => array_keys(key_get_integrations_as_options('enabled')),
+    );
+
+    $form['actions'] = array(
+      '#type' => 'actions',
+    );
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+    );
+
+    // Disable integrations that are locked.
+    foreach ($integrations as $name => $integration) {
+      if ($integration['locked'] && isset($form['enabled']['#options'][$name])) {
+        $form['enabled'][$name]['#disabled'] = TRUE;
+      }
+    }
+  }
+
+  return $form;
+}
+
+/**
+ * Form submission handler for key_ui_key_integration_form().
+ */
+function key_ui_key_integration_form_submit($form, &$form_state) {
+  if (!isset($form_state['values']['enabled'])) {
+    return;
+  }
+
+  $fields = array();
+  foreach ($form_state['values']['enabled'] as $name => $value) {
+    $fields['name'] = $name;
+
+    if ($value) {
+      $fields['enabled'] = 1;
+    }
+    else {
+      $fields['enabled'] = 0;
+    }
+
+    key_save_integration($fields, TRUE);
+  }
+
+  drupal_set_message(t('The integrations have been updated.'));
+
+//  $integrations = key_get_integrations();
+//
+//  foreach ($integrations as $key => $integration) {
+//    // If the usage was previously enabled and is now disabled.
+//    if (array_key_exists($key, $original_values) && !array_key_exists($key, $values)) {
+//      if ($disable_callback = ctools_plugin_get_function($integration, 'disable callback')) {
+//        call_user_func($disable_callback);
+//      }
+//    }
+//
+//    // If the usage was previously disabled and is now enabled.
+//    if (!array_key_exists($key, $original_values) && array_key_exists($key, $values)) {
+//      if ($enable_callback = ctools_plugin_get_function($integration, 'enable callback')) {
+//        call_user_func($enable_callback);
+//      }
+//    }
+//  }
+}
