@@ -439,12 +439,46 @@ function key_get_integration($name, $reset = FALSE) {
 }
 
 /**
- * Save a key integration.
+ * Gets information about key integration settings.
+ *
+ * @param string $name
+ *   The name of an integration to retrieve.
+ * @param bool $reset
+ *   A flag to force the settings to be retrieved from the database.
+ *
+ * @return array
+ *   An array of integration settings.
+ */
+function key_get_integration_settings($name = NULL, $reset = FALSE) {
+  $rows = &drupal_static(__FUNCTION__);
+
+  if (!isset($rows) || $reset) {
+    $rows = db_query("SELECT * FROM {key_integration} ORDER BY name ASC")->fetchAllAssoc('name', PDO::FETCH_ASSOC);
+
+    // Unserialize settings field.
+    foreach ($rows as $index => $row) {
+      if (!empty($row['settings'])) {
+        $settings = unserialize($row['settings']);
+        $rows[$index]['settings'] = $settings;
+      }
+    }
+  }
+
+  if ($name) {
+    return isset($rows[$name]) ? $rows[$name] : NULL;
+  }
+  else {
+    return $rows;
+  }
+}
+
+/**
+ * Save settings for a key integration.
  *
  * @param array $fields
  *   The fields of the integration to save.
  */
-function key_save_integration($fields) {
+function key_save_integration_settings($fields) {
   // Load the integration.
   $integration = key_get_integration($fields['name']);
 
@@ -553,7 +587,7 @@ function _key_integration_plugin_process(&$plugin, $info) {
  * Implements hook_features_api().
  *
  * Define the components that we want to make exportable, in this case
- * Key configurations.
+ * key configurations and integrations.
  */
 function key_features_api() {
   return array(
@@ -561,6 +595,12 @@ function key_features_api() {
       'name' => 'Keys',
       'file' => drupal_get_path('module', 'key') . '/includes/key_config.features.inc',
       'default_hook' => 'key_default_configs',
+      'feature_source' => TRUE,
+    ),
+    'key_integration' => array(
+      'name' => 'Key Integration',
+      'file' => drupal_get_path('module', 'key') . '/includes/key_integration.features.inc',
+      'default_hook' => 'key_default_integrations',
       'feature_source' => TRUE,
     ),
   );

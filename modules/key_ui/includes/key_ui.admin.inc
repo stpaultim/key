@@ -370,7 +370,7 @@ function key_ui_key_integration_form_submit($form, &$form_state) {
       $fields['enabled'] = 0;
     }
 
-    key_save_integration($fields, TRUE);
+    key_save_integration_settings($fields, TRUE);
   }
 
   drupal_set_message(t('The integrations have been updated.'));
