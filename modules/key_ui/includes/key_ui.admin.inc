@@ -316,37 +316,60 @@ function key_ui_key_integration_form($form, &$form_state) {
   }
 
   $integrations = key_get_integrations();
-  $options = key_get_integrations_as_options();
+  $modules = system_rebuild_module_data();
 
-  if (empty($options)) {
-    $form['no_integrations'] = array(
-      '#markup' => t('There are no integrations.'),
-      '#prefix' => '<p>',
-      '#suffix' => '</p>',
-    );
-  }
-  else {
-    $form['enabled'] = array(
-      '#type' => 'checkboxes',
-      '#options' => $options,
-      '#default_value' => array_keys(key_get_integrations_as_options('enabled')),
-    );
+  $form['#tree'] = TRUE;
+  $form['integrations'] = array();
+  foreach ($integrations as $name => $integration) {
+    // TODO: Replace this with a proper definition of integration type.
+    $type_label = !empty($integration['type']) ? ucwords(str_replace('_', ' ', $integration['type'])) : t('Other');
 
-    $form['actions'] = array(
-      '#type' => 'actions',
+    $form['integrations'][$type_label][$name] = array(
+      'enabled' => array(
+        '#type' => 'checkbox',
+        '#title' => t('Enabled'),
+        '#default_value' => $integration['enabled'],
+      ),
+      'name' => array(
+        '#markup' => $integration['title'],
+      ),
+      'description' => array(
+        '#markup' => $integration['description'],
+      ),
+      'module' => array(
+        '#markup' => $modules[$integration['module']]->info['name'],
+      ),
     );
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save'),
-    );
-
-    // Disable integrations that are locked.
-    foreach ($integrations as $name => $integration) {
-      if ($integration['locked'] && isset($form['enabled']['#options'][$name])) {
-        $form['enabled'][$name]['#disabled'] = TRUE;
-      }
+    if (isset($integration['locked']) && $integration['locked'] == TRUE) {
+      $form['integrations'][$type_label][$name]['enabled']['#disabled'] = TRUE;
     }
   }
+
+  // Create the fieldsets for each integration type.
+  foreach (element_children($form['integrations']) as $type) {
+    $form['integrations'][$type] += array(
+      '#type' => 'fieldset',
+      '#title' => $type,
+      '#collapsible' => TRUE,
+      '#theme' => 'key_ui_key_integrations_fieldset',
+      '#header' => array(
+        array('data' => t('Enabled'), 'class' => array('checkbox')),
+        t('Name'),
+        t('Description'),
+        t('Module'),
+      ),
+    );
+  }
+
+  // Sort the fieldsets by title.
+  uasort($form['integrations'], 'element_sort_by_title');
+
+  // Add the submit button.
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save integrations'),
+  );
 
   return $form;
 }
@@ -355,25 +378,27 @@ function key_ui_key_integration_form($form, &$form_state) {
  * Form submission handler for key_ui_key_integration_form().
  */
 function key_ui_key_integration_form_submit($form, &$form_state) {
-  if (!isset($form_state['values']['enabled'])) {
+  if (!isset($form_state['values']['integrations'])) {
     return;
   }
 
   $fields = array();
-  foreach ($form_state['values']['enabled'] as $name => $value) {
-    $fields['name'] = $name;
+  foreach ($form_state['values']['integrations'] as $type => $integrations) {
+    foreach ($integrations as $name => $integration) {
+      $fields['name'] = $name;
 
-    if ($value) {
-      $fields['enabled'] = 1;
-    }
-    else {
-      $fields['enabled'] = 0;
-    }
+      if ($integration['enabled']) {
+        $fields['enabled'] = 1;
+      }
+      else {
+        $fields['enabled'] = 0;
+      }
 
-    key_save_integration_settings($fields, TRUE);
+      key_save_integration_settings($fields, TRUE);
+    }
   }
 
-  drupal_set_message(t('The integrations have been updated.'));
+  drupal_set_message(t('The integration settings have been updated.'));
 
 //  $integrations = key_get_integrations();
 //
@@ -392,4 +417,39 @@ function key_ui_key_integration_form_submit($form, &$form_state) {
 //      }
 //    }
 //  }
+}
+
+/**
+ * Returns HTML for the Integrations form.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - form: A render element representing the form.
+ *
+ * @ingroup themeable
+ */
+function theme_key_ui_key_integrations_fieldset($variables) {
+  $form = $variables['form'];
+
+  // Individual table headers.
+  $rows = array();
+  // Iterate through all the integrations, which are
+  // children of this fieldset.
+  foreach (element_children($form) as $key) {
+    $integration = $form[$key];
+    $row = array();
+    unset($integration['enabled']['#title']);
+    $row[] = array('class' => array('checkbox'), 'data' => drupal_render($integration['enabled']));
+    $label = '<label';
+    if (isset($integration['enabled']['#id'])) {
+      $label .= ' for="' . $integration['enabled']['#id'] . '"';
+    }
+    $row[] = $label . '><strong>' . drupal_render($integration['name']) . '</strong></label>';
+    $row[] = array('data' => drupal_render($integration['description']), 'class' => array('integration-description'));
+    $row[] = array('data' => drupal_render($integration['module']), 'class' => array('integration-module'));
+
+    $rows[] = $row;
+  }
+
+  return theme('table', array('header' => $form['#header'], 'rows' => $rows));
 }

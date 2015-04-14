@@ -70,6 +70,10 @@ function key_ui_theme() {
       ),
       'file' => 'includes/key_ui.admin.inc',
     ),
+    'key_ui_key_integrations_fieldset' => array(
+      'render element' => 'form',
+      'file' => 'includes/key_ui.admin.inc',
+    ),
   );
 }
 
