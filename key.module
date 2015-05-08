@@ -513,6 +513,14 @@ function key_get_integration($name, $reset = FALSE) {
 }
 
 /**
+ * Checks if a specific key integration is enabled.
+ */
+function key_integration_is_enabled($name, $reset = FALSE) {
+  $integration = key_get_integration($name, $reset);
+  return $integration['enabled'];
+}
+
+/**
  * Gets information about key integration settings.
  *
  * @param string $name
