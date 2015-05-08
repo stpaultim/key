@@ -40,7 +40,7 @@ function key_ctools_plugin_type() {
   $plugins['key_storage_method'] = array(
     'cache' => TRUE,
     'cache table' => 'cache',
-    'process' => '_key_plugin_process',
+    'process' => '_key_storage_method_plugin_process',
     'defaults' => array(
       'title' => '',
       'description' => '',
@@ -634,20 +634,30 @@ function _key_clear_plugin_cache($type = NULL) {
 }
 
 /**
- * Helper function to determine if a plugin has unmet dependencies.
+ * Callback function to process key storage method plugins.
+ */
+function _key_storage_method_plugin_process(&$plugin, $info) {
+  // Check dependencies and attach any errors to the plugin.
+  if ($dependency_function = ctools_plugin_get_function($plugin, 'dependency callback')) {
+    $plugin['dependency errors'] = call_user_func($dependency_function);
+  }
+}
+
+/**
+ * Determine if a storage method plugin is valid.
  *
  * @param array $plugin
  *   The plugin to check.
  *
  * @return bool
- *   Whether or not the plugin is valid (has no unmet dependencies).
+ *   Whether or not the plugin is valid.
  */
 function _key_plugin_is_valid($plugin) {
-  if (isset($plugin['dependency errors']) && !empty($plugin['dependency errors'])) {
-    return FALSE;
+  if (empty($plugin['dependency errors'])) {
+    return TRUE;
   }
   else {
-    return TRUE;
+    return FALSE;
   }
 }
 
