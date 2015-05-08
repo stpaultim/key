@@ -321,7 +321,6 @@ function key_ui_key_integration_form($form, &$form_state) {
   $form['#tree'] = TRUE;
   $form['integrations'] = array();
   foreach ($integrations as $name => $integration) {
-    // TODO: Replace this with a proper definition of integration type.
     $type_label = !empty($integration['type']) ? $integration['type'] : t('Other');
 
     $form['integrations'][$type_label][$name] = array(
