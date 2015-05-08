@@ -75,6 +75,80 @@ function key_ctools_plugin_type() {
 }
 
 /**
+ * Implements hook_element_info().
+ */
+function key_element_info() {
+  $type['key'] = array(
+    '#input' => TRUE,
+    '#size' => 0,
+    '#multiple' => FALSE,
+    '#process' => array(
+      '_key_element_expand',
+      'form_process_select',
+      'ajax_process_form',
+    ),
+    '#theme' => 'select',
+    '#theme_wrappers' => array('form_element'),
+    '#options' => array(),
+    // Allow filtering of the list of key configurations.
+    // See _key_filter_configs().
+    '#filters' => array(),
+    '#key_description' => TRUE,
+  );
+
+  return $type;
+}
+
+/**
+ * Process function to expand the key element.
+ */
+function _key_element_expand($element) {
+  $element['#options'] = key_get_configs_as_options();
+  if (!empty($element['#filters'])) {
+    $element['#options'] = _key_configs_filter($element['#options'], $element['#filters']);
+  }
+
+  // Prefix the default description with a information about keys.
+  if ($element['#key_description']) {
+    $key_description = t('Choose an available key to use.');
+    if (module_exists('key_ui')) {
+      $key_description .= ' ' . t('If your key is not listed, <a href="@url">create a new key</a>.', array('@url' => '/' . KEY_MENU_PATH));
+    } else {
+      $key_description .= ' ' . t('If your key is not listed, enable the Keys UI module and create a new key.');
+    }
+
+    $element['#description'] = $key_description . ' ' . $element['#description'];
+  }
+
+  return $element;
+}
+
+/**
+ * Filter an array of key configurations.
+ */
+function _key_configs_filter($configs, $filters) {
+  $target_configs = array();
+
+  foreach (key_get_configs() as $config) {
+    $include = TRUE;
+
+    if (!empty($filters['kinds'])) {
+      $include &= in_array($config['kind'], $filters['kinds']);
+    }
+    if (!empty($filters['storage_methods'])) {
+      $include &= in_array($config['storage_method'], $filters['storage_methods']);
+    }
+
+    if ($include) {
+      $target_configs[$config['name']] = TRUE;
+    }
+  }
+  $configs = array_intersect_key($configs, $target_configs);
+
+  return $configs;
+}
+
+/**
  * Gets information about all key storage methods.
  *
  * @param bool $all
