@@ -33,8 +33,8 @@ function key_schema() {
         'not null' => TRUE,
         'size' => 'medium',
       ),
-      'kind' => array(
-        'description' => 'The kind of key.',
+      'type' => array(
+        'description' => 'The type of key.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -121,4 +121,21 @@ function key_install() {
   $key = drupal_random_key();
 
   key_save_config($fields, $key, FALSE, FALSE);
+}
+
+/**
+ * Change the "kind" db field to "type".
+ */
+function key_update_7101() {
+  if (db_field_exists('key_config', 'kind')) {
+    db_change_field('key_config', 'kind', 'type',
+      array(
+        'description' => 'The type of key.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      )
+    );
+  }
 }
