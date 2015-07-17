@@ -113,7 +113,7 @@ function key_install() {
     'name' => 'default',
     'label' => 'Default',
     'description' => 'A randomly generated basic key.',
-    'kind' => '',
+    'type' => 'general',
     'storage_method' => 'variable',
     'storage_settings' => array(
       'variable_name' => 'default',
