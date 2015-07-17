@@ -141,11 +141,11 @@ function _key_configs_filter($configs, $filters) {
   foreach (key_get_configs() as $config) {
     $include = TRUE;
 
-    if (!empty($filters['types'])) {
-      $include &= in_array($config['type'], $filters['types']);
+    if (!empty($filters['type'])) {
+      $include &= in_array($config['type'], (array) $filters['type']);
     }
-    if (!empty($filters['storage_methods'])) {
-      $include &= in_array($config['storage_method'], $filters['storage_methods']);
+    if (!empty($filters['storage_method'])) {
+      $include &= in_array($config['storage_method'], (array) $filters['storage_method']);
     }
 
     if ($include) {
