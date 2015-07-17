@@ -14,6 +14,7 @@ function key_ui_key_configs_list() {
   $header = array(
     t('Name'),
     t('Storage Method'),
+    t('Type'),
     t('Status'),
     array('data' => t('Operations'), 'colspan' => '2'),
   );
@@ -24,6 +25,7 @@ function key_ui_key_configs_list() {
     $name = $config['name'];
     $description = $config['description'];
     $storage_method = key_get_storage_method($config['storage_method']);
+    $type = key_get_type($config['type']);
 
     // Get the function to get the status of the key.
     $status_function = ctools_plugin_get_function($storage_method, 'status callback');
@@ -47,6 +49,9 @@ function key_ui_key_configs_list() {
 
     // Set the storage method column.
     $row[] = array('data' => $storage_method['title']);
+
+    // Set the type column.
+    $row[] = array('data' => $type['title']);
 
     // Set the status column.
     $row[] = array('data' => $status['message']);
@@ -102,6 +107,9 @@ function key_ui_key_config_form($form, &$form_state, $config = NULL) {
     $storage_method = NULL;
   }
 
+  // Get all valid types as options.
+  $type_options = key_get_types_as_options(FALSE);
+
   $form['label'] = array(
     '#title' => t('Name'),
     '#type' => 'textfield',
@@ -126,6 +134,14 @@ function key_ui_key_config_form($form, &$form_state, $config = NULL) {
     '#type' => 'textarea',
     '#default_value' => $config['description'],
     '#description' => t('A short description of the key.'),
+  );
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Type'),
+    '#description' => t('The type of key.'),
+    '#required' => TRUE,
+    '#options' => $type_options,
+    '#default_value' => $config['type'],
   );
   $form['storage_method'] = array(
     '#type' => 'select',
@@ -234,6 +250,7 @@ function key_ui_key_config_form_submit($form, &$form_state) {
     'name' => (string) $form_state['values']['name'],
     'label' => (string) $form_state['values']['label'],
     'description' => (string) $form_state['values']['description'],
+    'type' => (string) $form_state['values']['type'],
     'storage_method' => (string) $form_state['values']['storage_method'],
     'storage_settings' => serialize($form_state['values']['storage_settings']),
     'created' => (string) $form_state['values']['created'],

@@ -71,6 +71,15 @@ function key_ctools_plugin_type() {
     ),
   );
 
+  $plugins['key_type'] = array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'defaults' => array(
+      'title' => '',
+      'description' => '',
+    ),
+  );
+
   return $plugins;
 }
 
@@ -209,6 +218,69 @@ function key_get_storage_methods_as_options($all = TRUE, $reset = FALSE) {
 function key_get_storage_method($method, $reset = FALSE) {
   ctools_include('plugins');
   return ctools_get_plugins('key', 'key_storage_method', $method);
+}
+
+/**
+ * Gets information about all key types.
+ *
+ * @param bool $all
+ *   A flag indicating whether to include plugins with unmet dependencies.
+ * @param bool $reset
+ *   A flag indicating whether to clear the plugin cache. Otherwise, stale
+ *   data may be returned if plugin properties have changed.
+ *
+ * @return array
+ *   Information about all key types.
+ */
+function key_get_types($all = TRUE, $reset = FALSE) {
+  if ($reset) {
+    _key_clear_plugin_cache('key_type');
+  }
+
+  ctools_include('plugins');
+  $types = ctools_get_plugins('key', 'key_type');
+
+  return $all ? $types : array_filter($types, '_key_plugin_is_valid');
+}
+
+/**
+ * Gets all key types as options, for use in forms.
+ *
+ * @param bool $all
+ *   A flag indicating whether to include plugins with unmet dependencies.
+ * @param bool $reset
+ *   A flag indicating whether to clear the plugin cache. Otherwise, stale
+ *   data may be returned if plugin properties have changed.
+ *
+ * @return array
+ *   An array of types, with names for keys and labels for values.
+ */
+function key_get_types_as_options($all = TRUE, $reset = FALSE) {
+  $providers = key_get_types($all, $reset);
+  $options = array();
+
+  foreach($providers as $name => $provider) {
+    $options[$name] = $provider['title'];
+  }
+
+  return $options;
+}
+
+/**
+ * Gets information about a specific key type.
+ *
+ * @param string $type
+ *   The name of the type to get.
+ * @param bool $reset
+ *   A flag indicating whether to clear the plugin cache. Otherwise, stale
+ *   data may be returned if plugin properties have changed.
+ *
+ * @return array
+ *   A key type.
+ */
+function key_get_type($type, $reset = FALSE) {
+  ctools_include('plugins');
+  return ctools_get_plugins('key', 'key_type', $type);
 }
 
 /**
