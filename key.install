@@ -96,6 +96,7 @@ function key_schema() {
     ),
     'indexes' => array(
       'enabled' => array('enabled'),
+      'type' => array('type'),
     ),
     'primary key' => array('name'),
   );
@@ -137,5 +138,14 @@ function key_update_7101() {
         'default' => '',
       )
     );
+  }
+}
+
+/**
+ * Add an index to the "type" db field.
+ */
+function key_update_7102() {
+  if (!db_index_exists('key_config', 'type')) {
+    db_add_index('key_config', 'type', array('type'));
   }
 }
