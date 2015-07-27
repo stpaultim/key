@@ -69,6 +69,7 @@ function key_schema() {
     'indexes' => array(
       'label' => array('label'),
       'type' => array('type'),
+      'storage_method' => array('storage_method'),
     ),
     'primary key' => array('name'),
   );
@@ -147,5 +148,14 @@ function key_update_7101() {
 function key_update_7102() {
   if (!db_index_exists('key_config', 'type')) {
     db_add_index('key_config', 'type', array('type'));
+  }
+}
+
+/**
+ * Add an index to the "type" db field.
+ */
+function key_update_7103() {
+  if (!db_index_exists('key_config', 'storage_method')) {
+    db_add_index('key_config', 'storage_method', array('storage_method'));
   }
 }
