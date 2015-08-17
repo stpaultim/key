@@ -40,15 +40,15 @@ function key_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
-      'storage_method' => array(
-        'description' => 'The storage method to use.',
+      'provider' => array(
+        'description' => 'The key provider to use.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ),
-      'storage_settings' => array(
-        'description' => 'Additional settings for the storage method.',
+      'provider_settings' => array(
+        'description' => 'Additional settings for the key provider.',
         'type' => 'blob',
         'not null' => FALSE,
         'size' => 'big',
@@ -69,7 +69,7 @@ function key_schema() {
     'indexes' => array(
       'label' => array('label'),
       'type' => array('type'),
-      'storage_method' => array('storage_method'),
+      'provider' => array('provider'),
     ),
     'primary key' => array('name'),
   );
@@ -115,8 +115,8 @@ function key_install() {
     'label' => 'Default',
     'description' => 'A randomly generated basic key.',
     'type' => 'general',
-    'storage_method' => 'variable',
-    'storage_settings' => array(
+    'provider' => 'variable',
+    'provider_settings' => array(
       'variable_name' => 'default',
     ),
   );
@@ -157,5 +157,38 @@ function key_update_7102() {
 function key_update_7103() {
   if (!db_index_exists('key_config', 'storage_method')) {
     db_add_index('key_config', 'storage_method', array('storage_method'));
+  }
+}
+
+/**
+ * Change "storage method" db field to "provider".
+ */
+function key_update_7104() {
+  if (db_field_exists('key_config', 'storage_method')) {
+    db_change_field('key_config', 'storage_method', 'provider',
+      array(
+        'description' => 'The key provider to use.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      )
+    );
+  }
+}
+
+/**
+ * Change "storage settings" db field to "provider settings".
+ */
+function key_update_7105() {
+  if (db_field_exists('key_config', 'storage_settings')) {
+    db_change_field('key_config', 'storage_settings', 'provider_settings',
+      array(
+        'description' => 'Additional settings for the key provider.',
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+      )
+    );
   }
 }

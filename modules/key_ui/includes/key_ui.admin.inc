@@ -13,7 +13,7 @@ function key_ui_key_configs_list() {
 
   $header = array(
     t('Name'),
-    t('Storage Method'),
+    t('Provider'),
     t('Type'),
     t('Status'),
     array('data' => t('Operations'), 'colspan' => '2'),
@@ -24,17 +24,17 @@ function key_ui_key_configs_list() {
     $label = $config['label'];
     $name = $config['name'];
     $description = $config['description'];
-    $storage_method = key_get_storage_method($config['storage_method']);
+    $provider = key_get_provider($config['provider']);
     $type = key_get_type($config['type']);
 
     // Get the function to get the status of the key.
-    $status_function = ctools_plugin_get_function($storage_method, 'status callback');
+    $status_function = ctools_plugin_get_function($provider, 'status callback');
 
     // If there are any settings, use them.
-    $storage_settings = isset($config['storage_settings']) ? $config['storage_settings'] : array();
+    $provider_settings = isset($config['provider_settings']) ? $config['provider_settings'] : array();
 
     // Get the status of the key.
-    $status = call_user_func($status_function, $storage_settings);
+    $status = call_user_func($status_function, $provider_settings);
 
     $config_url_string = str_replace('_', '-', $name);
 
@@ -47,8 +47,8 @@ function key_ui_key_configs_list() {
     // Set the name column.
     $row = array(theme('key_ui_key_configs_list_description', $variables));
 
-    // Set the storage method column.
-    $row[] = array('data' => $storage_method['title']);
+    // Set the key provider column.
+    $row[] = array('data' => $provider['title']);
 
     // Set the type column.
     $row[] = array('data' => $type['title']);
@@ -90,21 +90,21 @@ function key_ui_key_config_form($form, &$form_state, $config = NULL) {
     _key_clear_plugin_cache();
   }
 
-  // Get all valid storage methods.
-  $storage_methods = key_get_storage_methods(FALSE);
+  // Get all valid key providers.
+  $providers = key_get_providers(FALSE);
 
-  // Get all valid storage methods as options.
-  $storage_method_options = key_get_storage_methods_as_options(FALSE);
+  // Get all valid key providers as options.
+  $provider_options = key_get_providers_as_options(FALSE);
 
-  // Determine the storage method.
-  if (isset($form_state['values']['storage_method'])) {
-    $storage_method = $form_state['values']['storage_method'];
+  // Determine the key provider.
+  if (isset($form_state['values']['provider'])) {
+    $provider = $form_state['values']['provider'];
   }
-  elseif (isset($config['storage_method'])) {
-    $storage_method = $config['storage_method'];
+  elseif (isset($config['provider'])) {
+    $provider = $config['provider'];
   }
   else {
-    $storage_method = NULL;
+    $provider = NULL;
   }
 
   // Get all valid types as options.
@@ -143,52 +143,52 @@ function key_ui_key_config_form($form, &$form_state, $config = NULL) {
     '#options' => $type_options,
     '#default_value' => $config['type'],
   );
-  $form['storage_method'] = array(
+  $form['provider'] = array(
     '#type' => 'select',
-    '#title' => t('Storage method'),
-    '#description' => t('The method used to store the key.'),
+    '#title' => t('Key provider'),
+    '#description' => t('The key provider to use.'),
     '#required' => TRUE,
-    '#options' => $storage_method_options,
-    '#default_value' => $config['storage_method'],
+    '#options' => $provider_options,
+    '#default_value' => $config['provider'],
     '#ajax' => array(
       'method' => 'replace',
-      'callback' => 'key_ui_storage_extras_ajax',
-      'wrapper' => 'key-storage-extras-wrapper',
+      'callback' => 'key_ui_provider_extras_ajax',
+      'wrapper' => 'key-provider-extras-wrapper',
     ),
   );
-  $form['storage_extras'] = array(
+  $form['provider_extras'] = array(
     '#type' => 'container',
-    '#prefix' => '<div id="key-storage-extras-wrapper">',
+    '#prefix' => '<div id="key-provider-extras-wrapper">',
     '#suffix' => '</div>',
   );
-  $form['storage_extras']['storage_settings'] = array(
+  $form['provider_extras']['provider_settings'] = array(
     '#type' => 'container',
-    '#title' => t('Storage method settings'),
+    '#title' => t('Key provider settings'),
     '#collapsible' => TRUE,
     '#tree' => TRUE,
   );
-  if ($storage_method && $storage_settings_form = ctools_plugin_get_function($storage_methods[$storage_method], 'settings form')) {
-    $form['storage_extras']['storage_settings']['#type'] = 'fieldset';
-    $form['storage_extras']['storage_settings'] += call_user_func($storage_settings_form, $config['storage_settings']);
+  if ($provider && $provider_settings_form = ctools_plugin_get_function($providers[$provider], 'settings form')) {
+    $form['provider_extras']['provider_settings']['#type'] = 'fieldset';
+    $form['provider_extras']['provider_settings'] += call_user_func($provider_settings_form, $config['provider_settings']);
   }
 
-  $form['storage_extras']['storage_key'] = array(
+  $form['provider_extras']['provider_key'] = array(
     '#type' => 'container',
   );
-  if ($storage_method && $storage_key_form = ctools_plugin_get_function($storage_methods[$storage_method], 'key form')) {
+  if ($provider && $provider_key_form = ctools_plugin_get_function($providers[$provider], 'key form')) {
     $key = !empty($config['name']) ? key_get_key($config['name']) : '';
-    $form['storage_extras']['storage_key'] += call_user_func($storage_key_form, array('key' => $key));
+    $form['provider_extras']['provider_key'] += call_user_func($provider_key_form, array('key' => $key));
   }
 
-  $form['storage_extras']['storage_instructions'] = array(
+  $form['provider_extras']['provider_instructions'] = array(
     '#type' => 'container',
     '#title' => t('Instructions'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  if ($storage_method && $storage_instructions = ctools_plugin_get_function($storage_methods[$storage_method], 'instructions')) {
-    $form['storage_extras']['storage_instructions']['#type'] = 'fieldset';
-    $form['storage_extras']['storage_instructions'] += call_user_func($storage_instructions);
+  if ($provider && $provider_instructions = ctools_plugin_get_function($providers[$provider], 'instructions')) {
+    $form['provider_extras']['provider_instructions']['#type'] = 'fieldset';
+    $form['provider_extras']['provider_instructions'] += call_user_func($provider_instructions);
   }
 
   $form['created'] = array(
@@ -227,17 +227,17 @@ function key_ui_key_config_form($form, &$form_state, $config = NULL) {
 /**
  * Callback for AJAX form re-rendering for provider additional settings.
  */
-function key_ui_storage_extras_ajax($form, $form_state) {
-  return $form['storage_extras'];
+function key_ui_provider_extras_ajax($form, $form_state) {
+  return $form['provider_extras'];
 }
 
 /**
  * Form submission handler for key_ui_key_config_form().
  */
 function key_ui_key_config_form_submit($form, &$form_state) {
-  $method = key_get_storage_method($form_state['values']['storage_method']);
+  $provider = key_get_provider($form_state['values']['provider']);
 
-  foreach (array($method) as $plugin) {
+  foreach (array($provider) as $plugin) {
     if ($submit_callback = ctools_plugin_get_function($plugin, 'submit callback')) {
       // Create a copy so that the plugin callback cannot change the
       // form state.
@@ -251,8 +251,8 @@ function key_ui_key_config_form_submit($form, &$form_state) {
     'label' => (string) $form_state['values']['label'],
     'description' => (string) $form_state['values']['description'],
     'type' => (string) $form_state['values']['type'],
-    'storage_method' => (string) $form_state['values']['storage_method'],
-    'storage_settings' => serialize($form_state['values']['storage_settings']),
+    'provider' => (string) $form_state['values']['provider'],
+    'provider_settings' => serialize($form_state['values']['provider_settings']),
     'created' => (string) $form_state['values']['created'],
   );
 

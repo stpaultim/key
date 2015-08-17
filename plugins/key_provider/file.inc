@@ -2,23 +2,23 @@
 
 /**
  * @file
- * Plugin definition for the File key storage method.
+ * Plugin definition for the File key provider.
  */
 
 $plugin = array(
   'title' => t('File'),
   'description' => t('Use a file, preferably one that is outside the web root directory.'),
-  'key get callback' => 'key_storage_method_file_get_key',
-  'settings form' => 'key_storage_method_file_settings_form',
-  'instructions' => 'key_storage_method_file_instructions',
-  'status callback' => 'key_storage_method_file_status',
+  'key get callback' => 'key_provider_file_get_key',
+  'settings form' => 'key_provider_file_settings_form',
+  'instructions' => 'key_provider_file_instructions',
+  'status callback' => 'key_provider_file_status',
 );
 
 /**
  * Callback function to return a key from a file.
  */
-function key_storage_method_file_get_key($settings) {
-  if (empty($settings['location']) || empty($settings['method'])) {
+function key_provider_file_get_key($settings) {
+  if (empty($settings['location']) || empty($settings['provider'])) {
     return NULL;
   }
   $file = $settings['location'];
@@ -28,7 +28,7 @@ function key_storage_method_file_get_key($settings) {
     return NULL;
   }
 
-  switch ($settings['method']) {
+  switch ($settings['provider']) {
     case 'file_contents':
       $key = file_get_contents($file);
       break;
@@ -43,9 +43,9 @@ function key_storage_method_file_get_key($settings) {
 }
 
 /**
- * Settings form for the File key storage method.
+ * Settings form for the File key provider.
  */
-function key_storage_method_file_settings_form($defaults) {
+function key_provider_file_settings_form($defaults) {
   $form = array();
 
   $form['location'] = array(
@@ -68,13 +68,13 @@ function key_storage_method_file_settings_form($defaults) {
       'file_contents' => t('File contents'),
       'md5' => t('MD5 hash'),
     ),
-    '#default_value' => isset($defaults['method']) ? $defaults['method'] : 'file_contents',
+    '#default_value' => isset($defaults['provider']) ? $defaults['provider'] : 'file_contents',
   );
 
   return $form;
 }
 
-function key_storage_method_file_instructions() {
+function key_provider_file_instructions() {
   return array(
     'instructions' => array(
       '#markup' => t('Enter the key in a file at the specified location. Be sure the file is readable by the user the web server runs under.'),
@@ -82,8 +82,8 @@ function key_storage_method_file_instructions() {
   );
 }
 
-function key_storage_method_file_status($settings) {
-  $key = key_storage_method_file_get_key($settings);
+function key_provider_file_status($settings) {
+  $key = key_provider_file_get_key($settings);
   if (!empty($key)) {
     $status = array(
       'valid' => KEY_STATUS_VALID,

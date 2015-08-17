@@ -37,10 +37,10 @@ function key_ctools_plugin_directory($module, $plugin) {
  * Tell CTools about plugins the module uses.
  */
 function key_ctools_plugin_type() {
-  $plugins['key_storage_method'] = array(
+  $plugins['key_provider'] = array(
     'cache' => TRUE,
     'cache table' => 'cache',
-    'process' => '_key_storage_method_plugin_process',
+    'process' => '_key_provider_plugin_process',
     'defaults' => array(
       'title' => '',
       'description' => '',
@@ -144,8 +144,8 @@ function _key_configs_filter($configs, $filters) {
     if (!empty($filters['type'])) {
       $include &= in_array($config['type'], (array) $filters['type']);
     }
-    if (!empty($filters['storage_method'])) {
-      $include &= in_array($config['storage_method'], (array) $filters['storage_method']);
+    if (!empty($filters['provider'])) {
+      $include &= in_array($config['provider'], (array) $filters['provider']);
     }
 
     if ($include) {
@@ -158,7 +158,7 @@ function _key_configs_filter($configs, $filters) {
 }
 
 /**
- * Gets information about all key storage methods.
+ * Gets information about all key providers.
  *
  * @param bool $all
  *   A flag indicating whether to include plugins with unmet dependencies.
@@ -167,21 +167,21 @@ function _key_configs_filter($configs, $filters) {
  *   data may be returned if plugin properties have changed.
  *
  * @return array
- *   Information about all key storage methods.
+ *   Information about all key providers.
  */
-function key_get_storage_methods($all = TRUE, $reset = FALSE) {
+function key_get_providers($all = TRUE, $reset = FALSE) {
   if ($reset) {
-    _key_clear_plugin_cache('key_storage_method');
+    _key_clear_plugin_cache('key_provider');
   }
 
   ctools_include('plugins');
-  $methods = ctools_get_plugins('key', 'key_storage_method');
+  $providers = ctools_get_plugins('key', 'key_provider');
 
-  return $all ? $methods : array_filter($methods, '_key_plugin_is_valid');
+  return $all ? $providers : array_filter($providers, '_key_plugin_is_valid');
 }
 
 /**
- * Gets all key storage methods as options, for use in forms.
+ * Gets all key providers as options, for use in forms.
  *
  * @param bool $all
  *   A flag indicating whether to include plugins with unmet dependencies.
@@ -190,10 +190,10 @@ function key_get_storage_methods($all = TRUE, $reset = FALSE) {
  *   data may be returned if plugin properties have changed.
  *
  * @return array
- *   An array of storage methods, with names for keys and labels for values.
+ *   An array of key providers, with names for keys and labels for values.
  */
-function key_get_storage_methods_as_options($all = TRUE, $reset = FALSE) {
-  $providers = key_get_storage_methods($all, $reset);
+function key_get_providers_as_options($all = TRUE, $reset = FALSE) {
+  $providers = key_get_providers($all, $reset);
   $options = array();
 
   foreach($providers as $name => $provider) {
@@ -204,20 +204,20 @@ function key_get_storage_methods_as_options($all = TRUE, $reset = FALSE) {
 }
 
 /**
- * Gets information about a specific key storage method.
+ * Gets information about a specific key provider.
  *
- * @param string $method
- *   The name of the storage method to get.
+ * @param string $provider
+ *   The name of the key provider to get.
  * @param bool $reset
  *   A flag indicating whether to clear the plugin cache. Otherwise, stale
  *   data may be returned if plugin properties have changed.
  *
  * @return array
- *   A key storage method.
+ *   A key provider.
  */
-function key_get_storage_method($method, $reset = FALSE) {
+function key_get_provider($provider, $reset = FALSE) {
   ctools_include('plugins');
-  return ctools_get_plugins('key', 'key_storage_method', $method);
+  return ctools_get_plugins('key', 'key_provider', $provider);
 }
 
 /**
@@ -298,11 +298,11 @@ function key_get_configs($reset = FALSE) {
   if (!isset($configs) || $reset) {
     $configs = db_query("SELECT * FROM {key_config} ORDER BY label ASC")->fetchAllAssoc('name', PDO::FETCH_ASSOC);
 
-    // Unserialize storage_settings field.
+    // Unserialize provider_settings field.
     foreach ($configs as $name => $config) {
-      if (!empty($config['storage_settings'])) {
-        $storage_settings = unserialize($config['storage_settings']);
-        $configs[$name]['storage_settings'] = $storage_settings;
+      if (!empty($config['provider_settings'])) {
+        $provider_settings = unserialize($config['provider_settings']);
+        $configs[$name]['provider_settings'] = $provider_settings;
       }
     }
   }
@@ -367,7 +367,7 @@ function key_get_config($name, $reset = FALSE) {
  * @param array $fields
  *   The fields of the configuration to save.
  * @param array $key
- *   The key to save, if desired and allowed for the chosen storage method.
+ *   The key to save, if desired and allowed for the chosen key provider.
  * @param array $overwrite
  *   FALSE if a new configuration should be created, instead of overwriting
  *   an existing one with the same name.
@@ -375,8 +375,8 @@ function key_get_config($name, $reset = FALSE) {
  *   TRUE if messages should be displayed.
  */
 function key_save_config($fields, $key = FALSE, $overwrite = TRUE, $messages = TRUE) {
-  // Load the storage method.
-  $storage_method = key_get_storage_method($fields['storage_method']);
+  // Load the key provider.
+  $provider = key_get_provider($fields['provider']);
 
   // If the configuration should not be overwritten, create a new one
   // and make sure that certain fields are unique.
@@ -403,20 +403,20 @@ function key_save_config($fields, $key = FALSE, $overwrite = TRUE, $messages = T
       $counter++;
     }
 
-    // If the storage method is variable and the key is defined,
+    // If the key provider is variable and the key is defined,
     // make sure the variable name is unique.
-    if ($fields['storage_method'] == 'variable' && isset($key)) {
+    if ($fields['provider'] == 'variable' && isset($key)) {
       $counter = 2;
-      $base_variable_name = $fields['storage_settings']['variable_name'];
+      $base_variable_name = $fields['provider_settings']['variable_name'];
       $config_variable_names = array();
       foreach ($configs as $index => $config) {
-        if ($config['storage_method'] == 'variable') {
-          $config_variable_names[] = $config['storage_settings']['variable_name'];
+        if ($config['provider'] == 'variable') {
+          $config_variable_names[] = $config['provider_settings']['variable_name'];
         }
       }
 
-      while (in_array($fields['storage_settings']['variable_name'], $config_variable_names)) {
-        $fields['storage_settings']['variable_name'] = "${base_variable_name}_$counter";
+      while (in_array($fields['provider_settings']['variable_name'], $config_variable_names)) {
+        $fields['provider_settings']['variable_name'] = "${base_variable_name}_$counter";
         $counter++;
       }
     }
@@ -476,9 +476,9 @@ function key_save_config($fields, $key = FALSE, $overwrite = TRUE, $messages = T
     return NULL;
   }
 
-  // Set the key if the storage method supports it and a key was defined.
-  if (isset($key) && $key_set_callback = ctools_plugin_get_function($storage_method, 'key set callback')) {
-    call_user_func($key_set_callback, $key_config['storage_settings'], $key);
+  // Set the key if the key provider supports it and a key was defined.
+  if (isset($key) && $key_set_callback = ctools_plugin_get_function($provider, 'key set callback')) {
+    call_user_func($key_set_callback, $key_config['provider_settings'], $key);
   }
 
   // Return the saved configuration.
@@ -676,16 +676,16 @@ function key_get_key($config_name) {
   }
 
   $config = key_get_config($config_name);
-  $storage_method = key_get_storage_method($config['storage_method']);
+  $provider = key_get_provider($config['provider']);
 
   // Get the function to retrieve the key.
-  $key_function = ctools_plugin_get_function($storage_method, 'key get callback');
+  $key_function = ctools_plugin_get_function($provider, 'key get callback');
 
   // If there are any settings, use them.
-  $storage_settings = isset($config['storage_settings']) ? $config['storage_settings'] : array();
+  $provider_settings = isset($config['provider_settings']) ? $config['provider_settings'] : array();
 
   // Retrieve the key.
-  $key = call_user_func($key_function, $storage_settings);
+  $key = call_user_func($key_function, $provider_settings);
 
   // Store the key, in case it's needed again.
   $keys[$config_name] = $key;
@@ -706,9 +706,9 @@ function _key_clear_plugin_cache($type = NULL) {
 }
 
 /**
- * Callback function to process key storage method plugins.
+ * Callback function to process key provider plugins.
  */
-function _key_storage_method_plugin_process(&$plugin, $info) {
+function _key_provider_plugin_process(&$plugin, $info) {
   // Check dependencies and attach any errors to the plugin.
   if ($dependency_function = ctools_plugin_get_function($plugin, 'dependency callback')) {
     $plugin['dependency errors'] = call_user_func($dependency_function);
@@ -716,7 +716,7 @@ function _key_storage_method_plugin_process(&$plugin, $info) {
 }
 
 /**
- * Determine if a storage method plugin is valid.
+ * Determine if a key provider plugin is valid.
  *
  * @param array $plugin
  *   The plugin to check.
