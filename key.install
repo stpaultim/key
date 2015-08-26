@@ -152,7 +152,7 @@ function key_update_7102() {
 }
 
 /**
- * Add an index to the "type" db field.
+ * Add an index to the "storage method" db field.
  */
 function key_update_7103() {
   if (!db_index_exists('key_config', 'storage_method')) {
@@ -190,5 +190,23 @@ function key_update_7105() {
         'size' => 'big',
       )
     );
+  }
+}
+
+/**
+ * Remove the "storage method" index.
+ */
+function key_update_7106() {
+  if (db_index_exists('key_config', 'storage_method')) {
+    db_drop_index('key_config', 'storage_method');
+  }
+}
+
+/**
+ * Add a "provider" index.
+ */
+function key_update_7107() {
+  if (!db_index_exists('key_config', 'provider')) {
+    db_add_index('key_config', 'provider', array('provider'));
   }
 }
