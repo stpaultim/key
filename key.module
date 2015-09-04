@@ -7,6 +7,7 @@
 
 define('KEY_STATUS_VALID', 1);
 define('KEY_STATUS_NOT_VALID', 0);
+define('KEY_MENU_PATH', 'admin/config/system/keys');
 
 /**
  * Implements hook_permission().
@@ -16,6 +17,69 @@ function key_permission() {
     'administer keys' => array(
       'title' => t('Administer keys'),
       'description' => 'Create, edit, and delete keys.',
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function key_menu() {
+  $items = array();
+
+  $items[KEY_MENU_PATH] = array(
+    'title' => 'Keys',
+    'description' => 'Manage keys.',
+    'page callback' => 'key_configs_list',
+    'access arguments' => array('administer keys'),
+    'file' => 'includes/key.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items[KEY_MENU_PATH . '/list'] = array(
+    'title' => 'List keys',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items[KEY_MENU_PATH . '/add'] = array(
+    'title' => 'Add key',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('key_config_form'),
+    'access arguments' => array('administer keys'),
+    'file' => 'includes/key.admin.inc',
+    'type' => MENU_LOCAL_ACTION,
+  );
+  $items[KEY_MENU_PATH . '/edit/%key_config'] = array(
+    'title' => 'Edit key',
+    'title callback' => 'key_config_edit_title',
+    'title arguments' => array(5),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('key_config_form', 5),
+    'access arguments' => array('administer keys'),
+    'file' => 'includes/key.admin.inc',
+  );
+  $items[KEY_MENU_PATH . '/delete/%key_config'] = array(
+    'title' => 'Delete key',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('key_config_delete_confirm', 5),
+    'access arguments' => array('administer keys'),
+    'file' => 'includes/key.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function key_theme() {
+  return array(
+    'key_configs_list_description' => array(
+      'variables' => array(
+        'label' => NULL,
+        'name' => NULL,
+        'description' => NULL,
+      ),
+      'file' => 'includes/key.admin.inc',
     ),
   );
 }
@@ -93,6 +157,34 @@ function key_element_info() {
 }
 
 /**
+ * Title callback for the key configuration edit page.
+ *
+ * @param string $config_name
+ *   The machine-readable name of the configuration being edited.
+ *
+ * @return string
+ *   The human-friendly label of the requested configuration.
+ */
+function key_config_edit_title($config) {
+  return t('Edit @name key', array('@name' => $config['label']));
+}
+
+/**
+ * Menu argument loader: loads a key configuration by name.
+ *
+ * @param string $name
+ *   The machine-readable name of an configuration to load,
+ *   where '-' is replaced with '_'.
+ *
+ * @return array
+ *   An array representing an key configuration or FALSE if the
+ *   configuration does not exist.
+ */
+function key_config_load($name) {
+  return key_get_config(strtr($name, array('-' => '_')));
+}
+
+/**
  * Process function to expand the key element.
  */
 function _key_element_expand($element) {
@@ -104,11 +196,7 @@ function _key_element_expand($element) {
   // Prefix the default description with a information about keys.
   if ($element['#key_description']) {
     $key_description = t('Choose an available key to use.');
-    if (module_exists('key_ui')) {
-      $key_description .= ' ' . t('If your key is not listed, <a href="@url">create a new key</a>.', array('@url' => '/' . KEY_MENU_PATH));
-    } else {
-      $key_description .= ' ' . t('If your key is not listed, enable the Keys UI module and create a new key.');
-    }
+    $key_description .= ' ' . t('If your key is not listed, <a href="@url">create a new key</a>.', array('@url' => '/' . KEY_MENU_PATH));
 
     $element['#description'] = $key_description . ' ' . $element['#description'];
   }

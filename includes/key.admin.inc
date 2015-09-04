@@ -8,7 +8,7 @@
 /**
  * Menu callback; displays the list of key configurations.
  */
-function key_ui_key_configs_list() {
+function key_configs_list() {
   $configs = key_get_configs();
 
   $header = array(
@@ -45,7 +45,7 @@ function key_ui_key_configs_list() {
     );
 
     // Set the name column.
-    $row = array(theme('key_ui_key_configs_list_description', $variables));
+    $row = array(theme('key_configs_list_description', $variables));
 
     // Set the key provider column.
     $row[] = array('data' => $provider['title']);
@@ -65,7 +65,7 @@ function key_ui_key_configs_list() {
     $rows[] = $row;
   }
 
-  $build['key_ui_configs_list_table'] = array(
+  $build['key_configs_list_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
@@ -84,7 +84,7 @@ function key_ui_key_configs_list() {
  *
  * @ingroup forms
  */
-function key_ui_key_config_form($form, &$form_state, $config = NULL) {
+function key_config_form($form, &$form_state, $config = NULL) {
   // Clear the plugin cache on the first page load, but not on AJAX refreshes.
   if (!isset($form_state['values'])) {
     _key_clear_plugin_cache();
@@ -124,7 +124,7 @@ function key_ui_key_config_form($form, &$form_state, $config = NULL) {
     '#maxlength' => 32,
     '#disabled' => isset($config['name']),
     '#machine_name' => array(
-      'exists' => 'key_ui_config_load',
+      'exists' => 'key_config_load',
       'source' => array('label'),
     ),
     '#description' => t('A unique machine-readable name for the key. It must only contain lowercase letters, numbers, and underscores.'),
@@ -152,7 +152,7 @@ function key_ui_key_config_form($form, &$form_state, $config = NULL) {
     '#default_value' => $config['provider'],
     '#ajax' => array(
       'method' => 'replace',
-      'callback' => 'key_ui_provider_extras_ajax',
+      'callback' => 'key_provider_extras_ajax',
       'wrapper' => 'key-provider-extras-wrapper',
     ),
   );
@@ -202,14 +202,14 @@ function key_ui_key_config_form($form, &$form_state, $config = NULL) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save key'),
-    '#submit' => array('key_ui_key_config_form_submit'),
+    '#submit' => array('key_config_form_submit'),
     '#weight' => 40,
   );
   if (isset($config['name'])) {
     $form['actions']['delete'] = array(
       '#type' => 'submit',
       '#value' => t('Delete key'),
-      '#submit' => array('key_ui_config_form_delete_submit'),
+      '#submit' => array('key_config_form_delete_submit'),
       '#limit_validation_errors' => array(),
       '#weight' => 45,
     );
@@ -227,14 +227,14 @@ function key_ui_key_config_form($form, &$form_state, $config = NULL) {
 /**
  * Callback for AJAX form re-rendering for provider additional settings.
  */
-function key_ui_provider_extras_ajax($form, $form_state) {
+function key_provider_extras_ajax($form, $form_state) {
   return $form['provider_extras'];
 }
 
 /**
- * Form submission handler for key_ui_key_config_form().
+ * Form submission handler for key_config_form().
  */
-function key_ui_key_config_form_submit($form, &$form_state) {
+function key_config_form_submit($form, &$form_state) {
   $provider = key_get_provider($form_state['values']['provider']);
 
   foreach (array($provider) as $plugin) {
@@ -264,18 +264,18 @@ function key_ui_key_config_form_submit($form, &$form_state) {
 }
 
 /**
- * Form submission handler for key_ui_key_config_form().
+ * Form submission handler for key_config_form().
  *
  * Handles the 'Delete' button on the key configuration form.
  */
-function key_ui_config_form_delete_submit($form, &$form_state) {
+function key_config_form_delete_submit($form, &$form_state) {
   $form_state['redirect'] = KEY_MENU_PATH . '/delete/' . str_replace('_', '-', $form['name']['#default_value']);
 }
 
 /**
  * Menu callback to delete a key configuration.
  */
-function key_ui_key_config_delete_confirm($form, &$form_state, $config) {
+function key_config_delete_confirm($form, &$form_state, $config) {
   $form['name'] = array('#type' => 'value', '#value' => $config['name']);
   $form['label'] = array('#type' => 'value', '#value' => $config['label']);
 
@@ -286,9 +286,9 @@ function key_ui_key_config_delete_confirm($form, &$form_state, $config) {
 }
 
 /**
- * Submit handler for key_ui_config_delete_confirm.
+ * Submit handler for key_config_delete_confirm.
  */
-function key_ui_key_config_delete_confirm_submit($form, &$form_state) {
+function key_config_delete_confirm_submit($form, &$form_state) {
   db_delete('key_config')
     ->condition('name', $form_state['values']['name'])
     ->execute();
@@ -311,7 +311,7 @@ function key_ui_key_config_delete_confirm_submit($form, &$form_state) {
  *
  * @ingroup themeable
  */
-function theme_key_ui_key_configs_list_description($variables) {
+function theme_key_configs_list_description($variables) {
   $label = $variables['label'];
   $name = $variables['name'];
   $description = $variables['description'];
