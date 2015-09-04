@@ -76,23 +76,3 @@ function key_schema() {
 
   return $schema;
 }
-
-/**
- * Implements hook_install().
- */
-function key_install() {
-  // Add a randomly generated default key.
-  $fields = array(
-    'name' => 'default',
-    'label' => 'Default',
-    'description' => 'A randomly generated basic key.',
-    'type' => 'general',
-    'provider' => 'variable',
-    'provider_settings' => array(
-      'variable_name' => 'default',
-    ),
-  );
-  $key = drupal_random_key();
-
-  key_save_config($fields, $key, FALSE, FALSE);
-}
