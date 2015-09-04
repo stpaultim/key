@@ -55,22 +55,6 @@ function key_ctools_plugin_type() {
     ),
   );
 
-  $plugins['key_integration'] = array(
-    'cache' => TRUE,
-    'cache table' => 'cache',
-    'process' => '_key_integration_plugin_process',
-    'defaults' => array(
-      'title' => '',
-      'description' => '',
-      'type' => NULL,
-      'enabled' => FALSE,
-      'locked' => FALSE,
-      'settings' => array(),
-      'enable callback' => NULL,
-      'disable callback' => NULL,
-    ),
-  );
-
   $plugins['key_type'] = array(
     'cache' => TRUE,
     'cache table' => 'cache',
@@ -486,179 +470,6 @@ function key_save_config($fields, $key = FALSE, $overwrite = TRUE, $messages = T
 }
 
 /**
- * Gets information about key integrations.
- *
- * @param string $status
- *   An enabled status by which to filter the results.
- * @param string $type
- *   An integration type by which to filter the results.
- * @param bool $reset
- *   A flag to force a reset of the integration data.
- *
- * @return array
- *   An array of integrations.
- */
-function key_get_integrations($status = NULL, $type = NULL, $reset = FALSE) {
-  $integrations = &drupal_static(__FUNCTION__);
-
-  if ($reset) {
-    _key_clear_plugin_cache('key_integration');
-  }
-
-  if (!isset($integrations) || $reset) {
-    ctools_include('plugins');
-    $integrations = ctools_get_plugins('key', 'key_integration');
-  }
-
-  // If no filtering should occur, return all integrations.
-  if (!$status && !$type) {
-    return $integrations;
-  }
-
-  $filtered_integrations = $integrations;
-
-  // Filter integrations by status and/or type.
-  foreach ($integrations as $name => $integration) {
-    if ($status == 'enabled' && !$integration['enabled']) {
-      unset($filtered_integrations[$name]);
-      continue;
-    }
-    if ($status == 'disabled' && $integration['enabled']) {
-      unset($filtered_integrations[$name]);
-      continue;
-    }
-    if (isset($type) && $integration['type'] != $type) {
-      unset($filtered_integrations[$name]);
-      continue;
-    }
-  }
-
-  return $filtered_integrations;
-}
-
-/**
- * Gets all key integrations as options, for use in forms.
- *
- * @param string $status
- *   An enabled status by which to filter the results.
- * @param string $type
- *   An integration type by which to filter the results.
- * @param bool $reset
- *   A flag to force a reset of the integration data.
- *
- * @return array
- *   An array of integrations, with names for keys and labels for values.
- */
-function key_get_integrations_as_options($status = NULL, $type = NULL, $reset = FALSE) {
-  $integrations = key_get_integrations($status, $type, $reset);
-
-  $options = array();
-  foreach($integrations as $name => $integration) {
-    $options[$name] = $integration['title'];
-  }
-
-  return $options;
-}
-
-/**
- * Gets information about a specific key integration.
- *
- * @param string $name
- *   The machine name of the integration to get.
- * @param bool $reset
- *   A flag to force a reset of the integration data.
- *
- * @return array
- *   A key integration.
- */
-function key_get_integration($name, $reset = FALSE) {
-  $integrations = key_get_integrations(NULL, NULL, $reset);
-
-  if (array_key_exists($name, $integrations)) {
-    $integration = $integrations[$name];
-  }
-  else {
-    $integration = NULL;
-  }
-
-  return $integration;
-}
-
-/**
- * Checks if a specific key integration is enabled.
- */
-function key_integration_is_enabled($name, $reset = FALSE) {
-  $integration = key_get_integration($name, $reset);
-  return $integration['enabled'];
-}
-
-/**
- * Gets information about key integration settings.
- *
- * @param string $name
- *   The name of an integration to retrieve.
- * @param bool $reset
- *   A flag to force the settings to be retrieved from the database.
- *
- * @return array
- *   An array of integration settings.
- */
-function key_get_integration_settings($name = NULL, $reset = FALSE) {
-  $rows = &drupal_static(__FUNCTION__);
-
-  if (!isset($rows) || $reset) {
-    $rows = db_query("SELECT * FROM {key_integration} ORDER BY name ASC")->fetchAllAssoc('name', PDO::FETCH_ASSOC);
-
-    // Unserialize settings field.
-    foreach ($rows as $index => $row) {
-      if (!empty($row['settings'])) {
-        $settings = unserialize($row['settings']);
-        $rows[$index]['settings'] = $settings;
-      }
-    }
-  }
-
-  if ($name) {
-    return isset($rows[$name]) ? $rows[$name] : NULL;
-  }
-  else {
-    return $rows;
-  }
-}
-
-/**
- * Save settings for a key integration.
- *
- * @param array $fields
- *   The fields of the integration to save.
- */
-function key_save_integration_settings($fields) {
-  // Load the integration.
-  $integration = key_get_integration($fields['name']);
-
-  // If the integration is locked, make sure no db record exists.
-  if ($integration['locked']) {
-    $num_deleted = db_delete('key_integration')
-      ->condition('name', $fields['name'])
-      ->execute();
-    return;
-  }
-
-  // Serialize any field that is an array.
-  foreach ($fields as $index => $field) {
-    if (is_array($field)) {
-      $fields[$index] = serialize($field);
-    }
-  }
-
-  // Save the integration.
-  $merge_status = db_merge('key_integration')
-    ->key(array('name' => $fields['name']))
-    ->fields($fields)
-    ->execute();
-}
-
-/**
  * Get a key using a key configuration.
  *
  * @param string $config_name
@@ -734,24 +545,10 @@ function _key_plugin_is_valid($plugin) {
 }
 
 /**
- * Callback function to process key integration plugins.
- */
-function _key_integration_plugin_process(&$plugin, $info) {
-  $integrations = db_query("SELECT * FROM {key_integration} ORDER BY name ASC")->fetchAllAssoc('name', PDO::FETCH_ASSOC);
-
-  $name = $plugin['name'];
-  if (array_key_exists($name, $integrations)) {
-    if (isset($integrations[$name]['enabled'])) {
-      $plugin['enabled'] = $integrations[$name]['enabled'];
-    }
-  }
-}
-
-/**
  * Implements hook_features_api().
  *
  * Define the components that we want to make exportable, in this case
- * key configurations and integrations.
+ * key configurations.
  */
 function key_features_api() {
   return array(
@@ -759,12 +556,6 @@ function key_features_api() {
       'name' => 'Keys',
       'file' => drupal_get_path('module', 'key') . '/includes/key_config.features.inc',
       'default_hook' => 'key_default_configs',
-      'feature_source' => TRUE,
-    ),
-    'key_integration' => array(
-      'name' => 'Key Integration',
-      'file' => drupal_get_path('module', 'key') . '/includes/key_integration.features.inc',
-      'default_hook' => 'key_default_integrations',
       'feature_source' => TRUE,
     ),
   );

@@ -74,34 +74,6 @@ function key_schema() {
     'primary key' => array('name'),
   );
 
-  $schema['key_integration'] = array(
-    'description' => 'Stores settings for key integrations.',
-    'fields' => array(
-      'name' => array(
-        'description' => 'The machine name of the integration.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'enabled' => array(
-        'description' => 'A boolean indicating if this integration is enabled.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'settings' => array(
-        'description' => 'Additional settings for the integration.',
-        'type' => 'blob',
-        'not null' => FALSE,
-        'size' => 'big',
-      ),
-    ),
-    'indexes' => array(
-      'enabled' => array('enabled'),
-    ),
-    'primary key' => array('name'),
-  );
-
   return $schema;
 }
 
