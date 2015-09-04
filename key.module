@@ -5,8 +5,6 @@
  * Provides the ability to manage keys, which can be used by other modules.
  */
 
-define('KEY_STATUS_VALID', 1);
-define('KEY_STATUS_NOT_VALID', 0);
 define('KEY_MENU_PATH', 'admin/config/system/keys');
 
 /**
@@ -115,7 +113,6 @@ function key_ctools_plugin_type() {
       'settings form' => NULL,
       'key form' => NULL,
       'instructions' => NULL,
-      'status callback' => NULL,
     ),
   );
 

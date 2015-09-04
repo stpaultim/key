@@ -15,7 +15,6 @@ function key_configs_list() {
     t('Name'),
     t('Provider'),
     t('Type'),
-    t('Status'),
     array('data' => t('Operations'), 'colspan' => '2'),
   );
   $rows = array();
@@ -27,14 +26,8 @@ function key_configs_list() {
     $provider = key_get_provider($config['provider']);
     $type = key_get_type($config['type']);
 
-    // Get the function to get the status of the key.
-    $status_function = ctools_plugin_get_function($provider, 'status callback');
-
     // If there are any settings, use them.
     $provider_settings = isset($config['provider_settings']) ? $config['provider_settings'] : array();
-
-    // Get the status of the key.
-    $status = call_user_func($status_function, $provider_settings);
 
     $config_url_string = str_replace('_', '-', $name);
 
@@ -52,9 +45,6 @@ function key_configs_list() {
 
     // Set the type column.
     $row[] = array('data' => $type['title']);
-
-    // Set the status column.
-    $row[] = array('data' => $status['message']);
 
     // Set the edit column.
     $row[] = array('data' => l(t('edit'), KEY_MENU_PATH . '/edit/' . $config_url_string));

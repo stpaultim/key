@@ -11,7 +11,6 @@ $plugin = array(
   'key get callback' => 'key_provider_file_get_key',
   'settings form' => 'key_provider_file_settings_form',
   'instructions' => 'key_provider_file_instructions',
-  'status callback' => 'key_provider_file_status',
 );
 
 /**
@@ -80,22 +79,4 @@ function key_provider_file_instructions() {
       '#markup' => t('Enter the key in a file at the specified location. Be sure the file is readable by the user the web server runs under.'),
     )
   );
-}
-
-function key_provider_file_status($settings) {
-  $key = key_provider_file_get_key($settings);
-  if (!empty($key)) {
-    $status = array(
-      'valid' => KEY_STATUS_VALID,
-      'message' => t('Key found'),
-    );
-  }
-  else {
-    $status = array(
-      'valid' => KEY_STATUS_NOT_VALID,
-      'message' => t('Key not found'),
-    );
-  }
-
-  return $status;
 }

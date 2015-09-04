@@ -15,7 +15,6 @@ $plugin = array(
   'settings form' => 'key_provider_variable_settings_form',
   'key form' => 'key_provider_variable_key_form',
   'instructions' => 'key_provider_variable_instructions',
-  'status callback' => 'key_provider_variable_status',
 );
 
 /**
@@ -81,24 +80,6 @@ function key_provider_variable_instructions() {
       '#markup' => t('To set the key in the site’s settings.php file, leave the key value blank on this form and define the specified key in the $conf array in settings.php. For example, if the text entered for the variable name in the key provider settings is “foobar” and the key is “12345”, add this line to settings.php: %code', array('%code' => "\$conf['key_foobar'] = '12345';")),
     )
   );
-}
-
-function key_provider_variable_status($settings) {
-  $key = key_provider_variable_get_key($settings);
-  if (!empty($key)) {
-    $status = array(
-      'valid' => KEY_STATUS_VALID,
-      'message' => t('Key found'),
-    );
-  }
-  else {
-    $status = array(
-      'valid' => KEY_STATUS_NOT_VALID,
-      'message' => t('Key not found'),
-    );
-  }
-
-  return $status;
 }
 
 /**
