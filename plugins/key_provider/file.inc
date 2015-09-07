@@ -26,16 +26,7 @@ function key_provider_file_get_key($settings) {
     return NULL;
   }
 
-  switch ($settings['provider']) {
-    case 'file_contents':
-      $key = file_get_contents($file);
-      break;
-    case 'md5':
-      $key = md5_file($file);
-      break;
-    default:
-      $key = NULL;
-  }
+  $key = file_get_contents($file);
 
   return $key;
 }
@@ -57,16 +48,6 @@ function key_provider_file_settings_form($defaults) {
     ),
     '#default_value' => isset($defaults['location']) ? $defaults['location'] : '',
     '#required' => TRUE,
-  );
-  $form['method'] = array(
-    '#type' => 'select',
-    '#title' => t('Method'),
-    '#description' => t('If the selected method is “File contents”, the contents of the file will be used as entered. If “MD5 hash” is selected, an MD5 hash of the file contents will be used as the key.'),
-    '#options' => array(
-      'file_contents' => t('File contents'),
-      'md5' => t('MD5 hash'),
-    ),
-    '#default_value' => isset($defaults['provider']) ? $defaults['provider'] : 'file_contents',
   );
 
   return $form;
