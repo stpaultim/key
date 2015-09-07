@@ -33,13 +33,6 @@ function key_schema() {
         'not null' => TRUE,
         'size' => 'medium',
       ),
-      'type' => array(
-        'description' => 'The type of key.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
       'provider' => array(
         'description' => 'The key provider to use.',
         'type' => 'varchar',
@@ -68,7 +61,6 @@ function key_schema() {
     ),
     'indexes' => array(
       'label' => array('label'),
-      'type' => array('type'),
       'provider' => array('provider'),
     ),
     'primary key' => array('name'),

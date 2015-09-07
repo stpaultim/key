@@ -14,7 +14,6 @@ function key_configs_list() {
   $header = array(
     t('Name'),
     t('Provider'),
-    t('Type'),
     array('data' => t('Operations'), 'colspan' => '2'),
   );
   $rows = array();
@@ -24,7 +23,6 @@ function key_configs_list() {
     $name = $config['name'];
     $description = $config['description'];
     $provider = key_get_provider($config['provider']);
-    $type = key_get_type($config['type']);
 
     // If there are any settings, use them.
     $provider_settings = isset($config['provider_settings']) ? $config['provider_settings'] : array();
@@ -42,9 +40,6 @@ function key_configs_list() {
 
     // Set the key provider column.
     $row[] = array('data' => $provider['title']);
-
-    // Set the type column.
-    $row[] = array('data' => $type['title']);
 
     // Set the edit column.
     $row[] = array('data' => l(t('edit'), KEY_MENU_PATH . '/edit/' . $config_url_string));
@@ -97,9 +92,6 @@ function key_config_form($form, &$form_state, $config = NULL) {
     $provider = NULL;
   }
 
-  // Get all valid types as options.
-  $type_options = key_get_types_as_options(FALSE);
-
   $form['label'] = array(
     '#title' => t('Name'),
     '#type' => 'textfield',
@@ -124,14 +116,6 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#type' => 'textarea',
     '#default_value' => $config['description'],
     '#description' => t('A short description of the key.'),
-  );
-  $form['type'] = array(
-    '#type' => 'select',
-    '#title' => t('Type'),
-    '#description' => t('The type of key.'),
-    '#required' => TRUE,
-    '#options' => $type_options,
-    '#default_value' => $config['type'],
   );
   $form['provider'] = array(
     '#type' => 'select',
@@ -240,7 +224,6 @@ function key_config_form_submit($form, &$form_state) {
     'name' => (string) $form_state['values']['name'],
     'label' => (string) $form_state['values']['label'],
     'description' => (string) $form_state['values']['description'],
-    'type' => (string) $form_state['values']['type'],
     'provider' => (string) $form_state['values']['provider'],
     'provider_settings' => serialize($form_state['values']['provider_settings']),
     'created' => (string) $form_state['values']['created'],
