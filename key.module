@@ -112,7 +112,6 @@ function key_ctools_plugin_type() {
       'dependency errors' => NULL,
       'settings form' => NULL,
       'key form' => NULL,
-      'instructions' => NULL,
     ),
   );
 

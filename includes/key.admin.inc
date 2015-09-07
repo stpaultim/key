@@ -154,17 +154,6 @@ function key_config_form($form, &$form_state, $config = NULL) {
     $form['provider_extras']['provider_key'] += call_user_func($provider_key_form, array('key' => $key));
   }
 
-  $form['provider_extras']['provider_instructions'] = array(
-    '#type' => 'container',
-    '#title' => t('Instructions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  if ($provider && $provider_instructions = ctools_plugin_get_function($providers[$provider], 'instructions')) {
-    $form['provider_extras']['provider_instructions']['#type'] = 'fieldset';
-    $form['provider_extras']['provider_instructions'] += call_user_func($provider_instructions);
-  }
-
   $form['created'] = array(
     '#type' => 'value',
     '#value' => $config['created'],

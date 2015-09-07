@@ -10,7 +10,6 @@ $plugin = array(
   'description' => t('Use a file, preferably one that is outside the web root directory.'),
   'key get callback' => 'key_provider_file_get_key',
   'settings form' => 'key_provider_file_settings_form',
-  'instructions' => 'key_provider_file_instructions',
 );
 
 /**
@@ -71,12 +70,4 @@ function key_provider_file_settings_form($defaults) {
   );
 
   return $form;
-}
-
-function key_provider_file_instructions() {
-  return array(
-    'instructions' => array(
-      '#markup' => t('Enter the key in a file at the specified location. Be sure the file is readable by the user the web server runs under.'),
-    )
-  );
 }

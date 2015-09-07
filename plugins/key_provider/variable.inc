@@ -14,7 +14,6 @@ $plugin = array(
   'key set callback' => 'key_provider_variable_set_key',
   'settings form' => 'key_provider_variable_settings_form',
   'key form' => 'key_provider_variable_key_form',
-  'instructions' => 'key_provider_variable_instructions',
 );
 
 /**
@@ -67,19 +66,11 @@ function key_provider_variable_key_form($defaults) {
   $form['key'] = array(
     '#type' => 'textarea',
     '#title' => t('Key value'),
-    '#description' => t('Enter the key to save it to the database. If it’s defined in the settings.php file, as described in the instructions, this field should be left blank.'),
+    '#description' => t('Enter the key to save it to the database. If it’s defined in the settings.php file, this field should be left blank.'),
     '#default_value' => isset($defaults['key']) ? $defaults['key'] : '',
   );
 
   return $form;
-}
-
-function key_provider_variable_instructions() {
-  return array(
-    'instructions' => array(
-      '#markup' => t('To set the key in the site’s settings.php file, leave the key value blank on this form and define the specified key in the $conf array in settings.php. For example, if the text entered for the variable name in the key provider settings is “foobar” and the key is “12345”, add this line to settings.php: %code', array('%code' => "\$conf['key_foobar'] = '12345';")),
-    )
-  );
 }
 
 /**
