@@ -10,6 +10,7 @@ $plugin = array(
   'description' => t('Use a file, preferably one that is outside the web root directory.'),
   'key get value' => 'key_provider_file_get_key',
   'provider settings form' => 'key_provider_file_settings_form',
+  'config form validate' => 'key_provider_file_config_form_validate',
 );
 
 /**
@@ -51,4 +52,20 @@ function key_provider_file_settings_form($defaults) {
   );
 
   return $form;
+}
+
+/**
+ * Validate callback for the configuration form.
+ */
+function key_provider_file_config_form_validate($form, $form_state) {
+  $file = $form_state['values']['provider_settings']['file_location'];
+
+  // Verify that the file exists.
+  if (!is_file($file)) {
+    form_set_error('file_location', t('A file at the specified location does not exist.'));
+  }
+  // Verify that the file is readable.
+  elseif (!is_readable($file)) {
+    form_set_error('file_location', t('The file at the specified location is not readable.'));
+  }
 }
