@@ -113,7 +113,7 @@ function key_config_form($form, &$form_state, $config = NULL) {
   );
   $form['description'] = array(
     '#title' => t('Description'),
-    '#type' => 'textarea',
+    '#type' => 'textfield',
     '#default_value' => $config['description'],
     '#description' => t('A short description of the key.'),
   );
