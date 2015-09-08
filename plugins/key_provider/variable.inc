@@ -32,7 +32,7 @@ function key_provider_variable_get_key($config) {
 /**
  * Submit callback.
  */
-function key_provider_variable_config_form_submit($form, $form_state) {
+function key_provider_variable_config_form_submit($form, &$form_state) {
   if (empty($form_state['values']['provider_settings']['variable_name'])) {
     return NULL;
   }

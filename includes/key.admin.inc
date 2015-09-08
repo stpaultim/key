@@ -203,9 +203,7 @@ function key_config_form_validate($form, &$form_state) {
   $provider = key_get_provider($form_state['values']['provider']);
 
   if ($validate_callback = ctools_plugin_get_function($provider, 'config form validate')) {
-    // Create a copy so that the plugin callback cannot change the form state.
-    $form_state_copy = $form_state;
-    call_user_func($validate_callback, $form, $form_state_copy);
+    call_user_func($validate_callback, $form, $form_state);
   }
 }
 
@@ -216,9 +214,7 @@ function key_config_form_submit($form, &$form_state) {
   $provider = key_get_provider($form_state['values']['provider']);
 
   if ($submit_callback = ctools_plugin_get_function($provider, 'config form submit')) {
-    // Create a copy so that the plugin callback cannot change the form state.
-    $form_state_copy = $form_state;
-    call_user_func($submit_callback, $form, $form_state_copy);
+    call_user_func($submit_callback, $form, $form_state);
   }
 
   $fields = array(
@@ -266,10 +262,8 @@ function key_config_delete_confirm($form, &$form_state, $config) {
 function key_config_delete_confirm_submit($form, &$form_state) {
   $provider = key_get_provider($form_state['values']['provider']);
 
-  if ($submit_callback = ctools_plugin_get_function($provider, 'delete form submit')) {
-    // Create a copy so that the plugin callback cannot change the form state.
-    $form_state_copy = $form_state;
-    call_user_func($submit_callback, $form, $form_state_copy);
+  if ($submit_callback = ctools_plugin_get_function($provider, 'config form submit')) {
+    call_user_func($submit_callback, $form, $form_state);
   }
 
   db_delete('key_config')

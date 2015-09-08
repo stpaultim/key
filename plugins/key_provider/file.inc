@@ -57,7 +57,7 @@ function key_provider_file_settings_form($defaults) {
 /**
  * Validate callback for the configuration form.
  */
-function key_provider_file_config_form_validate($form, $form_state) {
+function key_provider_file_config_form_validate($form, &$form_state) {
   $file = $form_state['values']['provider_settings']['file_location'];
 
   // Verify that the file exists.
