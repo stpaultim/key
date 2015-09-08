@@ -503,11 +503,8 @@ function key_get_key($config_name) {
   // Get the function to retrieve the key.
   $key_function = ctools_plugin_get_function($provider, 'key get value');
 
-  // If there are any settings, use them.
-  $provider_settings = isset($config['provider_settings']) ? $config['provider_settings'] : array();
-
   // Retrieve the key.
-  $key = call_user_func($key_function, $provider_settings);
+  $key = call_user_func($key_function, $config);
 
   // Store the key, in case it's needed again.
   $keys[$config_name] = $key;

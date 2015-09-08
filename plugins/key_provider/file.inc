@@ -15,11 +15,11 @@ $plugin = array(
 /**
  * Callback function to return a key from a file.
  */
-function key_provider_file_get_key($settings) {
-  if (empty($settings['location'])) {
+function key_provider_file_get_key($config) {
+  if (empty($config['provider_settings']['file_location'])) {
     return NULL;
   }
-  $file = $settings['location'];
+  $file = $config['provider_settings']['file_location'];
 
   // Make sure the file exists and is readable.
   if (!is_file($file) || !is_readable($file)) {
@@ -37,7 +37,7 @@ function key_provider_file_get_key($settings) {
 function key_provider_file_settings_form($defaults) {
   $form = array();
 
-  $form['location'] = array(
+  $form['file_location'] = array(
     '#type' => 'textfield',
     '#title' => t('File location'),
     '#description' => t('The location of the file in which the key will be stored. The path may be absolute (e.g., %abs), relative to the Drupal directory (e.g., %rel), or defined using a stream wrapper (e.g., %str).', array(
@@ -46,7 +46,7 @@ function key_provider_file_settings_form($defaults) {
       '%str' => 'private://keys/foobar.key',
       )
     ),
-    '#default_value' => isset($defaults['location']) ? $defaults['location'] : '',
+    '#default_value' => isset($defaults['file_location']) ? $defaults['file_location'] : '',
     '#required' => TRUE,
   );
 

@@ -19,11 +19,11 @@ $plugin = array(
 /**
  * Return a key from a variable.
  */
-function key_provider_variable_get_key($settings) {
-  if (empty($settings['variable_name'])) {
+function key_provider_variable_get_key($config) {
+  if (empty($config['provider_settings']['variable_name'])) {
     return NULL;
   }
-  $variable_name = KEY_PROVIDER_VARIABLE_PREFIX . $settings['variable_name'];
+  $variable_name = KEY_PROVIDER_VARIABLE_PREFIX . $config['provider_settings']['variable_name'];
   $key = variable_get($variable_name, '');
 
   return $key;
