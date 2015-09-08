@@ -150,10 +150,10 @@ function key_config_form($form, &$form_state, $config = NULL) {
     $form['provider_extras']['provider_settings'] += call_user_func($provider_settings_form, $config['provider_settings']);
   }
 
-  if ($provider && $provider_key_form = ctools_plugin_get_function($providers[$provider], 'key value form')) {
+  if ($provider && $key_value_form = ctools_plugin_get_function($providers[$provider], 'key value form')) {
     $form['provider_extras']['key_value']['#type'] = 'fieldset';
     $key = !empty($config['name']) ? key_get_key($config['name']) : '';
-    $form['provider_extras']['key_value'] += call_user_func($provider_key_form, array('key' => $key));
+    $form['provider_extras']['key_value'] += call_user_func($key_value_form, array('key' => $key));
   }
 
   $form['created'] = array(
