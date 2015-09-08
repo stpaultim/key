@@ -10,14 +10,14 @@ define('KEY_PROVIDER_VARIABLE_PREFIX', 'key_');
 $plugin = array(
   'title' => t('Variable'),
   'description' => t('Use a variable, either from the database or from the $conf array in settings.php.'),
-  'key get callback' => 'key_provider_variable_get_key',
-  'key set callback' => 'key_provider_variable_set_key',
-  'settings form' => 'key_provider_variable_settings_form',
-  'key form' => 'key_provider_variable_key_form',
+  'key get value' => 'key_provider_variable_get_key',
+  'config form submit' => 'key_provider_variable_config_form_submit',
+  'provider settings form' => 'key_provider_variable_settings_form',
+  'key value form' => 'key_provider_variable_key_value_form',
 );
 
 /**
- * Callback function to return a key from a variable.
+ * Return a key from a variable.
  */
 function key_provider_variable_get_key($settings) {
   if (empty($settings['variable_name'])) {
@@ -30,13 +30,15 @@ function key_provider_variable_get_key($settings) {
 }
 
 /**
- * Callback function to set a key from a variable.
+ * Submit callback.
  */
-function key_provider_variable_set_key($settings, $key) {
-  if (empty($settings['variable_name'])) {
+function key_provider_variable_config_form_submit($form, $form_state) {
+  if (empty($form_state['values']['provider_settings']['variable_name'])) {
     return NULL;
   }
-  $variable_name = KEY_PROVIDER_VARIABLE_PREFIX . $settings['variable_name'];
+  $variable_name = KEY_PROVIDER_VARIABLE_PREFIX . $form_state['values']['provider_settings']['variable_name'];
+  $key = (isset($form_state['values']['key_value']['key_text'])) ? $form_state['values']['key_value']['key_text'] : '';
+
   if (empty($key)) {
     variable_del($variable_name);
   }
@@ -60,10 +62,10 @@ function key_provider_variable_settings_form($defaults) {
   return $form;
 }
 
-function key_provider_variable_key_form($defaults) {
+function key_provider_variable_key_value_form($defaults) {
   $form = array();
 
-  $form['key'] = array(
+  $form['key_text'] = array(
     '#type' => 'textarea',
     '#title' => t('Key value'),
     '#description' => t('Enter the key to save it to the database. If it’s defined in the settings.php file, this field should be left blank.'),

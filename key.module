@@ -106,12 +106,14 @@ function key_ctools_plugin_type() {
     'defaults' => array(
       'title' => '',
       'description' => '',
-      'key get callback' => NULL,
-      'key set callback' => NULL,
+      'key get value' => NULL,
+      'config form validate' => NULL,
+      'config form submit' => NULL,
+      'delete form submit' => NULL,
       'dependency callback' => NULL,
       'dependency errors' => NULL,
-      'settings form' => NULL,
-      'key form' => NULL,
+      'provider settings form' => NULL,
+      'key value form' => NULL,
     ),
   );
 
@@ -499,7 +501,7 @@ function key_get_key($config_name) {
   $provider = key_get_provider($config['provider']);
 
   // Get the function to retrieve the key.
-  $key_function = ctools_plugin_get_function($provider, 'key get callback');
+  $key_function = ctools_plugin_get_function($provider, 'key get value');
 
   // If there are any settings, use them.
   $provider_settings = isset($config['provider_settings']) ? $config['provider_settings'] : array();

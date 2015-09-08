@@ -8,15 +8,15 @@
 $plugin = array(
   'title' => t('File'),
   'description' => t('Use a file, preferably one that is outside the web root directory.'),
-  'key get callback' => 'key_provider_file_get_key',
-  'settings form' => 'key_provider_file_settings_form',
+  'key get value' => 'key_provider_file_get_key',
+  'provider settings form' => 'key_provider_file_settings_form',
 );
 
 /**
  * Callback function to return a key from a file.
  */
 function key_provider_file_get_key($settings) {
-  if (empty($settings['location']) || empty($settings['provider'])) {
+  if (empty($settings['location'])) {
     return NULL;
   }
   $file = $settings['location'];

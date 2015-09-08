@@ -141,17 +141,22 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#collapsible' => TRUE,
     '#tree' => TRUE,
   );
-  if ($provider && $provider_settings_form = ctools_plugin_get_function($providers[$provider], 'settings form')) {
+  $form['provider_extras']['key_value'] = array(
+    '#type' => 'container',
+    '#title' => t('Key value'),
+    '#collapsible' => TRUE,
+    '#tree' => TRUE,
+  );
+
+  if ($provider && $provider_settings_form = ctools_plugin_get_function($providers[$provider], 'provider settings form')) {
     $form['provider_extras']['provider_settings']['#type'] = 'fieldset';
     $form['provider_extras']['provider_settings'] += call_user_func($provider_settings_form, $config['provider_settings']);
   }
 
-  $form['provider_extras']['provider_key'] = array(
-    '#type' => 'container',
-  );
-  if ($provider && $provider_key_form = ctools_plugin_get_function($providers[$provider], 'key form')) {
+  if ($provider && $provider_key_form = ctools_plugin_get_function($providers[$provider], 'key value form')) {
+    $form['provider_extras']['key_value']['#type'] = 'fieldset';
     $key = !empty($config['name']) ? key_get_key($config['name']) : '';
-    $form['provider_extras']['provider_key'] += call_user_func($provider_key_form, array('key' => $key));
+    $form['provider_extras']['key_value'] += call_user_func($provider_key_form, array('key' => $key));
   }
 
   $form['created'] = array(
@@ -195,18 +200,28 @@ function key_provider_extras_ajax($form, $form_state) {
 }
 
 /**
+ * Form validate handler for key_config_form().
+ */
+function key_config_form_validate($form, &$form_state) {
+  $provider = key_get_provider($form_state['values']['provider']);
+
+  if ($validate_callback = ctools_plugin_get_function($provider, 'config form validate')) {
+    // Create a copy so that the plugin callback cannot change the form state.
+    $form_state_copy = $form_state;
+    call_user_func($validate_callback, $form, $form_state_copy);
+  }
+}
+
+/**
  * Form submission handler for key_config_form().
  */
 function key_config_form_submit($form, &$form_state) {
   $provider = key_get_provider($form_state['values']['provider']);
 
-  foreach (array($provider) as $plugin) {
-    if ($submit_callback = ctools_plugin_get_function($plugin, 'submit callback')) {
-      // Create a copy so that the plugin callback cannot change the
-      // form state.
-      $form_state_copy = $form_state;
-      call_user_func($submit_callback, $form, $form_state_copy);
-    }
+  if ($submit_callback = ctools_plugin_get_function($provider, 'config form submit')) {
+    // Create a copy so that the plugin callback cannot change the form state.
+    $form_state_copy = $form_state;
+    call_user_func($submit_callback, $form, $form_state_copy);
   }
 
   $fields = array(
@@ -240,6 +255,7 @@ function key_config_form_delete_submit($form, &$form_state) {
 function key_config_delete_confirm($form, &$form_state, $config) {
   $form['name'] = array('#type' => 'value', '#value' => $config['name']);
   $form['label'] = array('#type' => 'value', '#value' => $config['label']);
+  $form['provider'] = array('#type' => 'value', '#value' => $config['provider']);
 
   $message = t('Are you sure you want to delete the key %label?', array('%label' => $config['label']));
   $caption = '<p>' . t('This action cannot be undone.') . '</p>';
@@ -248,9 +264,17 @@ function key_config_delete_confirm($form, &$form_state, $config) {
 }
 
 /**
- * Submit handler for key_config_delete_confirm.
+ * Submit handler for key_config_delete_confirm().
  */
 function key_config_delete_confirm_submit($form, &$form_state) {
+  $provider = key_get_provider($form_state['values']['provider']);
+
+  if ($submit_callback = ctools_plugin_get_function($provider, 'delete form submit')) {
+    // Create a copy so that the plugin callback cannot change the form state.
+    $form_state_copy = $form_state;
+    call_user_func($submit_callback, $form, $form_state_copy);
+  }
+
   db_delete('key_config')
     ->condition('name', $form_state['values']['name'])
     ->execute();
