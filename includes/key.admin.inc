@@ -24,9 +24,6 @@ function key_configs_list() {
     $description = $config['description'];
     $provider = key_get_provider($config['provider']);
 
-    // If there are any settings, use them.
-    $provider_settings = isset($config['provider_settings']) ? $config['provider_settings'] : array();
-
     $config_url_string = str_replace('_', '-', $name);
 
     $variables = array(
