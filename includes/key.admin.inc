@@ -78,7 +78,21 @@ function key_config_form($form, &$form_state, $config = NULL) {
   // Get all valid key providers as options.
   $provider_options = key_get_providers_as_options(FALSE);
 
-  // Determine the key provider.
+  // Store the original key in the form.
+  if (!empty($config['name'])) {
+    $key_value = key_get_key($config['name']);
+
+    $form['#original_key'] = array(
+      'config' => $config,
+      'key_value' => $key_value,
+    );
+
+    if (!empty($key_value) && $key_value_obscure = ctools_plugin_get_function($providers[$config['provider']], 'key value obscure')) {
+      $form['#original_key']['key_value_obscured'] = call_user_func($key_value_obscure, $key_value, $config);
+    }
+  }
+
+  // Determine the current key provider.
   if (isset($form_state['values']['provider'])) {
     $provider = $form_state['values']['provider'];
   }
@@ -145,6 +159,11 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#tree' => TRUE,
   );
 
+  // Unset the input values for provider settings and key value,
+  // so they can be updated via AJAX.
+  unset($form_state['input']['provider_settings']);
+  unset($form_state['input']['key_value']);
+
   if ($provider && $provider_settings_form = ctools_plugin_get_function($providers[$provider], 'provider settings form')) {
     $form['provider_extras']['provider_settings']['#type'] = 'fieldset';
     $form['provider_extras']['provider_settings'] += call_user_func($provider_settings_form, $config['provider_settings']);
@@ -152,8 +171,16 @@ function key_config_form($form, &$form_state, $config = NULL) {
 
   if ($provider && $key_value_form = ctools_plugin_get_function($providers[$provider], 'key value form')) {
     $form['provider_extras']['key_value']['#type'] = 'fieldset';
-    $key = !empty($config['name']) ? key_get_key($config['name']) : '';
-    $form['provider_extras']['key_value'] += call_user_func($key_value_form, array('key' => $key));
+
+    // Determine what to display for the key value, if anything.
+    if (isset($form['#original_key']['key_value_obscured'])) {
+      $key_value = ($provider == $config['provider']) ? $form['#original_key']['key_value_obscured'] : '';
+    }
+    else {
+      $key_value = (isset($form['#original_key']['key_value'])) ? $form['#original_key']['key_value'] : '';
+    }
+
+    $form['provider_extras']['key_value'] += call_user_func($key_value_form, array('key_value' => $key_value));
   }
 
   $form['created'] = array(

@@ -114,6 +114,7 @@ function key_ctools_plugin_type() {
       'dependency errors' => NULL,
       'provider settings form' => NULL,
       'key value form' => NULL,
+      'key value obscure' => NULL,
     ),
   );
 

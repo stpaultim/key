@@ -69,7 +69,7 @@ function key_provider_variable_key_value_form($defaults) {
     '#type' => 'textarea',
     '#title' => t('Key value'),
     '#description' => t('Enter the key to save it to the database. If it’s defined in the settings.php file, this field should be left blank.'),
-    '#default_value' => isset($defaults['key']) ? $defaults['key'] : '',
+    '#default_value' => isset($defaults['key_value']) ? $defaults['key_value'] : '',
   );
 
   return $form;

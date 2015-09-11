@@ -11,6 +11,8 @@ $plugin = array(
   'key get value' => 'key_provider_file_get_key',
   'provider settings form' => 'key_provider_file_settings_form',
   'config form validate' => 'key_provider_file_config_form_validate',
+  'key value form' => 'key_provider_file_key_value_form',
+  'key value obscure' => 'key_provider_file_key_value_obscure',
 );
 
 /**
