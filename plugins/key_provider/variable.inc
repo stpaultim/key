@@ -12,6 +12,7 @@ $plugin = array(
   'description' => t('Use a variable, either from the database or from the $conf array in settings.php.'),
   'key get value' => 'key_provider_variable_get_key',
   'config form submit' => 'key_provider_variable_config_form_submit',
+  'delete form submit' => 'key_provider_variable_delete_form_submit',
   'provider settings form' => 'key_provider_variable_settings_form',
   'key value form' => 'key_provider_variable_key_value_form',
 );
@@ -73,6 +74,14 @@ function key_provider_variable_key_value_form($defaults) {
   );
 
   return $form;
+}
+
+/**
+ * Callback function to delete a key using this provider.
+ */
+function key_provider_variable_delete_form_submit($config) {
+  $variable_name = KEY_PROVIDER_VARIABLE_PREFIX . $config['provider_settings']['variable_name'];
+  variable_del($variable_name);
 }
 
 /**
