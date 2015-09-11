@@ -295,7 +295,7 @@ function key_config_delete_confirm($form, &$form_state, $config) {
  */
 function key_config_delete_confirm_submit($form, &$form_state) {
   $config = key_get_config($form_state['values']['name']);
-  $provider = $config['provider'];
+  $provider = key_get_provider($config['provider']);
 
   if ($delete_callback = ctools_plugin_get_function($provider, 'delete form submit')) {
     call_user_func($delete_callback, $config);
