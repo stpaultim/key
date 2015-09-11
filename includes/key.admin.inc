@@ -253,9 +253,7 @@ function key_config_form_submit($form, &$form_state) {
     'created' => (string) $form_state['values']['created'],
   );
 
-  $key = isset($form_state['values']['key']) ? $form_state['values']['key'] : NULL;
-
-  key_save_config($fields, $key);
+  key_save_config($fields);
 
   $form_state['redirect'] = KEY_MENU_PATH . '/list';
 }

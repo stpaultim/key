@@ -362,69 +362,12 @@ function key_get_config($name, $reset = FALSE) {
  *
  * @param array $fields
  *   The fields of the configuration to save.
- * @param array $key
- *   The key to save, if desired and allowed for the chosen key provider.
- * @param array $overwrite
- *   FALSE if a new configuration should be created, instead of overwriting
- *   an existing one with the same name.
  * @param bool $messages
  *   TRUE if messages should be displayed.
  */
-function key_save_config($fields, $key = FALSE, $overwrite = TRUE, $messages = TRUE) {
+function key_save_config($fields, $messages = TRUE) {
   // Load the key provider.
   $provider = key_get_provider($fields['provider']);
-
-  // If the configuration should not be overwritten, create a new one
-  // and make sure that certain fields are unique.
-  if (!$overwrite) {
-    $configs = key_get_configs();
-
-    // Make sure the configuration name is unique.
-    $counter = 2;
-    $base_name = $fields['name'];
-    while (key_get_config($fields['name'])) {
-      $fields['name'] = "${base_name}_$counter";
-      $counter++;
-    }
-
-    // Make sure the configuration label is unique.
-    $counter = 2;
-    $base_label = $fields['label'];
-    $config_labels = array();
-    foreach ($configs as $index => $config) {
-      $config_labels[] = $config['label'];
-    }
-    while (in_array($fields['label'], $config_labels)) {
-      $fields['label'] = "$base_label $counter";
-      $counter++;
-    }
-
-    // If the key provider is variable and the key is defined,
-    // make sure the variable name is unique.
-    if ($fields['provider'] == 'variable' && isset($key)) {
-      $counter = 2;
-      $base_variable_name = $fields['provider_settings']['variable_name'];
-      $config_variable_names = array();
-      foreach ($configs as $index => $config) {
-        if ($config['provider'] == 'variable') {
-          $config_variable_names[] = $config['provider_settings']['variable_name'];
-        }
-      }
-
-      while (in_array($fields['provider_settings']['variable_name'], $config_variable_names)) {
-        $fields['provider_settings']['variable_name'] = "${base_variable_name}_$counter";
-        $counter++;
-      }
-    }
-
-    foreach ($configs as $index => $config) {
-      // Change the configuration label to be unique.
-      while (key_get_config($fields['name'])) {
-        $fields['name'] = "${base_name}_$counter";
-        $counter++;
-      }
-    }
-  }
 
   // Serialize any field that is an array.
   foreach ($fields as $index => $field) {
@@ -470,11 +413,6 @@ function key_save_config($fields, $key = FALSE, $overwrite = TRUE, $messages = T
   $key_config = key_get_config($fields['name'], TRUE);
   if (empty($key_config)) {
     return NULL;
-  }
-
-  // Set the key if the key provider supports it and a key was defined.
-  if (isset($key) && $key_set_callback = ctools_plugin_get_function($provider, 'key set callback')) {
-    call_user_func($key_set_callback, $key_config['provider_settings'], $key);
   }
 
   // Return the saved configuration.
