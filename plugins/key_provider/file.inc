@@ -71,3 +71,10 @@ function key_provider_file_config_form_validate($form, &$form_state) {
     form_set_error('file_location', t('The file at the specified location is not readable.'));
   }
 }
+
+/**
+ * Obscure the key on configuration form.
+ */
+function key_provider_file_key_value_obscure($key_value, $config) {
+  return '';
+}
