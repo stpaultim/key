@@ -244,6 +244,16 @@ function key_config_form_submit($form, &$form_state) {
     call_user_func($submit_callback, $form, $form_state);
   }
 
+  // If the provider has changed, call the delete callback for the old
+  // provider.
+  if (isset($form['#original_key']['config'])) {
+    $original_config = $form['#original_key']['config'];
+    $original_provider = key_get_provider($original_config['provider']);
+    if (($provider['name'] != $original_provider['name']) && ($delete_callback = ctools_plugin_get_function($original_provider, 'delete form submit'))) {
+      call_user_func($delete_callback, $original_config);
+    }
+  }
+
   $fields = array(
     'name' => (string) $form_state['values']['name'],
     'label' => (string) $form_state['values']['label'],
@@ -273,7 +283,6 @@ function key_config_form_delete_submit($form, &$form_state) {
 function key_config_delete_confirm($form, &$form_state, $config) {
   $form['name'] = array('#type' => 'value', '#value' => $config['name']);
   $form['label'] = array('#type' => 'value', '#value' => $config['label']);
-  $form['provider'] = array('#type' => 'value', '#value' => $config['provider']);
 
   $message = t('Are you sure you want to delete the key %label?', array('%label' => $config['label']));
   $caption = '<p>' . t('This action cannot be undone.') . '</p>';
@@ -285,10 +294,11 @@ function key_config_delete_confirm($form, &$form_state, $config) {
  * Submit handler for key_config_delete_confirm().
  */
 function key_config_delete_confirm_submit($form, &$form_state) {
-  $provider = key_get_provider($form_state['values']['provider']);
+  $config = key_get_config($form_state['values']['name']);
+  $provider = $config['provider'];
 
-  if ($submit_callback = ctools_plugin_get_function($provider, 'config form submit')) {
-    call_user_func($submit_callback, $form, $form_state);
+  if ($delete_callback = ctools_plugin_get_function($provider, 'delete form submit')) {
+    call_user_func($delete_callback, $config);
   }
 
   db_delete('key_config')
