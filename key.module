@@ -437,6 +437,12 @@ function key_get_key($config_name) {
   }
 
   $config = key_get_config($config_name);
+
+  // If the configuration doesn't exist, return NULL.
+  if (!isset($config)) {
+    return NULL;
+  }
+
   $provider = key_get_provider($config['provider']);
 
   // Get the function to retrieve the key.
