@@ -241,7 +241,7 @@ function key_config_form_submit($form, &$form_state) {
   $provider = key_get_provider($form_state['values']['provider']);
 
   if ($submit_callback = ctools_plugin_get_function($provider, 'config form submit')) {
-    call_user_func($submit_callback, $form, $form_state);
+    call_user_func_array($submit_callback, array($form, &$form_state));
   }
 
   // If the provider has changed, call the delete callback for the old
@@ -259,7 +259,7 @@ function key_config_form_submit($form, &$form_state) {
     'label' => (string) $form_state['values']['label'],
     'description' => (string) $form_state['values']['description'],
     'provider' => (string) $form_state['values']['provider'],
-    'provider_settings' => serialize($form_state['values']['provider_settings']),
+    'provider_settings' => (isset($form_state['values']['provider_settings'])) ? serialize($form_state['values']['provider_settings']) : '',
     'created' => (string) $form_state['values']['created'],
   );
 
