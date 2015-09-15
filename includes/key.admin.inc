@@ -39,10 +39,10 @@ function key_configs_list() {
     $row[] = array('data' => $provider['title']);
 
     // Set the edit column.
-    $row[] = array('data' => l(t('edit'), KEY_MENU_PATH . '/edit/' . $config_url_string));
+    $row[] = array('data' => l(t('edit'), KEY_MENU_PATH . '/manage/' . $config_url_string));
 
     // Set the delete column.
-    $row[] = array('data' => l(t('delete'), KEY_MENU_PATH . '/delete/' . $config_url_string));
+    $row[] = array('data' => l(t('delete'), KEY_MENU_PATH . '/manage/' . $config_url_string . '/delete'));
 
     $rows[] = $row;
   }

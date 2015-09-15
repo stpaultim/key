@@ -46,7 +46,7 @@ function key_menu() {
     'file' => 'includes/key.admin.inc',
     'type' => MENU_LOCAL_ACTION,
   );
-  $items[KEY_MENU_PATH . '/edit/%key_config'] = array(
+  $items[KEY_MENU_PATH . '/manage/%key_config'] = array(
     'title' => 'Edit key',
     'title callback' => 'key_config_edit_title',
     'title arguments' => array(5),
@@ -55,7 +55,7 @@ function key_menu() {
     'access arguments' => array('administer keys'),
     'file' => 'includes/key.admin.inc',
   );
-  $items[KEY_MENU_PATH . '/delete/%key_config'] = array(
+  $items[KEY_MENU_PATH . '/manage/%key_config/delete'] = array(
     'title' => 'Delete key',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('key_config_delete_confirm', 5),
