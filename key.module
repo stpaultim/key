@@ -178,6 +178,7 @@ function key_config_load($name) {
  * Process function to expand the key element.
  */
 function _key_element_expand($element) {
+  $element['#empty_option'] = t('Select a key');
   $element['#options'] = key_get_configs_as_options();
   if (!empty($element['#filters'])) {
     $element['#options'] = _key_configs_filter($element['#options'], $element['#filters']);
