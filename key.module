@@ -186,10 +186,11 @@ function _key_element_expand($element) {
 
   // Prefix the default description with a information about keys.
   if ($element['#key_description']) {
+    $original_description = (isset($element['#description'])) ? $element['#description'] : '';
     $key_description = t('Choose an available key to use.');
     $key_description .= ' ' . t('If your key is not listed, <a href="@url">create a new key</a>.', array('@url' => '/' . KEY_MENU_PATH));
 
-    $element['#description'] = $key_description . ' ' . $element['#description'];
+    $element['#description'] = $key_description . ' ' . $original_description;
   }
 
   return $element;
