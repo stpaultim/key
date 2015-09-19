@@ -274,7 +274,7 @@ function key_config_form_submit($form, &$form_state) {
  * Handles the 'Delete' button on the key configuration form.
  */
 function key_config_form_delete_submit($form, &$form_state) {
-  $form_state['redirect'] = KEY_MENU_PATH . '/delete/' . str_replace('_', '-', $form['name']['#default_value']);
+  $form_state['redirect'] = KEY_MENU_PATH . '/manage/' . str_replace('_', '-', $form['name']['#default_value']) . '/delete';
 }
 
 /**
