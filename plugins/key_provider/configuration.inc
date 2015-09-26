@@ -25,7 +25,25 @@ function key_provider_configuration_get_key($config) {
     $key_value = NULL;
   }
 
+  // Base64-decode if necessary.
+  if (isset($config['provider_settings']['base64_encoded']) && $config['provider_settings']['base64_encoded']) {
+    $key_value = base64_decode($key_value);
+  }
+
   return $key_value;
+}
+
+function key_provider_configuration_settings_form($defaults) {
+  $form = array();
+
+  $form['base64_encoded'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Base64-encoded'),
+    '#description' => t('Check this if the key has been Base64-encoded. If the key should be used as-is, without Base64-decoding, leave this unchecked.'),
+    '#default_value' => isset($defaults['base64_encoded']) ? $defaults['base64_encoded'] : 0,
+  );
+
+  return $form;
 }
 
 /**
