@@ -164,23 +164,41 @@ function key_config_form($form, &$form_state, $config = NULL) {
   unset($form_state['input']['provider_settings']);
   unset($form_state['input']['key_value']);
 
-  if ($provider && $provider_settings_form = ctools_plugin_get_function($providers[$provider], 'provider settings form')) {
-    $form['provider_extras']['provider_settings']['#type'] = 'fieldset';
-    $form['provider_extras']['provider_settings'] += call_user_func($provider_settings_form, $config['provider_settings']);
-  }
-
-  if ($provider && $key_value_form = ctools_plugin_get_function($providers[$provider], 'key value form')) {
-    $form['provider_extras']['key_value']['#type'] = 'fieldset';
-
-    // Determine what to display for the key value, if anything.
-    if (isset($form['#original_key']['key_value_obscured'])) {
-      $key_value = ($provider == $config['provider']) ? $form['#original_key']['key_value_obscured'] : '';
-    }
-    else {
-      $key_value = (isset($form['#original_key']['key_value'])) ? $form['#original_key']['key_value'] : '';
+  if ($provider) {
+    // Add the Base64 checkbox to the settings, if allowed.
+    if ($providers[$provider]['allow base64 encoding']) {
+      $form['provider_extras']['provider_settings']['base64_encoded'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Base64-encoded'),
+        '#description' => t('Check this if the key has been Base64-encoded. If the key should be used as-is, without Base64-decoding, leave this unchecked.'),
+        '#default_value' => isset($config['provider_settings']['base64_encoded']) ? $config['provider_settings']['base64_encoded'] : 0,
+      );
     }
 
-    $form['provider_extras']['key_value'] += call_user_func($key_value_form, array('key_value' => $key_value));
+    // Add any additional provider settings.
+    if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'provider settings form')) {
+      $form['provider_extras']['provider_settings'] += call_user_func($provider_settings_form, $config['provider_settings']);
+    }
+
+    // If there are any provider settings, make the container a fieldset.
+    if (element_children($form['provider_extras']['provider_settings'])) {
+      $form['provider_extras']['provider_settings']['#type'] = 'fieldset';
+    }
+
+    // Add the value form, if defined.
+    if ($provider && $key_value_form = ctools_plugin_get_function($providers[$provider], 'key value form')) {
+      $form['provider_extras']['key_value']['#type'] = 'fieldset';
+
+      // Determine what to display for the key value, if anything.
+      if (isset($form['#original_key']['key_value_obscured'])) {
+        $key_value = ($provider == $config['provider']) ? $form['#original_key']['key_value_obscured'] : '';
+      }
+      else {
+        $key_value = (isset($form['#original_key']['key_value'])) ? $form['#original_key']['key_value'] : '';
+      }
+
+      $form['provider_extras']['key_value'] += call_user_func($key_value_form, array('key_value' => $key_value));
+    }
   }
 
   $form['created'] = array(

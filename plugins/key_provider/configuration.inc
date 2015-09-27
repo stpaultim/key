@@ -9,7 +9,6 @@ $plugin = array(
   'title' => t('Configuration'),
   'description' => t('Saves the key in configuration in the database.'),
   'key get value' => 'key_provider_configuration_get_key',
-  'provider settings form' => 'key_provider_configuration_settings_form',
   'config form submit' => 'key_provider_configuration_config_form_submit',
   'key value form' => 'key_provider_configuration_key_value_form',
 );
@@ -31,19 +30,6 @@ function key_provider_configuration_get_key($config) {
   }
 
   return $key_value;
-}
-
-function key_provider_configuration_settings_form($defaults) {
-  $form = array();
-
-  $form['base64_encoded'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Base64-encoded'),
-    '#description' => t('Check this if the key has been Base64-encoded. If the key should be used as-is, without Base64-decoding, leave this unchecked.'),
-    '#default_value' => isset($defaults['base64_encoded']) ? $defaults['base64_encoded'] : 0,
-  );
-
-  return $form;
 }
 
 /**
