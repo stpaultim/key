@@ -99,6 +99,28 @@ function key_ctools_plugin_directory($module, $plugin) {
  * Tell CTools about plugins the module uses.
  */
 function key_ctools_plugin_type() {
+  $plugins['key_type'] = array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'process' => '_key_type_plugin_process',
+    'defaults' => array(
+      'title' => '',
+      'description' => '',
+      'group' => 'none',
+      'key_value' => array(
+        'plugin' => 'text_field',
+      ),
+      'build configuration form' => NULL,
+      'validate configuration form' => NULL,
+      'submit configuration form' => NULL,
+      'build delete form' => NULL,
+      'validate delete form' => NULL,
+      'submit delete form' => NULL,
+      'generate key value' => '_key_default_generate_key_value',
+      'validate key value' => NULL,
+    ),
+  );
+
   $plugins['key_provider'] = array(
     'cache' => TRUE,
     'cache table' => 'cache',
