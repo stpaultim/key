@@ -130,7 +130,7 @@ function key_ctools_plugin_type() {
  * Implements hook_element_info().
  */
 function key_element_info() {
-  $type['key'] = array(
+  $type['key_select'] = array(
     '#input' => TRUE,
     '#size' => 0,
     '#multiple' => FALSE,

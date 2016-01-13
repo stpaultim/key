@@ -62,10 +62,10 @@ a provider.
 Key defines a custom Form API element that works like a standard select 
 field, except its options are defined as the list of available keys. The 
 easiest way to include a key field is just to set the field's '#type' to 
-'key'. For example:
+'key_select'. For example:
 
 $form['secret_key'] = array(
-  '#type' => 'key',
+  '#type' => 'key_select',
   '#title' => t('Secret key'),
 );
 
@@ -76,7 +76,7 @@ passing an array in the #filters property. Currently, the only option for
 filtering is on the key provider. Example:
 
 $form['secret_key'] = array(
-  '#type' => 'key',
+  '#type' => 'key_select',
   '#title' => t('Secret key'),
   '#key_description' => FALSE,
   '#filters' = array(
