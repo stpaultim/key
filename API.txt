@@ -38,14 +38,14 @@ following keys can be assigned values:
 - title - The title of the provider (REQUIRED)
 - description - A short description of the how the key will be
   retrieved and/or stored
-- key get value - The function that retrieves a key value and returns it
-- config form validate - A validate function fot the key configuration form
-- config form submit - A submit function for the key configuration form
-- delete form submit - A submit function for the delete confirmation form
+- get key value - The function that retrieves a key value and returns it
+- validate configuration form - A validate function fot the key configuration form
+- submit configuration form - A submit function for the key configuration form
+- submit delete form - A submit function for the delete confirmation form
 - dependency callback - A function that checks for provider dependencies
   and returns errors if they are not met; dependency errors are then stored
   in 'dependency errors'
-- provider settings form' - A form definition function for settings specific
+- build configuration form - A form definition function for settings specific
   to the provider
 - key value form - A form definition function for submitting key value, if
   it should be able to be submitted on the key configuration page

@@ -8,8 +8,8 @@
 $plugin = array(
   'title' => t('Configuration'),
   'description' => t('Saves the key in configuration in the database.'),
-  'key get value' => 'key_provider_configuration_get_key',
-  'config form submit' => 'key_provider_configuration_config_form_submit',
+  'get key value' => 'key_provider_configuration_get_key',
+  'submit configuration form' => 'key_provider_configuration_config_form_submit',
   'key value form' => 'key_provider_configuration_key_value_form',
 );
 

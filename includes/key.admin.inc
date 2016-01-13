@@ -176,7 +176,7 @@ function key_config_form($form, &$form_state, $config = NULL) {
     }
 
     // Add any additional provider settings.
-    if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'provider settings form')) {
+    if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'build configuration form')) {
       $form['provider_extras']['provider_settings'] += call_user_func($provider_settings_form, $config['provider_settings']);
     }
 
@@ -247,7 +247,7 @@ function key_provider_extras_ajax($form, $form_state) {
 function key_config_form_validate($form, &$form_state) {
   $provider = key_get_provider($form_state['values']['provider']);
 
-  if ($validate_callback = ctools_plugin_get_function($provider, 'config form validate')) {
+  if ($validate_callback = ctools_plugin_get_function($provider, 'validate configuration form')) {
     call_user_func($validate_callback, $form, $form_state);
   }
 }
@@ -258,7 +258,7 @@ function key_config_form_validate($form, &$form_state) {
 function key_config_form_submit($form, &$form_state) {
   $provider = key_get_provider($form_state['values']['provider']);
 
-  if ($submit_callback = ctools_plugin_get_function($provider, 'config form submit')) {
+  if ($submit_callback = ctools_plugin_get_function($provider, 'submit configuration form')) {
     call_user_func_array($submit_callback, array($form, &$form_state));
   }
 
@@ -267,7 +267,7 @@ function key_config_form_submit($form, &$form_state) {
   if (isset($form['#original_key']['config'])) {
     $original_config = $form['#original_key']['config'];
     $original_provider = key_get_provider($original_config['provider']);
-    if (($provider['name'] != $original_provider['name']) && ($delete_callback = ctools_plugin_get_function($original_provider, 'delete form submit'))) {
+    if (($provider['name'] != $original_provider['name']) && ($delete_callback = ctools_plugin_get_function($original_provider, 'submit delete form'))) {
       call_user_func($delete_callback, $original_config);
     }
   }
@@ -315,7 +315,7 @@ function key_config_delete_confirm_submit($form, &$form_state) {
   $config = key_get_config($form_state['values']['name']);
   $provider = key_get_provider($config['provider']);
 
-  if ($delete_callback = ctools_plugin_get_function($provider, 'delete form submit')) {
+  if ($delete_callback = ctools_plugin_get_function($provider, 'submit delete form')) {
     call_user_func($delete_callback, $config);
   }
 

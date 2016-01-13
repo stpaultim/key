@@ -106,13 +106,17 @@ function key_ctools_plugin_type() {
     'defaults' => array(
       'title' => '',
       'description' => '',
-      'key get value' => NULL,
-      'config form validate' => NULL,
-      'config form submit' => NULL,
-      'delete form submit' => NULL,
+      'build configuration form' => NULL,
+      'validate configuration form' => NULL,
+      'submit configuration form' => NULL,
+      'build delete form' => NULL,
+      'validate delete form' => NULL,
+      'submit delete form' => NULL,
+      'get key value' => NULL,
+      'set key value' => NULL,
+      'obscure key value' => NULL,
       'dependency callback' => NULL,
       'dependency errors' => NULL,
-      'provider settings form' => NULL,
       'key value form' => NULL,
       'key value obscure' => NULL,
       'allow base64 encoding' => TRUE,
@@ -449,7 +453,7 @@ function key_get_key($config_name) {
   $provider = key_get_provider($config['provider']);
 
   // Get the function to retrieve the key.
-  $key_function = ctools_plugin_get_function($provider, 'key get value');
+  $key_function = ctools_plugin_get_function($provider, 'get key value');
 
   // Retrieve the key.
   $key = call_user_func($key_function, $config);
