@@ -27,7 +27,7 @@ function key_menu() {
 
   $items[KEY_MENU_PATH] = array(
     'title' => 'Keys',
-    'description' => 'Manage keys.',
+    'description' => 'Manage site-wide keys.',
     'page callback' => 'key_configs_list',
     'access arguments' => array('administer keys'),
     'file' => 'includes/key.admin.inc',
