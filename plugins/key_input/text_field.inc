@@ -8,7 +8,7 @@
 $plugin = array(
   'label' => t('Text field'),
   'description' => t("A simple text field."),
-  'build configuration form' => NULL,
+  'build configuration form' => 'key_input_text_field_build_configuration_form',
 );
 
 /**
@@ -22,7 +22,7 @@ $plugin = array(
  * @return array
  *   The modified settings form.
  */
-function key_input_none_settings_form($form, &$form_state) {
+function key_input_text_field_build_configuration_form($form, &$form_state) {
   $key_value_data = $form_state['key_value'];
 
   $form['key_value'] = array(

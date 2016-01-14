@@ -8,9 +8,9 @@
 $plugin = array(
   'label' => t('File'),
   'description' => t('Use a file, preferably one that is outside the web root directory.'),
-  'get key value' => 'key_provider_file_get_key',
-  'build configuration form' => 'key_provider_file_settings_form',
-  'validate configuration form' => 'key_provider_file_config_form_validate',
+  'get key value' => 'key_provider_file_get_key_value',
+  'build configuration form' => 'key_provider_file_build_configuration_form',
+  'validate configuration form' => 'key_provider_file_validate_configuration_form',
   'key value form' => 'key_provider_file_key_value_form',
   'key value obscure' => 'key_provider_file_key_value_obscure',
 );
@@ -18,7 +18,7 @@ $plugin = array(
 /**
  * Callback function to return a key from a file.
  */
-function key_provider_file_get_key($config) {
+function key_provider_file_get_key_value($config) {
   if (empty($config['key_provider_settings']['file_location'])) {
     return NULL;
   }
@@ -42,7 +42,7 @@ function key_provider_file_get_key($config) {
 /**
  * Settings form for the File key provider.
  */
-function key_provider_file_settings_form($defaults) {
+function key_provider_file_build_configuration_form($defaults) {
   $form = array();
 
   $form['file_location'] = array(
@@ -64,7 +64,7 @@ function key_provider_file_settings_form($defaults) {
 /**
  * Validate callback for the configuration form.
  */
-function key_provider_file_config_form_validate($form, &$form_state) {
+function key_provider_file_validate_configuration_form($form, &$form_state) {
   $file = $form_state['values']['key_provider_settings']['file_location'];
 
   // Verify that the file exists.

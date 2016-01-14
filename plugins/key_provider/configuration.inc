@@ -8,15 +8,15 @@
 $plugin = array(
   'label' => t('Configuration'),
   'description' => t('Saves the key in configuration in the database.'),
-  'get key value' => 'key_provider_configuration_get_key',
-  'submit configuration form' => 'key_provider_configuration_config_form_submit',
+  'get key value' => 'key_provider_configuration_get_key_value',
+  'submit configuration form' => 'key_provider_configuration_submit_configuration_form',
   'key value form' => 'key_provider_configuration_key_value_form',
 );
 
 /**
  * Return a key stored with the configuration.
  */
-function key_provider_configuration_get_key($config) {
+function key_provider_configuration_get_key_value($config) {
   if (isset($config['key_provider_settings']['key_value'])) {
     $key_value = $config['key_provider_settings']['key_value'];
   }
@@ -35,7 +35,7 @@ function key_provider_configuration_get_key($config) {
 /**
  * Submit callback.
  */
-function key_provider_configuration_config_form_submit($form, &$form_state) {
+function key_provider_configuration_submit_configuration_form($form, &$form_state) {
   $form_state['values']['key_provider_settings']['key_value'] = $form_state['values']['key_value']['key_text'];
 }
 
