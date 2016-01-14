@@ -79,6 +79,12 @@ function key_config_form($form, &$form_state, $config = NULL) {
     $form_state['#key_value'] = _key_key_value_data($config);
   }
 
+  // Get all valid key types.
+  $key_types = key_get_plugins('key_type', FALSE);
+
+  // Get all valid key types as options.
+  $key_type_options = key_get_plugins_as_options('key_type', FALSE);
+
   // Get all valid key providers.
   $providers = key_get_plugins('key_provider', FALSE);
 
@@ -97,6 +103,17 @@ function key_config_form($form, &$form_state, $config = NULL) {
     if (!empty($key_value) && $key_value_obscure = ctools_plugin_get_function($providers[$config['key_provider']], 'key value obscure')) {
       $form['#original_key']['key_value_obscured'] = call_user_func($key_value_obscure, $key_value, $config);
     }
+  }
+
+  // Determine the current key type.
+  if (isset($form_state['values']['key_type'])) {
+    $key_type = $form_state['values']['key_type'];
+  }
+  elseif (isset($config['key_type'])) {
+    $key_type = $config['key_type'];
+  }
+  else {
+    $key_type = 'basic';
   }
 
   // Determine the current key provider.
@@ -141,6 +158,37 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#prefix' => '<div id="key-settings">',
     '#suffix' => '</div>',
   );
+
+  // Key type section.
+  $form['settings']['type_section'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Type settings'),
+    '#collapsible' => TRUE,
+  );
+  $form['settings']['type_section']['key_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Key type'),
+    '#options' => $key_type_options,
+    '#required' => TRUE,
+    '#default_value' => isset($config['key_type']) ? $config['key_type'] : 'basic',
+    '#ajax' => array(
+      'callback' => '_key_config_form_ajax_update_settings',
+      'event' => 'change',
+      'wrapper' => 'key-settings',
+    ),
+  );
+  $form['settings']['type_section']['key_type_settings'] = array(
+    '#type' => 'container',
+    '#title' => t('Key type settings'),
+    '#title_display' => FALSE,
+    '#tree' => TRUE,
+  );
+  if ($key_type) {
+    // Add any additional key type settings.
+    if ($key_type_settings_form = ctools_plugin_get_function($key_types[$key_type], 'build configuration form')) {
+      $form['settings']['type_section']['key_type_settings'] += call_user_func($key_type_settings_form, $config['key_type_settings']);
+    }
+  }
 
   // Key provider section.
   $form['settings']['provider_section'] = array(

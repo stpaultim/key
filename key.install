@@ -33,6 +33,19 @@ function key_schema() {
         'not null' => TRUE,
         'size' => 'medium',
       ),
+      'key_type' => array(
+        'description' => 'The key type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'key_type_settings' => array(
+        'description' => 'Additional settings for the key type.',
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+      ),
       'key_provider' => array(
         'description' => 'The key provider to use.',
         'type' => 'varchar',
@@ -61,6 +74,7 @@ function key_schema() {
     ),
     'indexes' => array(
       'label' => array('label'),
+      'key_type' => array('key_type'),
       'key_provider' => array('key_provider'),
     ),
     'primary key' => array('id'),
