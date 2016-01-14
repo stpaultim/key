@@ -36,7 +36,7 @@ function key_configs_list() {
     $row = array(theme('key_configs_list_description', $variables));
 
     // Set the key provider column.
-    $row[] = array('data' => $provider['title']);
+    $row[] = array('data' => $provider['label']);
 
     // Set the edit column.
     $row[] = array('data' => l(t('edit'), KEY_MENU_PATH . '/manage/' . $config_url_string));

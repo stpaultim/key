@@ -104,7 +104,7 @@ function key_ctools_plugin_type() {
     'cache table' => 'cache',
     'process' => '_key_type_plugin_process',
     'defaults' => array(
-      'title' => '',
+      'label' => '',
       'description' => '',
       'group' => 'none',
       'key value' => array(
@@ -126,7 +126,7 @@ function key_ctools_plugin_type() {
     'cache table' => 'cache',
     'process' => '_key_provider_plugin_process',
     'defaults' => array(
-      'title' => '',
+      'label' => '',
       'description' => '',
       'storage method' => '',
       'key value' => array(
@@ -156,7 +156,7 @@ function key_ctools_plugin_type() {
     'cache table' => 'cache',
     'process' => '_key_type_plugin_process',
     'defaults' => array(
-      'title' => '',
+      'label' => '',
       'description' => '',
       'build configuration form' => NULL,
       'validate configuration form' => NULL,
@@ -318,7 +318,7 @@ function key_get_plugins_as_options($type, $all = TRUE, $reset = FALSE) {
   $options = array();
 
   foreach($plugins as $id => $plugin) {
-    $options[$id] = $plugin['title'];
+    $options[$id] = $plugin['label'];
   }
 
   return $options;

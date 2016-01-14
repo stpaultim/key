@@ -6,7 +6,7 @@
  */
 
 $plugin = array(
-  'title' => t('File'),
+  'label' => t('File'),
   'description' => t('Use a file, preferably one that is outside the web root directory.'),
   'get key value' => 'key_provider_file_get_key',
   'build configuration form' => 'key_provider_file_settings_form',

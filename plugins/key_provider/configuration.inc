@@ -6,7 +6,7 @@
  */
 
 $plugin = array(
-  'title' => t('Configuration'),
+  'label' => t('Configuration'),
   'description' => t('Saves the key in configuration in the database.'),
   'get key value' => 'key_provider_configuration_get_key',
   'submit configuration form' => 'key_provider_configuration_config_form_submit',
