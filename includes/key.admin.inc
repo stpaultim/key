@@ -111,10 +111,9 @@ function key_config_form($form, &$form_state, $config = NULL) {
   }
 
   $form['label'] = array(
-    '#title' => t('Name'),
+    '#title' => t('Key name'),
     '#type' => 'textfield',
     '#default_value' => $config['label'],
-    '#description' => t('The human-readable name of the key.'),
     '#required' => TRUE,
     '#size' => 30,
   );
@@ -135,31 +134,40 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#default_value' => $config['description'],
     '#description' => t('A short description of the key.'),
   );
-  $form['key_provider'] = array(
-    '#type' => 'select',
-    '#title' => t('Key provider'),
-    '#description' => t('The key provider to use.'),
-    '#required' => TRUE,
-    '#options' => $provider_options,
-    '#default_value' => $config['key_provider'],
-    '#ajax' => array(
-      'method' => 'replace',
-      'callback' => 'key_provider_extras_ajax',
-      'wrapper' => 'key-provider-extras-wrapper',
-    ),
-  );
-  $form['provider_extras'] = array(
+
+  // This is the element that contains all of the dynamic parts of the form.
+  $form['settings'] = array(
     '#type' => 'container',
-    '#prefix' => '<div id="key-provider-extras-wrapper">',
+    '#prefix' => '<div id="key-settings">',
     '#suffix' => '</div>',
   );
-  $form['provider_extras']['key_provider_settings'] = array(
+
+  // Key provider section.
+  $form['settings']['provider_section'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Provider settings'),
+    '#collapsible' => TRUE,
+  );
+  $form['settings']['provider_section']['key_provider'] = array(
+    '#type' => 'select',
+    '#title' => t('Key provider'),
+    '#options' => $provider_options,
+    '#required' => TRUE,
+    '#default_value' => $config['key_provider'],
+    '#ajax' => array(
+      'callback' => '_key_config_form_ajax_update_settings',
+      'event' => 'change',
+      'wrapper' => 'key-settings',
+    ),
+  );
+  $form['settings']['provider_section']['key_provider_settings'] = array(
     '#type' => 'container',
     '#title' => t('Key provider settings'),
-    '#collapsible' => TRUE,
+    '#title_display' => FALSE,
     '#tree' => TRUE,
   );
-  $form['provider_extras']['key_value'] = array(
+
+  $form['settings']['provider_section']['key_value'] = array(
     '#type' => 'container',
     '#title' => t('Key value'),
     '#collapsible' => TRUE,
@@ -174,7 +182,7 @@ function key_config_form($form, &$form_state, $config = NULL) {
   if ($provider) {
     // Add the Base64 checkbox to the settings, if allowed.
     if ($providers[$provider]['allow base64 encoding']) {
-      $form['provider_extras']['key_provider_settings']['base64_encoded'] = array(
+      $form['settings']['provider_section']['key_provider_settings']['base64_encoded'] = array(
         '#type' => 'checkbox',
         '#title' => t('Base64-encoded'),
         '#description' => t('Check this if the key has been Base64-encoded. If the key should be used as-is, without Base64-decoding, leave this unchecked.'),
@@ -184,17 +192,12 @@ function key_config_form($form, &$form_state, $config = NULL) {
 
     // Add any additional provider settings.
     if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'build configuration form')) {
-      $form['provider_extras']['key_provider_settings'] += call_user_func($provider_settings_form, $config['key_provider_settings']);
-    }
-
-    // If there are any provider settings, make the container a fieldset.
-    if (element_children($form['provider_extras']['key_provider_settings'])) {
-      $form['provider_extras']['key_provider_settings']['#type'] = 'fieldset';
+      $form['settings']['provider_section']['key_provider_settings'] += call_user_func($provider_settings_form, $config['key_provider_settings']);
     }
 
     // Add the value form, if defined.
     if ($provider && $key_value_form = ctools_plugin_get_function($providers[$provider], 'key value form')) {
-      $form['provider_extras']['key_value']['#type'] = 'fieldset';
+      $form['settings']['provider_section']['key_value']['#type'] = 'fieldset';
 
       // Determine what to display for the key value, if anything.
       if (isset($form['#original_key']['key_value_obscured'])) {
@@ -204,7 +207,7 @@ function key_config_form($form, &$form_state, $config = NULL) {
         $key_value = (isset($form['#original_key']['key_value'])) ? $form['#original_key']['key_value'] : '';
       }
 
-      $form['provider_extras']['key_value'] += call_user_func($key_value_form, array('key_value' => $key_value));
+      $form['settings']['provider_section']['key_value'] += call_user_func($key_value_form, array('key_value' => $key_value));
     }
   }
 
@@ -242,10 +245,10 @@ function key_config_form($form, &$form_state, $config = NULL) {
 }
 
 /**
- * Callback for AJAX form re-rendering for provider additional settings.
+ * Callback for AJAX form re-rendering.
  */
-function key_provider_extras_ajax($form, $form_state) {
-  return $form['provider_extras'];
+function _key_config_form_ajax_update_settings($form, $form_state) {
+  return $form['settings'];
 }
 
 /**
