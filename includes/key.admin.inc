@@ -12,7 +12,8 @@ function key_configs_list() {
   $configs = key_get_configs();
 
   $header = array(
-    t('Name'),
+    t('Key'),
+    t('Type'),
     t('Provider'),
     array('data' => t('Operations'), 'colspan' => '2'),
   );
@@ -22,7 +23,8 @@ function key_configs_list() {
     $label = $config['label'];
     $id = $config['id'];
     $description = $config['description'];
-    $provider = key_get_plugin('key_provider', $config['key_provider']);
+    $key_type = key_get_plugin('key_type', $config['key_type']);
+    $key_provider = key_get_plugin('key_provider', $config['key_provider']);
 
     $config_url_string = str_replace('_', '-', $id);
 
@@ -35,8 +37,11 @@ function key_configs_list() {
     // Set the name column.
     $row = array(theme('key_configs_list_description', $variables));
 
+    // Set the key type column.
+    $row[] = array('data' => $key_type['label']);
+
     // Set the key provider column.
-    $row[] = array('data' => $provider['label']);
+    $row[] = array('data' => $key_provider['label']);
 
     // Set the edit column.
     $row[] = array('data' => l(t('edit'), KEY_MENU_PATH . '/manage/' . $config_url_string));
@@ -334,6 +339,8 @@ function key_config_form_submit($form, &$form_state) {
     'id' => (string) $form_state['values']['id'],
     'label' => (string) $form_state['values']['label'],
     'description' => (string) $form_state['values']['description'],
+    'key_type' => (string) $form_state['values']['key_type'],
+    'key_type_settings' => (isset($form_state['values']['key_type_settings'])) ? serialize($form_state['values']['key_type_settings']) : '',
     'key_provider' => (string) $form_state['values']['key_provider'],
     'key_provider_settings' => (isset($form_state['values']['key_provider_settings'])) ? serialize($form_state['values']['key_provider_settings']) : '',
     'created' => (string) $form_state['values']['created'],
