@@ -124,7 +124,7 @@ function key_config_form($form, &$form_state, $config = NULL) {
     $provider = $config['key_provider'];
   }
   else {
-    $provider = NULL;
+    $provider = 'configuration';
   }
 
   $form['label'] = array(
@@ -201,7 +201,7 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#title' => t('Key provider'),
     '#options' => $provider_options,
     '#required' => TRUE,
-    '#default_value' => $config['key_provider'],
+    '#default_value' => isset($config['key_provider']) ? $config['key_provider'] : 'configuration',
     '#ajax' => array(
       'callback' => '_key_config_form_ajax_update_settings',
       'event' => 'change',
