@@ -269,9 +269,12 @@ function _key_configs_filter($configs, $filters) {
   return $configs;
 }
 
+
 /**
- * Gets information about all key providers.
+ * Gets information about all key plugins of the requested type.
  *
+ * @param string $type
+ *   The type of plugin.
  * @param bool $all
  *   A flag indicating whether to include plugins with unmet dependencies.
  * @param bool $reset
@@ -279,22 +282,28 @@ function _key_configs_filter($configs, $filters) {
  *   data may be returned if plugin properties have changed.
  *
  * @return array
- *   Information about all key providers.
+ *   Information about all key plugins of the requested type.
  */
-function key_get_providers($all = TRUE, $reset = FALSE) {
+function key_get_plugins($type, $all = TRUE, $reset = FALSE) {
+  if (!in_array($type, _key_get_plugin_types())) {
+    return array();
+  }
+
   if ($reset) {
-    _key_clear_plugin_cache('key_provider');
+    _key_clear_plugin_cache($type);
   }
 
   ctools_include('plugins');
-  $providers = ctools_get_plugins('key', 'key_provider');
+  $plugins = ctools_get_plugins('key', $type);
 
-  return $all ? $providers : array_filter($providers, '_key_plugin_is_valid');
+  return $all ? $plugins : array_filter($plugins, '_key_plugin_is_valid');
 }
 
 /**
- * Gets all key providers as options, for use in forms.
+ * Gets all key plugins of the requested type as options, for use in forms.
  *
+ * @param string $type
+ *   The type of plugin.
  * @param bool $all
  *   A flag indicating whether to include plugins with unmet dependencies.
  * @param bool $reset
@@ -302,22 +311,24 @@ function key_get_providers($all = TRUE, $reset = FALSE) {
  *   data may be returned if plugin properties have changed.
  *
  * @return array
- *   An array of key providers, with ids for keys and labels for values.
+ *   An array of key plugins, with ids for keys and labels for values.
  */
-function key_get_providers_as_options($all = TRUE, $reset = FALSE) {
-  $providers = key_get_providers($all, $reset);
+function key_get_plugins_as_options($type, $all = TRUE, $reset = FALSE) {
+  $plugins = key_get_plugins($type, $all, $reset);
   $options = array();
 
-  foreach($providers as $id => $provider) {
-    $options[$id] = $provider['title'];
+  foreach($plugins as $id => $plugin) {
+    $options[$id] = $plugin['title'];
   }
 
   return $options;
 }
 
 /**
- * Gets information about a specific key provider.
+ * Gets information about a specific key plugin of a requested type.
  *
+ * @param string $type
+ *   The type of plugin.
  * @param string $provider
  *   The id of the key provider to get.
  * @param bool $reset
@@ -325,11 +336,15 @@ function key_get_providers_as_options($all = TRUE, $reset = FALSE) {
  *   data may be returned if plugin properties have changed.
  *
  * @return array
- *   A key provider.
+ *   Information about the key plugin.
  */
-function key_get_provider($provider, $reset = FALSE) {
+function key_get_plugin($type, $provider, $reset = FALSE) {
+  if (!in_array($type, _key_get_plugin_types())) {
+    return array();
+  }
+
   ctools_include('plugins');
-  return ctools_get_plugins('key', 'key_provider', $provider);
+  return ctools_get_plugins('key', $type, $provider);
 }
 
 /**
@@ -420,7 +435,7 @@ function key_get_config($id, $reset = FALSE) {
  */
 function key_save_config($fields, $messages = TRUE) {
   // Load the key provider.
-  $provider = key_get_provider($fields['key_provider']);
+  $provider = key_get_plugin('key_provider', $fields['key_provider']);
 
   // Serialize any field that is an array.
   foreach ($fields as $index => $field) {
@@ -496,7 +511,7 @@ function key_get_key($config_id) {
     return NULL;
   }
 
-  $provider = key_get_provider($config['key_provider']);
+  $provider = key_get_plugin('key_provider', $config['key_provider']);
 
   // Get the function to retrieve the key.
   $key_function = ctools_plugin_get_function($provider, 'get key value');
@@ -548,6 +563,16 @@ function _key_plugin_is_valid($plugin) {
   else {
     return FALSE;
   }
+}
+
+/**
+ * Return a list of plugin types used with keys.
+ *
+ * @return array
+ *   The list of plugin types.
+ */
+function _key_get_plugin_types() {
+  return array('key_type', 'key_provider', 'key_input');
 }
 
 /**
