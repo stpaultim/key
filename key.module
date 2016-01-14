@@ -107,7 +107,7 @@ function key_ctools_plugin_type() {
       'title' => '',
       'description' => '',
       'group' => 'none',
-      'key_value' => array(
+      'key value' => array(
         'plugin' => 'text_field',
       ),
       'build configuration form' => NULL,
@@ -128,6 +128,12 @@ function key_ctools_plugin_type() {
     'defaults' => array(
       'title' => '',
       'description' => '',
+      'storage method' => '',
+      'key value' => array(
+        'accepted' => FALSE,
+        'required' => FALSE,
+        'editable' => FALSE,
+      ),
       'build configuration form' => NULL,
       'validate configuration form' => NULL,
       'submit configuration form' => NULL,
