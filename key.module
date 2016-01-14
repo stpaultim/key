@@ -488,6 +488,54 @@ function key_save_config($fields, $messages = TRUE) {
 }
 
 /**
+ * Delete a key configuration.
+ *
+ * @param string $id
+ *   The ID of the configuration to delete.
+ * @param bool $messages
+ *   TRUE if messages should be displayed.
+ *
+ * @return bool
+ *   TRUE if successful, FALSE if not.
+ */
+function key_delete_config($id, $messages = TRUE) {
+  // Load the configuration.
+  $config = key_get_config($id);
+
+  // If the configuration could not be loaded.
+  if (!$config) {
+    // Display message and log to watchdog.
+    if ($messages) {
+      drupal_set_message(t('The key was not deleted because it could not be found.'));
+      watchdog('key', 'The key was not deleted because it could not be found.', array(), WATCHDOG_NOTICE, l(t('view'), KEY_MENU_PATH . '/list'));
+    }
+    return FALSE;
+  }
+
+  // Load the key provider plugin.
+  $provider = key_get_plugin('key_provider', $config['key_provider']);
+
+  if ($delete_callback = ctools_plugin_get_function($provider, 'submit delete form')) {
+    call_user_func($delete_callback, $config);
+  }
+
+  db_delete('key_config')
+    ->condition('id', $id)
+    ->execute();
+
+  if ($messages) {
+    $t_args = array('%label' => $config['label']);
+    drupal_set_message(t('The key %label has been deleted.', $t_args));
+    watchdog('key', 'Deleted key %label.', $t_args, WATCHDOG_NOTICE);
+  }
+
+  // Try to load the configuration again.
+  $config = key_get_config($id);
+
+  return ($config) ? FALSE : TRUE;
+}
+
+/**
  * Get a key using a key configuration.
  *
  * @param string $config_id

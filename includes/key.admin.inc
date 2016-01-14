@@ -370,21 +370,8 @@ function key_config_delete_confirm($form, &$form_state, $config) {
  * Submit handler for key_config_delete_confirm().
  */
 function key_config_delete_confirm_submit($form, &$form_state) {
-  $config = key_get_config($form_state['values']['id']);
-  $provider = key_get_plugin('key_provider', $config['key_provider']);
-
-  if ($delete_callback = ctools_plugin_get_function($provider, 'submit delete form')) {
-    call_user_func($delete_callback, $config);
-  }
-
-  db_delete('key_config')
-    ->condition('id', $form_state['values']['id'])
-    ->execute();
-
-  $t_args = array('%label' => $form_state['values']['label']);
-  drupal_set_message(t('The key %label has been deleted.', $t_args));
-  watchdog('key', 'Deleted key %label.', $t_args, WATCHDOG_NOTICE);
-
+  $id = (isset($form_state['values']['id'])) ? $form_state['values']['id'] : NULL;
+  key_delete_config($id);
   $form_state['redirect'] = KEY_MENU_PATH;
 }
 
