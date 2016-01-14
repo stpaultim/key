@@ -73,10 +73,10 @@ function key_config_form($form, &$form_state, $config = NULL) {
     _key_clear_plugin_cache();
 
     // Store the original key configuration.
-    $form_state['#original_key'] = $config;
+    $form_state['original_key'] = $config;
 
     // Store the key value data.
-    $form_state['#key_value'] = _key_key_value_data($config);
+    $form_state['key_value'] = _key_key_value_data($config);
   }
 
   // Get all valid key types.
