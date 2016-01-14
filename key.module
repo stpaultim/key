@@ -151,6 +151,24 @@ function key_ctools_plugin_type() {
     ),
   );
 
+  $plugins['key_input'] = array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'process' => '_key_type_plugin_process',
+    'defaults' => array(
+      'title' => '',
+      'description' => '',
+      'build configuration form' => NULL,
+      'validate configuration form' => NULL,
+      'submit configuration form' => NULL,
+      'build delete form' => NULL,
+      'validate delete form' => NULL,
+      'submit delete form' => NULL,
+      'process submitted key value' => '_key_default_process_submitted_key_value',
+      'process existing key value' => '_key_default_process_existing_key_value',
+    ),
+  );
+
   return $plugins;
 }
 
