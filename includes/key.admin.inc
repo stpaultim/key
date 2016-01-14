@@ -67,9 +67,16 @@ function key_configs_list() {
  * @ingroup forms
  */
 function key_config_form($form, &$form_state, $config = NULL) {
-  // Clear the plugin cache on the first page load, but not on AJAX refreshes.
-  if (!isset($form_state['values'])) {
+  // Only when the form is first built.
+  if (!$form_state['rebuild']) {
+    // Clear the plugin cache.
     _key_clear_plugin_cache();
+
+    // Store the original key configuration.
+    $form_state['#original_key'] = $config;
+
+    // Store the key value data.
+    $form_state['#key_value'] = _key_key_value_data($config);
   }
 
   // Get all valid key providers.
@@ -351,4 +358,24 @@ function theme_key_configs_list_description($variables) {
   $output .= '<div class="description">' . filter_xss_admin($description) . '</div>';
 
   return $output;
+}
+
+function _key_key_value_data($config = NULL) {
+  $key_value_data = array(
+    'original' => NULL,
+    'processed_original' => NULL,
+    'obscured' => NULL,
+    'current' => '',
+  );
+
+  // If this is a new key being added, return the defaults.
+  if (!$config) {
+    return $key_value_data;
+  }
+
+  // Determine the obscure options.
+  $obscure_options = [];
+  $obscure_options['key_provider_id'] = $config['provider'];
+
+  return $key_value_data;
 }
