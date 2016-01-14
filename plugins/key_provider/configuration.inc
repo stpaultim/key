@@ -17,15 +17,15 @@ $plugin = array(
  * Return a key stored with the configuration.
  */
 function key_provider_configuration_get_key($config) {
-  if (isset($config['provider_settings']['key_value'])) {
-    $key_value = $config['provider_settings']['key_value'];
+  if (isset($config['key_provider_settings']['key_value'])) {
+    $key_value = $config['key_provider_settings']['key_value'];
   }
   else {
     $key_value = NULL;
   }
 
   // Base64-decode if necessary.
-  if (isset($config['provider_settings']['base64_encoded']) && $config['provider_settings']['base64_encoded']) {
+  if (isset($config['key_provider_settings']['base64_encoded']) && $config['key_provider_settings']['base64_encoded']) {
     $key_value = base64_decode($key_value);
   }
 
@@ -36,7 +36,7 @@ function key_provider_configuration_get_key($config) {
  * Submit callback.
  */
 function key_provider_configuration_config_form_submit($form, &$form_state) {
-  $form_state['values']['provider_settings']['key_value'] = $form_state['values']['key_value']['key_text'];
+  $form_state['values']['key_provider_settings']['key_value'] = $form_state['values']['key_value']['key_text'];
 }
 
 function key_provider_configuration_key_value_form($defaults) {

@@ -33,14 +33,14 @@ function key_schema() {
         'not null' => TRUE,
         'size' => 'medium',
       ),
-      'provider' => array(
+      'key_provider' => array(
         'description' => 'The key provider to use.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ),
-      'provider_settings' => array(
+      'key_provider_settings' => array(
         'description' => 'Additional settings for the key provider.',
         'type' => 'blob',
         'not null' => FALSE,
@@ -61,7 +61,7 @@ function key_schema() {
     ),
     'indexes' => array(
       'label' => array('label'),
-      'provider' => array('provider'),
+      'key_provider' => array('key_provider'),
     ),
     'primary key' => array('name'),
   );

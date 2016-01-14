@@ -257,7 +257,7 @@ function _key_configs_filter($configs, $filters) {
     $include = TRUE;
 
     if (!empty($filters['provider'])) {
-      $include &= in_array($config['provider'], (array) $filters['provider']);
+      $include &= in_array($config['key_provider'], (array) $filters['provider']);
     }
 
     if ($include) {
@@ -349,9 +349,9 @@ function key_get_configs($reset = FALSE) {
 
     // Unserialize provider_settings field.
     foreach ($configs as $name => $config) {
-      if (!empty($config['provider_settings'])) {
-        $provider_settings = unserialize($config['provider_settings']);
-        $configs[$name]['provider_settings'] = $provider_settings;
+      if (!empty($config['key_provider_settings'])) {
+        $provider_settings = unserialize($config['key_provider_settings']);
+        $configs[$name]['key_provider_settings'] = $provider_settings;
       }
     }
   }
@@ -420,7 +420,7 @@ function key_get_config($name, $reset = FALSE) {
  */
 function key_save_config($fields, $messages = TRUE) {
   // Load the key provider.
-  $provider = key_get_provider($fields['provider']);
+  $provider = key_get_provider($fields['key_provider']);
 
   // Serialize any field that is an array.
   foreach ($fields as $index => $field) {
@@ -496,7 +496,7 @@ function key_get_key($config_name) {
     return NULL;
   }
 
-  $provider = key_get_provider($config['provider']);
+  $provider = key_get_provider($config['key_provider']);
 
   // Get the function to retrieve the key.
   $key_function = ctools_plugin_get_function($provider, 'get key value');

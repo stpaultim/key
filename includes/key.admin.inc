@@ -22,7 +22,7 @@ function key_configs_list() {
     $label = $config['label'];
     $name = $config['name'];
     $description = $config['description'];
-    $provider = key_get_provider($config['provider']);
+    $provider = key_get_provider($config['key_provider']);
 
     $config_url_string = str_replace('_', '-', $name);
 
@@ -94,17 +94,17 @@ function key_config_form($form, &$form_state, $config = NULL) {
       'key_value' => $key_value,
     );
 
-    if (!empty($key_value) && $key_value_obscure = ctools_plugin_get_function($providers[$config['provider']], 'key value obscure')) {
+    if (!empty($key_value) && $key_value_obscure = ctools_plugin_get_function($providers[$config['key_provider']], 'key value obscure')) {
       $form['#original_key']['key_value_obscured'] = call_user_func($key_value_obscure, $key_value, $config);
     }
   }
 
   // Determine the current key provider.
-  if (isset($form_state['values']['provider'])) {
-    $provider = $form_state['values']['provider'];
+  if (isset($form_state['values']['key_provider'])) {
+    $provider = $form_state['values']['key_provider'];
   }
-  elseif (isset($config['provider'])) {
-    $provider = $config['provider'];
+  elseif (isset($config['key_provider'])) {
+    $provider = $config['key_provider'];
   }
   else {
     $provider = NULL;
@@ -135,13 +135,13 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#default_value' => $config['description'],
     '#description' => t('A short description of the key.'),
   );
-  $form['provider'] = array(
+  $form['key_provider'] = array(
     '#type' => 'select',
     '#title' => t('Key provider'),
     '#description' => t('The key provider to use.'),
     '#required' => TRUE,
     '#options' => $provider_options,
-    '#default_value' => $config['provider'],
+    '#default_value' => $config['key_provider'],
     '#ajax' => array(
       'method' => 'replace',
       'callback' => 'key_provider_extras_ajax',
@@ -153,7 +153,7 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#prefix' => '<div id="key-provider-extras-wrapper">',
     '#suffix' => '</div>',
   );
-  $form['provider_extras']['provider_settings'] = array(
+  $form['provider_extras']['key_provider_settings'] = array(
     '#type' => 'container',
     '#title' => t('Key provider settings'),
     '#collapsible' => TRUE,
@@ -168,28 +168,28 @@ function key_config_form($form, &$form_state, $config = NULL) {
 
   // Unset the input values for provider settings and key value,
   // so they can be updated via AJAX.
-  unset($form_state['input']['provider_settings']);
+  unset($form_state['input']['key_provider_settings']);
   unset($form_state['input']['key_value']);
 
   if ($provider) {
     // Add the Base64 checkbox to the settings, if allowed.
     if ($providers[$provider]['allow base64 encoding']) {
-      $form['provider_extras']['provider_settings']['base64_encoded'] = array(
+      $form['provider_extras']['key_provider_settings']['base64_encoded'] = array(
         '#type' => 'checkbox',
         '#title' => t('Base64-encoded'),
         '#description' => t('Check this if the key has been Base64-encoded. If the key should be used as-is, without Base64-decoding, leave this unchecked.'),
-        '#default_value' => isset($config['provider_settings']['base64_encoded']) ? $config['provider_settings']['base64_encoded'] : 0,
+        '#default_value' => isset($config['key_provider_settings']['base64_encoded']) ? $config['key_provider_settings']['base64_encoded'] : 0,
       );
     }
 
     // Add any additional provider settings.
     if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'build configuration form')) {
-      $form['provider_extras']['provider_settings'] += call_user_func($provider_settings_form, $config['provider_settings']);
+      $form['provider_extras']['key_provider_settings'] += call_user_func($provider_settings_form, $config['key_provider_settings']);
     }
 
     // If there are any provider settings, make the container a fieldset.
-    if (element_children($form['provider_extras']['provider_settings'])) {
-      $form['provider_extras']['provider_settings']['#type'] = 'fieldset';
+    if (element_children($form['provider_extras']['key_provider_settings'])) {
+      $form['provider_extras']['key_provider_settings']['#type'] = 'fieldset';
     }
 
     // Add the value form, if defined.
@@ -198,7 +198,7 @@ function key_config_form($form, &$form_state, $config = NULL) {
 
       // Determine what to display for the key value, if anything.
       if (isset($form['#original_key']['key_value_obscured'])) {
-        $key_value = ($provider == $config['provider']) ? $form['#original_key']['key_value_obscured'] : '';
+        $key_value = ($provider == $config['key_provider']) ? $form['#original_key']['key_value_obscured'] : '';
       }
       else {
         $key_value = (isset($form['#original_key']['key_value'])) ? $form['#original_key']['key_value'] : '';
@@ -252,7 +252,7 @@ function key_provider_extras_ajax($form, $form_state) {
  * Form validate handler for key_config_form().
  */
 function key_config_form_validate($form, &$form_state) {
-  $provider = key_get_provider($form_state['values']['provider']);
+  $provider = key_get_provider($form_state['values']['key_provider']);
 
   if ($validate_callback = ctools_plugin_get_function($provider, 'validate configuration form')) {
     call_user_func($validate_callback, $form, $form_state);
@@ -263,7 +263,7 @@ function key_config_form_validate($form, &$form_state) {
  * Form submission handler for key_config_form().
  */
 function key_config_form_submit($form, &$form_state) {
-  $provider = key_get_provider($form_state['values']['provider']);
+  $provider = key_get_provider($form_state['values']['key_provider']);
 
   if ($submit_callback = ctools_plugin_get_function($provider, 'submit configuration form')) {
     call_user_func_array($submit_callback, array($form, &$form_state));
@@ -273,7 +273,7 @@ function key_config_form_submit($form, &$form_state) {
   // provider.
   if (isset($form['#original_key']['config'])) {
     $original_config = $form['#original_key']['config'];
-    $original_provider = key_get_provider($original_config['provider']);
+    $original_provider = key_get_provider($original_config['key_provider']);
     if (($provider['name'] != $original_provider['name']) && ($delete_callback = ctools_plugin_get_function($original_provider, 'submit delete form'))) {
       call_user_func($delete_callback, $original_config);
     }
@@ -283,8 +283,8 @@ function key_config_form_submit($form, &$form_state) {
     'name' => (string) $form_state['values']['name'],
     'label' => (string) $form_state['values']['label'],
     'description' => (string) $form_state['values']['description'],
-    'provider' => (string) $form_state['values']['provider'],
-    'provider_settings' => (isset($form_state['values']['provider_settings'])) ? serialize($form_state['values']['provider_settings']) : '',
+    'key_provider' => (string) $form_state['values']['key_provider'],
+    'key_provider_settings' => (isset($form_state['values']['key_provider_settings'])) ? serialize($form_state['values']['key_provider_settings']) : '',
     'created' => (string) $form_state['values']['created'],
   );
 
@@ -320,7 +320,7 @@ function key_config_delete_confirm($form, &$form_state, $config) {
  */
 function key_config_delete_confirm_submit($form, &$form_state) {
   $config = key_get_config($form_state['values']['name']);
-  $provider = key_get_provider($config['provider']);
+  $provider = key_get_provider($config['key_provider']);
 
   if ($delete_callback = ctools_plugin_get_function($provider, 'submit delete form')) {
     call_user_func($delete_callback, $config);
@@ -375,7 +375,7 @@ function _key_key_value_data($config = NULL) {
 
   // Determine the obscure options.
   $obscure_options = [];
-  $obscure_options['key_provider_id'] = $config['provider'];
+  $obscure_options['key_provider_id'] = $config['key_provider'];
 
   return $key_value_data;
 }

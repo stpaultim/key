@@ -19,10 +19,10 @@ $plugin = array(
  * Callback function to return a key from a file.
  */
 function key_provider_file_get_key($config) {
-  if (empty($config['provider_settings']['file_location'])) {
+  if (empty($config['key_provider_settings']['file_location'])) {
     return NULL;
   }
-  $file = $config['provider_settings']['file_location'];
+  $file = $config['key_provider_settings']['file_location'];
 
   // Make sure the file exists and is readable.
   if (!is_file($file) || !is_readable($file)) {
@@ -32,7 +32,7 @@ function key_provider_file_get_key($config) {
   $key_value = file_get_contents($file);
 
   // Base64-decode if necessary.
-  if (isset($config['provider_settings']['base64_encoded']) && $config['provider_settings']['base64_encoded']) {
+  if (isset($config['key_provider_settings']['base64_encoded']) && $config['key_provider_settings']['base64_encoded']) {
     $key_value = base64_decode($key_value);
   }
 
@@ -65,7 +65,7 @@ function key_provider_file_settings_form($defaults) {
  * Validate callback for the configuration form.
  */
 function key_provider_file_config_form_validate($form, &$form_state) {
-  $file = $form_state['values']['provider_settings']['file_location'];
+  $file = $form_state['values']['key_provider_settings']['file_location'];
 
   // Verify that the file exists.
   if (!is_file($file)) {
