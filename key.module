@@ -74,7 +74,7 @@ function key_theme() {
     'key_configs_list_description' => array(
       'variables' => array(
         'label' => NULL,
-        'name' => NULL,
+        'id' => NULL,
         'description' => NULL,
       ),
       'file' => 'includes/key.admin.inc',
@@ -211,9 +211,9 @@ function key_config_edit_title($config) {
 }
 
 /**
- * Menu argument loader: loads a key configuration by name.
+ * Menu argument loader: loads a key configuration by id.
  *
- * @param string $name
+ * @param string $id
  *   The machine-readable name of an configuration to load,
  *   where '-' is replaced with '_'.
  *
@@ -221,8 +221,8 @@ function key_config_edit_title($config) {
  *   An array representing an key configuration or FALSE if the
  *   configuration does not exist.
  */
-function key_config_load($name) {
-  return key_get_config(strtr($name, array('-' => '_')));
+function key_config_load($id) {
+  return key_get_config(strtr($id, array('-' => '_')));
 }
 
 /**
@@ -261,7 +261,7 @@ function _key_configs_filter($configs, $filters) {
     }
 
     if ($include) {
-      $target_configs[$config['name']] = TRUE;
+      $target_configs[$config['id']] = TRUE;
     }
   }
   $configs = array_intersect_key($configs, $target_configs);
@@ -302,14 +302,14 @@ function key_get_providers($all = TRUE, $reset = FALSE) {
  *   data may be returned if plugin properties have changed.
  *
  * @return array
- *   An array of key providers, with names for keys and labels for values.
+ *   An array of key providers, with ids for keys and labels for values.
  */
 function key_get_providers_as_options($all = TRUE, $reset = FALSE) {
   $providers = key_get_providers($all, $reset);
   $options = array();
 
-  foreach($providers as $name => $provider) {
-    $options[$name] = $provider['title'];
+  foreach($providers as $id => $provider) {
+    $options[$id] = $provider['title'];
   }
 
   return $options;
@@ -319,7 +319,7 @@ function key_get_providers_as_options($all = TRUE, $reset = FALSE) {
  * Gets information about a specific key provider.
  *
  * @param string $provider
- *   The name of the key provider to get.
+ *   The id of the key provider to get.
  * @param bool $reset
  *   A flag indicating whether to clear the plugin cache. Otherwise, stale
  *   data may be returned if plugin properties have changed.
@@ -345,13 +345,13 @@ function key_get_configs($reset = FALSE) {
   $configs = &drupal_static(__FUNCTION__);
 
   if (!isset($configs) || $reset) {
-    $configs = db_query("SELECT * FROM {key_config} ORDER BY label ASC")->fetchAllAssoc('name', PDO::FETCH_ASSOC);
+    $configs = db_query("SELECT * FROM {key_config} ORDER BY label ASC")->fetchAllAssoc('id', PDO::FETCH_ASSOC);
 
     // Unserialize provider_settings field.
-    foreach ($configs as $name => $config) {
+    foreach ($configs as $id => $config) {
       if (!empty($config['key_provider_settings'])) {
         $provider_settings = unserialize($config['key_provider_settings']);
-        $configs[$name]['key_provider_settings'] = $provider_settings;
+        $configs[$id]['key_provider_settings'] = $provider_settings;
       }
     }
   }
@@ -366,7 +366,7 @@ function key_get_configs($reset = FALSE) {
  *   A flag to force the configurations to be retrieved from the database.
  *
  * @return array
- *   An array of configurations, with names for keys and labels for values.
+ *   An array of configurations, with ids for keys and labels for values.
  */
 function key_get_configs_as_options($reset = FALSE) {
   $options = &drupal_static(__FUNCTION__);
@@ -374,8 +374,8 @@ function key_get_configs_as_options($reset = FALSE) {
   if (!isset($options) || $reset) {
     $configs = key_get_configs($reset);
     $options = array();
-    foreach($configs as $name => $config) {
-      $options[$name] = $config['label'];
+    foreach($configs as $id => $config) {
+      $options[$id] = $config['label'];
     }
   }
 
@@ -385,7 +385,7 @@ function key_get_configs_as_options($reset = FALSE) {
 /**
  * Gets information about a specific key configuration.
  *
- * @param string $name
+ * @param string $id
  *   The machine name of the configuration to get.
  * @param bool $reset
  *   A flag to force the configuration to be retrieved from the database.
@@ -393,15 +393,15 @@ function key_get_configs_as_options($reset = FALSE) {
  * @return array
  *   A key configuration.
  */
-function key_get_config($name, $reset = FALSE) {
+function key_get_config($id, $reset = FALSE) {
   $configs = &drupal_static(__FUNCTION__);
 
   if (!isset($configs) || $reset) {
     $configs = key_get_configs($reset);
   }
 
-  if (array_key_exists($name, $configs)) {
-    $config = $configs[$name];
+  if (array_key_exists($id, $configs)) {
+    $config = $configs[$id];
   }
   else {
     $config = NULL;
@@ -441,7 +441,7 @@ function key_save_config($fields, $messages = TRUE) {
 
   // Save the configuration.
   $merge_status = db_merge('key_config')
-    ->key(array('name' => $fields['name']))
+    ->key(array('id' => $fields['id']))
     ->fields($fields)
     ->execute();
 
@@ -463,7 +463,7 @@ function key_save_config($fields, $messages = TRUE) {
   }
 
   // Load the configuration to make sure it was saved.
-  $key_config = key_get_config($fields['name'], TRUE);
+  $key_config = key_get_config($fields['id'], TRUE);
   if (empty($key_config)) {
     return NULL;
   }
@@ -475,21 +475,21 @@ function key_save_config($fields, $messages = TRUE) {
 /**
  * Get a key using a key configuration.
  *
- * @param string $config_name
- *   The configuration name of the key to retrieve.
+ * @param string $config_id
+ *   The configuration id of the key to retrieve.
  *
  * @return string
  *   The key.
  */
-function key_get_key($config_name) {
+function key_get_key($config_id) {
   $keys = &drupal_static(__FUNCTION__);
 
   // If the key already exists, return it.
-  if (isset($keys[$config_name])) {
-    return $keys[$config_name];
+  if (isset($keys[$config_id])) {
+    return $keys[$config_id];
   }
 
-  $config = key_get_config($config_name);
+  $config = key_get_config($config_id);
 
   // If the configuration doesn't exist, return NULL.
   if (!isset($config)) {
@@ -505,7 +505,7 @@ function key_get_key($config_name) {
   $key = call_user_func($key_function, $config);
 
   // Store the key, in case it's needed again.
-  $keys[$config_name] = $key;
+  $keys[$config_id] = $key;
 
   return $key;
 }

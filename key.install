@@ -14,7 +14,7 @@ function key_schema() {
   $schema['key_config'] = array(
     'description' => 'Stores key configurations.',
     'fields' => array(
-      'name' => array(
+      'id' => array(
         'description' => 'The machine name of the configuration.',
         'type' => 'varchar',
         'length' => 32,
@@ -63,7 +63,7 @@ function key_schema() {
       'label' => array('label'),
       'key_provider' => array('key_provider'),
     ),
-    'primary key' => array('name'),
+    'primary key' => array('id'),
   );
 
   return $schema;

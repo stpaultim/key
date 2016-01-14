@@ -18,17 +18,17 @@ function key_configs_list() {
   );
   $rows = array();
 
-  foreach ($configs as $name => $config) {
+  foreach ($configs as $id => $config) {
     $label = $config['label'];
-    $name = $config['name'];
+    $id = $config['id'];
     $description = $config['description'];
     $provider = key_get_provider($config['key_provider']);
 
-    $config_url_string = str_replace('_', '-', $name);
+    $config_url_string = str_replace('_', '-', $id);
 
     $variables = array(
       'label' => $label,
-      'name' => $name,
+      'id' => $id,
       'description' => $description,
     );
 
@@ -86,8 +86,8 @@ function key_config_form($form, &$form_state, $config = NULL) {
   $provider_options = key_get_providers_as_options(FALSE);
 
   // Store the original key in the form.
-  if (!empty($config['name'])) {
-    $key_value = key_get_key($config['name']);
+  if (!empty($config['id'])) {
+    $key_value = key_get_key($config['id']);
 
     $form['#original_key'] = array(
       'config' => $config,
@@ -118,11 +118,11 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#required' => TRUE,
     '#size' => 30,
   );
-  $form['name'] = array(
+  $form['id'] = array(
     '#type' => 'machine_name',
-    '#default_value' => $config['name'],
+    '#default_value' => $config['id'],
     '#maxlength' => 32,
-    '#disabled' => isset($config['name']),
+    '#disabled' => isset($config['id']),
     '#machine_name' => array(
       'exists' => 'key_config_load',
       'source' => array('label'),
@@ -222,7 +222,7 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#submit' => array('key_config_form_submit'),
     '#weight' => 40,
   );
-  if (isset($config['name'])) {
+  if (isset($config['id'])) {
     $form['actions']['delete'] = array(
       '#type' => 'submit',
       '#value' => t('Delete key'),
@@ -280,7 +280,7 @@ function key_config_form_submit($form, &$form_state) {
   }
 
   $fields = array(
-    'name' => (string) $form_state['values']['name'],
+    'id' => (string) $form_state['values']['id'],
     'label' => (string) $form_state['values']['label'],
     'description' => (string) $form_state['values']['description'],
     'key_provider' => (string) $form_state['values']['key_provider'],
@@ -299,14 +299,14 @@ function key_config_form_submit($form, &$form_state) {
  * Handles the 'Delete' button on the key configuration form.
  */
 function key_config_form_delete_submit($form, &$form_state) {
-  $form_state['redirect'] = KEY_MENU_PATH . '/manage/' . str_replace('_', '-', $form['name']['#default_value']) . '/delete';
+  $form_state['redirect'] = KEY_MENU_PATH . '/manage/' . str_replace('_', '-', $form['id']['#default_value']) . '/delete';
 }
 
 /**
  * Menu callback to delete a key configuration.
  */
 function key_config_delete_confirm($form, &$form_state, $config) {
-  $form['name'] = array('#type' => 'value', '#value' => $config['name']);
+  $form['id'] = array('#type' => 'value', '#value' => $config['id']);
   $form['label'] = array('#type' => 'value', '#value' => $config['label']);
 
   $message = t('Are you sure you want to delete the key %label?', array('%label' => $config['label']));
@@ -319,7 +319,7 @@ function key_config_delete_confirm($form, &$form_state, $config) {
  * Submit handler for key_config_delete_confirm().
  */
 function key_config_delete_confirm_submit($form, &$form_state) {
-  $config = key_get_config($form_state['values']['name']);
+  $config = key_get_config($form_state['values']['id']);
   $provider = key_get_provider($config['key_provider']);
 
   if ($delete_callback = ctools_plugin_get_function($provider, 'submit delete form')) {
@@ -327,7 +327,7 @@ function key_config_delete_confirm_submit($form, &$form_state) {
   }
 
   db_delete('key_config')
-    ->condition('name', $form_state['values']['name'])
+    ->condition('id', $form_state['values']['id'])
     ->execute();
 
   $t_args = array('%label' => $form_state['values']['label']);
@@ -343,18 +343,18 @@ function key_config_delete_confirm_submit($form, &$form_state) {
  * @param array $variables
  *   An associative array containing:
  *   - label: The human-readable label of the configuration.
- *   - name: The machine name of the configuration.
+ *   - id: The machine name of the configuration.
  *   - description: A brief description of the configuration.
  *
  * @ingroup themeable
  */
 function theme_key_configs_list_description($variables) {
   $label = $variables['label'];
-  $name = $variables['name'];
+  $id = $variables['id'];
   $description = $variables['description'];
 
   $output = check_plain($label);
-  $output .= ' <small>' . t('(Machine name: @name)', array('@name' => $name)) . '</small>';
+  $output .= ' <small>' . t('(Machine name: @id)', array('@id' => $id)) . '</small>';
   $output .= '<div class="description">' . filter_xss_admin($description) . '</div>';
 
   return $output;

@@ -34,11 +34,11 @@ function key_config_features_export_render($module_name, $data, $export = NULL) 
   $code[] = '  $configs = array();';
   $code[] = '';
 
-  foreach ($data as $name) {
-    $config = key_get_config($name, TRUE);
-    $config_identifier = features_var_export($name);
+  foreach ($data as $id) {
+    $config = key_get_config($id, TRUE);
+    $config_identifier = features_var_export($id);
     $config_export = features_var_export($config , '  ');
-    $code[] = "  // Exported key: {$name}.";
+    $code[] = "  // Exported key: {$id}.";
     $code[] = "  \$configs[{$config_identifier}] = {$config_export};";
     $code[] = "";
   }
