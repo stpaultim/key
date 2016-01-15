@@ -9,8 +9,6 @@ $plugin = array(
   'label' => t('Configuration'),
   'description' => t('Saves the key in configuration in the database.'),
   'get key value' => 'key_provider_configuration_get_key_value',
-  'default configuration' => 'key_provider_configuration_default_configuration',
-  'build configuration form' => 'key_provider_configuration_build_configuration_form',
   'submit configuration form' => 'key_provider_configuration_submit_configuration_form',
   'key value form' => 'key_provider_configuration_key_value_form',
 );
@@ -32,40 +30,6 @@ function key_provider_configuration_get_key_value($config) {
   }
 
   return $key_value;
-}
-
-/**
- * The defaults for the File key provider settings form.
- *
- * @return array
- *   The default settings.
- */
-function key_provider_configuration_default_configuration() {
-  return array(
-    'file_location' => 'craziness!',
-  );
-}
-
-/**
- * Settings form for the File key provider.
- */
-function key_provider_configuration_build_configuration_form($form, $form_state) {
-  dpm($form_state);
-
-  $form['file_location'] = array(
-    '#type' => 'textfield',
-    '#title' => t('File location'),
-    '#description' => t('The location of the file in which the key will be stored. The path may be absolute (e.g., %abs), relative to the Drupal directory (e.g., %rel), or defined using a stream wrapper (e.g., %str).', array(
-        '%abs' => '/etc/keys/foobar.key',
-        '%rel' => '../keys/foobar.key',
-        '%str' => 'private://keys/foobar.key',
-      )
-    ),
-    '#default_value' => $form_state['file_location'],
-    '#required' => TRUE,
-  );
-
-  return $form;
 }
 
 /**

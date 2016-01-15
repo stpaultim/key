@@ -110,7 +110,6 @@ function key_ctools_plugin_type() {
       'key value' => array(
         'plugin' => 'text_field',
       ),
-      'default configuration' => NULL,
       'build configuration form' => NULL,
       'validate configuration form' => NULL,
       'submit configuration form' => NULL,
@@ -135,7 +134,6 @@ function key_ctools_plugin_type() {
         'required' => FALSE,
         'editable' => FALSE,
       ),
-      'default configuration' => NULL,
       'build configuration form' => NULL,
       'validate configuration form' => NULL,
       'submit configuration form' => NULL,
@@ -160,7 +158,6 @@ function key_ctools_plugin_type() {
     'defaults' => array(
       'label' => '',
       'description' => '',
-      'default configuration' => NULL,
       'build configuration form' => NULL,
       'validate configuration form' => NULL,
       'submit configuration form' => NULL,
@@ -624,35 +621,6 @@ function _key_plugin_is_valid($plugin) {
  */
 function _key_get_plugin_types() {
   return array('key_type', 'key_provider', 'key_input');
-}
-
-/**
- * Define the defaults for a key configuration.
- *
- * @return array
- *   The defaults.
- */
-function _key_config_defaults() {
-  $key_type_id = 'basic';
-  $key_provider_id = 'configuration';
-
-  $key_type = key_get_plugin('key_type', $key_type_id);
-  $key_provider = key_get_plugin('key_provider', $key_provider_id);
-
-  $key_type_defaults = ($key_type_defaults_function = ctools_plugin_get_function($key_type, 'default configuration')) ? call_user_func($key_type_defaults_function) : array();
-  $key_provider_defaults = ($key_provider_defaults_function = ctools_plugin_get_function($key_provider, 'default configuration')) ? call_user_func($key_provider_defaults_function) : array();
-
-  $defaults = array(
-    'id' => '',
-    'label' => '',
-    'description' => '',
-    'key_type' => $key_type_id,
-    'key_type_settings' => $key_type_defaults,
-    'key_provider' => $key_provider_id,
-    'key_provider_settings' =>  $key_provider_defaults,
-  );
-
-  return $defaults;
 }
 
 /**

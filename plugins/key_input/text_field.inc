@@ -8,21 +8,8 @@
 $plugin = array(
   'label' => t('Text field'),
   'description' => t("A simple text field."),
-  'default configuration' => 'key_input_text_field_default_configuration',
   'build configuration form' => 'key_input_text_field_build_configuration_form',
 );
-
-/**
- * The defaults for the Text Field key input settings form.
- *
- * @return array
- *   The default settings.
- */
-function key_input_text_field_default_configuration() {
-  return array(
-    'key_value' => '',
-  );
-}
 
 /**
  * Settings form for the Text Field key input plugin.
