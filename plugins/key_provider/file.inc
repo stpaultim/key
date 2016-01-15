@@ -9,6 +9,7 @@ $plugin = array(
   'label' => t('File'),
   'description' => t('Use a file, preferably one that is outside the web root directory.'),
   'get key value' => 'key_provider_file_get_key_value',
+  'default configuration' => 'key_provider_file_default_configuration',
   'build configuration form' => 'key_provider_file_build_configuration_form',
   'validate configuration form' => 'key_provider_file_validate_configuration_form',
   'key value form' => 'key_provider_file_key_value_form',
@@ -40,10 +41,22 @@ function key_provider_file_get_key_value($config) {
 }
 
 /**
+ * The defaults for the File key provider settings form.
+ *
+ * @return array
+ *   The default settings.
+ */
+function key_provider_file_default_configuration() {
+  return array(
+    'file_location' => 'foobar',
+  );
+}
+
+/**
  * Settings form for the File key provider.
  */
-function key_provider_file_build_configuration_form($defaults) {
-  $form = array();
+function key_provider_file_build_configuration_form($form, $form_state) {
+  dpm($form_state);
 
   $form['file_location'] = array(
     '#type' => 'textfield',
@@ -54,7 +67,7 @@ function key_provider_file_build_configuration_form($defaults) {
       '%str' => 'private://keys/foobar.key',
       )
     ),
-    '#default_value' => isset($defaults['file_location']) ? $defaults['file_location'] : '',
+    '#default_value' => $form_state['file_location'],
     '#required' => TRUE,
   );
 
