@@ -1,5 +1,5 @@
 name = Key
-description = Provides the ability to manage keys, which can be used by other modules.
+description = Provides the ability to manage site-wide keys.
 package = Security
 core = 7.x
 

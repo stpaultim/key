@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Plugin definition for the None key input plugin.
+ * Plugin definition for the None key input.
  */
 
 $plugin = array(
@@ -12,19 +12,18 @@ $plugin = array(
 );
 
 /**
- * Settings form for the None key input plugin.
+ * Build the plugin configuration form.
  *
  * @param array $form
- *   The settings form.
  * @param array $form_state
- *   The plugin form state.
  *
  * @return array
- *   The modified settings form.
+ *   The plugin configuration form.
  */
 function key_input_none_build_configuration_form($form, &$form_state) {
   $form['key_value_message'] = array(
     '#markup' => t("The selected key provider does not accept a value. See the provider's description for instructions on how and where to store the key value."),
   );
+
   return $form;
 }

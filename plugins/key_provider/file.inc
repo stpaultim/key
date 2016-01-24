@@ -7,13 +7,93 @@
 
 $plugin = array(
   'label' => t('File'),
-  'description' => t('Use a file, preferably one that is outside the web root directory.'),
-  'get key value' => 'key_provider_file_get_key_value',
+  'description' => t('The File key provider allows a key to be stored in a file, preferably outside of the web root.'),
+  'storage method' => 'file',
+  'key value' => array(
+    'accepted' => FALSE,
+    'required' => FALSE,
+  ),
+  'default configuration' => 'key_provider_file_default_configuration',
   'build configuration form' => 'key_provider_file_build_configuration_form',
   'validate configuration form' => 'key_provider_file_validate_configuration_form',
-  'key value form' => 'key_provider_file_key_value_form',
-  'key value obscure' => 'key_provider_file_key_value_obscure',
+  'get key value' => 'key_provider_file_get_key_value',
 );
+
+/**
+ * The default plugin configuration.
+ *
+ * @return array
+ *   The default plugin configuration.
+ */
+function key_provider_file_default_configuration() {
+  return array(
+    'file_location' => '',
+  );
+}
+
+/**
+ * Build the plugin configuration form.
+ *
+ * @param array $form
+ * @param array $form_state
+ *
+ * @return array
+ *   The plugin configuration form.
+ */
+function key_provider_file_build_configuration_form($form, &$form_state) {
+  $config = $form_state['storage']['key_config'];
+  $plugin_config = $form_state['storage']['key_config']['key_provider_settings'] + key_provider_file_default_configuration();
+
+  $form['file_location'] = array(
+    '#type' => 'textfield',
+    '#title' => t('File location'),
+    '#description' => t('The location of the file in which the key will be stored. The path may be absolute (e.g., %abs), relative to the Drupal directory (e.g., %rel), or defined using a stream wrapper (e.g., %str).', array(
+        '%abs' => '/etc/keys/foobar.key',
+        '%rel' => '../keys/foobar.key',
+        '%str' => 'private://keys/foobar.key',
+      )
+    ),
+    '#default_value' => $plugin_config['file_location'],
+    '#required' => TRUE,
+  );
+
+  // If this key input is for an encryption key.
+  $key_type = key_get_plugin('key_type', $config['key_type']);
+  if ($key_type['group'] == 'encryption') {
+    // Add an option to indicate that the value is Base64-encoded.
+    $form['base64_encoded'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Base64-encoded'),
+      '#description' => t('Checking this will store the key with Base64 encoding.'),
+      '#default_value' => $config['key_provider_settings']['base64_encoded'],
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Validate callback for the configuration form.
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function key_provider_file_validate_configuration_form($form, &$form_state) {
+  $key_provider_settings = $form_state['values'];
+  $file = $key_provider_settings['file_location'];
+
+  // Does the file exist?
+  if (!is_file($file)) {
+    form_set_error('file_location', t('There is no file at the specified location.'));
+    return;
+  }
+
+  // Is the file readable?
+  if ((!is_readable($file))) {
+    form_set_error('file_location', t('The file at the specified location is not readable.'));
+    return;
+  }
+}
 
 /**
  * Callback function to return a key from a file.
@@ -37,49 +117,4 @@ function key_provider_file_get_key_value($config) {
   }
 
   return $key_value;
-}
-
-/**
- * Settings form for the File key provider.
- */
-function key_provider_file_build_configuration_form($defaults) {
-  $form = array();
-
-  $form['file_location'] = array(
-    '#type' => 'textfield',
-    '#title' => t('File location'),
-    '#description' => t('The location of the file in which the key will be stored. The path may be absolute (e.g., %abs), relative to the Drupal directory (e.g., %rel), or defined using a stream wrapper (e.g., %str).', array(
-      '%abs' => '/etc/keys/foobar.key',
-      '%rel' => '../keys/foobar.key',
-      '%str' => 'private://keys/foobar.key',
-      )
-    ),
-    '#default_value' => isset($defaults['file_location']) ? $defaults['file_location'] : '',
-    '#required' => TRUE,
-  );
-
-  return $form;
-}
-
-/**
- * Validate callback for the configuration form.
- */
-function key_provider_file_validate_configuration_form($form, &$form_state) {
-  $file = $form_state['values']['key_provider_settings']['file_location'];
-
-  // Verify that the file exists.
-  if (!is_file($file)) {
-    form_set_error('file_location', t('A file at the specified location does not exist.'));
-  }
-  // Verify that the file is readable.
-  elseif (!is_readable($file)) {
-    form_set_error('file_location', t('The file at the specified location is not readable.'));
-  }
-}
-
-/**
- * Obscure the key on configuration form.
- */
-function key_provider_file_key_value_obscure($key_value, $config) {
-  return '';
 }

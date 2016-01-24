@@ -7,6 +7,9 @@
 
 /**
  * Menu callback; displays the list of key configurations.
+ *
+ * @return array
+ *   The table of key configurations.
  */
 function key_configs_list() {
   $configs = key_get_configs();
@@ -63,74 +66,59 @@ function key_configs_list() {
 }
 
 /**
- * Form constructor for the key configuration edit form.
+ * Form constructor for the key configuration form.
  *
+ * @param array $form
+ * @param array $form_state
  * @param array $config
  *   (optional) An array representing the configuration, when editing an
  *   existing configuration.
  *
- * @ingroup forms
+ * @return array
+ *   The key configuration form.
  */
-function key_config_form($form, &$form_state, $config = NULL) {
-  // Only when the form is first built.
-  if (!$form_state['rebuild']) {
+function key_config_form($form, &$form_state, $config = array()) {
+  // Add the defaults to the configuration, if they are needed.
+  $config += _key_config_defaults();
+
+  // If the form is rebuilding.
+  if ($form_state['rebuild']) {
+    // If a key type change triggered the rebuild.
+    if ($form_state['triggering_element']['#name'] == 'key_type') {
+      // Update the type and input plugins.
+      _key_update_key_type($form_state, $config);
+      _key_update_key_input($form_state, $config);
+    }
+
+    // If a key provider change triggered the rebuild.
+    if ($form_state['triggering_element']['#name'] == 'key_provider') {
+      // Update the provider and input plugins.
+      _key_update_key_provider($form_state, $config);
+      _key_update_key_input($form_state, $config);
+    }
+  }
+  // If the form is not rebuilding.
+  else {
     // Clear the plugin cache.
     _key_clear_plugin_cache();
 
     // Store the original key configuration.
-    $form_state['original_key'] = $config;
+    $form_state['storage']['original_key'] = $config;
 
-    // Store the key value data.
-    $form_state['key_value'] = _key_key_value_data($config);
+    // Store the key value data in form state for use by plugins.
+    $form_state['storage']['key_value'] = _key_set_key_value_data($config);
+
+    // Update the input plugin.
+    _key_update_key_input($form_state, $config);
   }
 
-  // Get all valid key types.
-  $key_types = key_get_plugins('key_type', FALSE);
+  // Store the current key configuration.
+  $form_state['storage']['key_config'] = $config;
 
-  // Get all valid key types as options.
-  $key_type_options = key_get_plugins_as_options('key_type', FALSE);
-
-  // Get all valid key providers.
-  $providers = key_get_plugins('key_provider', FALSE);
-
-  // Get all valid key providers as options.
-  $provider_options = key_get_plugins_as_options('key_provider', FALSE);
-
-  // Store the original key in the form.
-  if (!empty($config['id'])) {
-    $key_value = key_get_key($config['id']);
-
-    $form['#original_key'] = array(
-      'config' => $config,
-      'key_value' => $key_value,
-    );
-
-    if (!empty($key_value) && $key_value_obscure = ctools_plugin_get_function($providers[$config['key_provider']], 'key value obscure')) {
-      $form['#original_key']['key_value_obscured'] = call_user_func($key_value_obscure, $key_value, $config);
-    }
-  }
-
-  // Determine the current key type.
-  if (isset($form_state['values']['key_type'])) {
-    $key_type = $form_state['values']['key_type'];
-  }
-  elseif (isset($config['key_type'])) {
-    $key_type = $config['key_type'];
-  }
-  else {
-    $key_type = 'basic';
-  }
-
-  // Determine the current key provider.
-  if (isset($form_state['values']['key_provider'])) {
-    $provider = $form_state['values']['key_provider'];
-  }
-  elseif (isset($config['key_provider'])) {
-    $provider = $config['key_provider'];
-  }
-  else {
-    $provider = 'configuration';
-  }
+  // Load the plugins.
+  $key_type = key_get_plugin('key_type', $config['key_type']);
+  $key_provider = key_get_plugin('key_provider', $config['key_provider']);
+  $key_input = key_get_plugin('key_input', $config['key_input']);
 
   $form['label'] = array(
     '#title' => t('Key name'),
@@ -143,7 +131,7 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#type' => 'machine_name',
     '#default_value' => $config['id'],
     '#maxlength' => 32,
-    '#disabled' => isset($config['id']),
+    '#disabled' => !empty($config['id']),
     '#machine_name' => array(
       'exists' => 'key_config_load',
       'source' => array('label'),
@@ -173,14 +161,17 @@ function key_config_form($form, &$form_state, $config = NULL) {
   $form['settings']['type_section']['key_type'] = array(
     '#type' => 'select',
     '#title' => t('Key type'),
-    '#options' => $key_type_options,
+    '#options' => key_get_plugins_as_options('key_type', FALSE),
     '#required' => TRUE,
-    '#default_value' => isset($config['key_type']) ? $config['key_type'] : 'basic',
+    '#default_value' => $config['key_type'],
     '#ajax' => array(
       'callback' => '_key_config_form_ajax_update_settings',
       'event' => 'change',
       'wrapper' => 'key-settings',
     ),
+  );
+  $form['settings']['type_section']['key_type_description'] = array(
+    '#markup' => $key_type['description'],
   );
   $form['settings']['type_section']['key_type_settings'] = array(
     '#type' => 'container',
@@ -188,11 +179,10 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#title_display' => FALSE,
     '#tree' => TRUE,
   );
-  if ($key_type) {
-    // Add any additional key type settings.
-    if ($key_type_settings_form = ctools_plugin_get_function($key_types[$key_type], 'build configuration form')) {
-      $form['settings']['type_section']['key_type_settings'] += call_user_func($key_type_settings_form, $config['key_type_settings']);
-    }
+  if ($key_type_settings_form = ctools_plugin_get_function(key_get_plugin('key_type', $config['key_type']), 'build configuration form')) {
+    $plugin_form_state = _key_create_plugin_form_state('key_type', $form_state);
+    $form['settings']['type_section']['key_type_settings'] += $key_type_settings_form(array(), $plugin_form_state);
+    $form_state['values']['key_type_settings'] = $plugin_form_state['values'];
   }
 
   // Key provider section.
@@ -204,14 +194,17 @@ function key_config_form($form, &$form_state, $config = NULL) {
   $form['settings']['provider_section']['key_provider'] = array(
     '#type' => 'select',
     '#title' => t('Key provider'),
-    '#options' => $provider_options,
+    '#options' => key_get_plugins_as_options('key_provider', FALSE),
     '#required' => TRUE,
-    '#default_value' => isset($config['key_provider']) ? $config['key_provider'] : 'configuration',
+    '#default_value' => $config['key_provider'],
     '#ajax' => array(
       'callback' => '_key_config_form_ajax_update_settings',
       'event' => 'change',
       'wrapper' => 'key-settings',
     ),
+  );
+  $form['settings']['provider_section']['key_provider_description'] = array(
+    '#markup' => $key_provider['description'],
   );
   $form['settings']['provider_section']['key_provider_settings'] = array(
     '#type' => 'container',
@@ -219,55 +212,33 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#title_display' => FALSE,
     '#tree' => TRUE,
   );
-
-  $form['settings']['provider_section']['key_value'] = array(
-    '#type' => 'container',
-    '#title' => t('Key value'),
-    '#collapsible' => TRUE,
-    '#tree' => TRUE,
-  );
-
-  // Unset the input values for provider settings and key value,
-  // so they can be updated via AJAX.
-  unset($form_state['input']['key_provider_settings']);
-  unset($form_state['input']['key_value']);
-
-  if ($provider) {
-    // Add the Base64 checkbox to the settings, if allowed.
-    if ($providers[$provider]['allow base64 encoding']) {
-      $form['settings']['provider_section']['key_provider_settings']['base64_encoded'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Base64-encoded'),
-        '#description' => t('Check this if the key has been Base64-encoded. If the key should be used as-is, without Base64-decoding, leave this unchecked.'),
-        '#default_value' => isset($config['key_provider_settings']['base64_encoded']) ? $config['key_provider_settings']['base64_encoded'] : 0,
-      );
-    }
-
-    // Add any additional provider settings.
-    if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'build configuration form')) {
-      $form['settings']['provider_section']['key_provider_settings'] += call_user_func($provider_settings_form, $config['key_provider_settings']);
-    }
-
-    // Add the value form, if defined.
-    if ($provider && $key_value_form = ctools_plugin_get_function($providers[$provider], 'key value form')) {
-      $form['settings']['provider_section']['key_value']['#type'] = 'fieldset';
-
-      // Determine what to display for the key value, if anything.
-      if (isset($form['#original_key']['key_value_obscured'])) {
-        $key_value = ($provider == $config['key_provider']) ? $form['#original_key']['key_value_obscured'] : '';
-      }
-      else {
-        $key_value = (isset($form['#original_key']['key_value'])) ? $form['#original_key']['key_value'] : '';
-      }
-
-      $form['settings']['provider_section']['key_value'] += call_user_func($key_value_form, array('key_value' => $key_value));
-    }
+  if ($key_provider_settings_form = ctools_plugin_get_function(key_get_plugin('key_provider', $config['key_provider']), 'build configuration form')) {
+    $plugin_form_state = _key_create_plugin_form_state('key_provider', $form_state);
+    $form['settings']['provider_section']['key_provider_settings'] += $key_provider_settings_form(array(), $plugin_form_state);
+    $form_state['values']['key_provider_settings'] = $plugin_form_state['values'];
   }
 
-  $form['created'] = array(
-    '#type' => 'value',
-    '#value' => $config['created'],
+  // Key input section.
+  $form['settings']['input_section'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Value'),
+    '#collapsible' => TRUE,
   );
+  $form['settings']['input_section']['key_input'] = array(
+    '#type' => 'value',
+    '#value' => $config['key_input'],
+  );
+  $form['settings']['input_section']['key_input_settings'] = array(
+    '#type' => 'container',
+    '#title' => t('Key input settings'),
+    '#title_display' => FALSE,
+    '#tree' => TRUE,
+  );
+  if ($key_input_settings_form = ctools_plugin_get_function(key_get_plugin('key_input', $config['key_input']), 'build configuration form')) {
+    $plugin_form_state = _key_create_plugin_form_state('key_input', $form_state);
+    $form['settings']['input_section']['key_input_settings'] += $key_input_settings_form(array(), $plugin_form_state);
+    $form_state['values']['key_input_settings'] = $plugin_form_state['values'];
+  }
 
   $form['actions'] = array(
     '#type' => 'actions',
@@ -278,7 +249,7 @@ function key_config_form($form, &$form_state, $config = NULL) {
     '#submit' => array('key_config_form_submit'),
     '#weight' => 40,
   );
-  if (isset($config['id'])) {
+  if (!empty($config['id'])) {
     $form['actions']['delete'] = array(
       '#type' => 'submit',
       '#value' => t('Delete key'),
@@ -287,18 +258,16 @@ function key_config_form($form, &$form_state, $config = NULL) {
       '#weight' => 45,
     );
   }
-  $form['actions']['cancel'] = array(
-    '#type' => 'link',
-    '#title' => t('Cancel'),
-    '#href' => KEY_MENU_PATH,
-    '#weight' => 50,
-  );
 
   return $form;
 }
 
 /**
  * Callback for AJAX form re-rendering.
+ *
+ * @param $form
+ * @param $form_state
+ * @return array
  */
 function _key_config_form_ajax_update_settings($form, $form_state) {
   return $form['settings'];
@@ -306,32 +275,113 @@ function _key_config_form_ajax_update_settings($form, $form_state) {
 
 /**
  * Form validate handler for key_config_form().
+ *
+ * @param array $form
+ * @param array $form_state
  */
 function key_config_form_validate($form, &$form_state) {
-  $provider = key_get_plugin('key_provider', $form_state['values']['key_provider']);
+  if (!$form_state['submitted']) {
+    return;
+  }
 
-  if ($validate_callback = ctools_plugin_get_function($provider, 'validate configuration form')) {
-    call_user_func($validate_callback, $form, $form_state);
+  $plugin_types = _key_get_plugin_types();
+  $key_type = key_get_plugin('key_type', $form_state['values']['key_type']);
+  $key_provider = key_get_plugin('key_provider', $form_state['values']['key_provider']);
+  $key_input = key_get_plugin('key_input', $form_state['values']['key_input']);
+
+  // Make sure each plugin settings field is an array.
+  foreach (_key_get_plugin_types() as $type) {
+    if (empty($form_state['values'][$type . '_settings'])) {
+      $form_state['values'][$type . '_settings'] = array();
+    }
+  }
+
+  $processed_values = array(
+    'submitted' => NULL,
+    'processed_submitted' => NULL,
+  );
+  foreach ($plugin_types as $type) {
+    $plugin = $$type;
+    $plugin_form_state = _key_create_plugin_form_state($type, $form_state);
+
+    // Special behavior for the Key Input plugin.
+    if ($type == 'key_input') {
+      // If the provider accepts a key value.
+      if ($key_provider['key value']['accepted']) {
+        $process_value_function = ctools_plugin_get_function($plugin, 'process submitted key value');
+        $processed_values = $process_value_function($plugin_form_state);
+      }
+    }
+
+    if ($validate_function = ctools_plugin_get_function($plugin, 'validate configuration form')) {
+      $validate_function($form, $plugin_form_state);
+    }
+    $form_state['values'][$type . '_settings'] = $plugin_form_state['values'];
+    _key_move_form_state_storage($plugin_form_state, $form_state);
+  }
+
+  // Store the submitted and processed key values in form state.
+  $form_state['storage']['key_value']['submitted'] = $processed_values['submitted'];
+  $form_state['storage']['key_value']['processed_submitted'] = $processed_values['processed_submitted'];
+
+  // Allow the Key Type plugin to validate the key value. Use the processed
+  // key value if there is one. Otherwise, retrieve the key value using the
+  // key provider.
+  if ($validate_function = ctools_plugin_get_function($key_type, 'validate key value')) {
+    if (!empty($processed_values['processed_submitted'])) {
+      $key_value = $processed_values['processed_submitted'];
+    }
+    else {
+      // Create a temporary key configuration to retrieve the key value.
+      $temp_key = $form_state['values'];
+      $key_value = key_get_key_value($temp_key);
+    }
+    $plugin_form_state = _key_create_plugin_form_state('key_type', $form_state);
+    $validate_function($form, $plugin_form_state, $key_value);
+    $form_state['values']['key_type_settings'] = $plugin_form_state['values'];
+    _key_move_form_state_storage($plugin_form_state, $form_state);
   }
 }
 
 /**
  * Form submission handler for key_config_form().
+ *
+ * @param array $form
+ * @param array $form_state
  */
 function key_config_form_submit($form, &$form_state) {
-  $provider = key_get_plugin('key_provider', $form_state['values']['key_provider']);
+  $key_value_data = $form_state['storage']['key_value'];
 
-  if ($submit_callback = ctools_plugin_get_function($provider, 'submit configuration form')) {
-    call_user_func_array($submit_callback, array($form, &$form_state));
+  $plugin_types = _key_get_plugin_types();
+  $key_type = key_get_plugin('key_type', $form_state['values']['key_type']);
+  $key_provider = key_get_plugin('key_provider', $form_state['values']['key_provider']);
+  $key_input = key_get_plugin('key_input', $form_state['values']['key_input']);
+  $original_key = $form_state['storage']['original_key'];
+  $config = $form_state['values'];
+
+  foreach ($plugin_types as $type) {
+    $plugin = $$type;
+    $plugin_form_state = _key_create_plugin_form_state($type, $form_state);
+
+    if ($submit_function = ctools_plugin_get_function($plugin, 'submit configuration form')) {
+      $submit_function($form, $plugin_form_state);
+      $form_state['values'][$type . '_settings'] = $plugin_form_state['values'];
+      _key_move_form_state_storage($plugin_form_state, $form_state);
+    }
   }
 
-  // If the provider has changed, call the delete callback for the old
-  // provider.
-  if (isset($form['#original_key']['config'])) {
-    $original_config = $form['#original_key']['config'];
-    $original_provider = key_get_plugin('key_provider', $original_config['key_provider']);
-    if (($provider['name'] != $original_provider['name']) && ($delete_callback = ctools_plugin_get_function($original_provider, 'submit delete form'))) {
-      call_user_func($delete_callback, $original_config);
+  // If the key provider allows a key value to be set.
+  if ($key_provider['key value']['accepted'] && $set_key_value_function = ctools_plugin_get_function($key_provider, 'set key value')) {
+    // If either the key provider has changed or the submitted value
+    // is not the same as the obscured value.
+    if (($original_key && $original_key['key_provider'] != $form_state['values']['key_provider'])
+      || ($key_value_data['submitted'] != $key_value_data['obscured']))
+    {
+      // Set the key value.
+      $plugin_form_state = _key_create_plugin_form_state('key_provider', $form_state);
+      $set_key_value_function($config, $plugin_form_state, $key_value_data['processed_submitted']);
+      $form_state['values']['key_provider_settings'] = $plugin_form_state['values'];
+      _key_move_form_state_storage($plugin_form_state, $form_state);
     }
   }
 
@@ -340,10 +390,11 @@ function key_config_form_submit($form, &$form_state) {
     'label' => (string) $form_state['values']['label'],
     'description' => (string) $form_state['values']['description'],
     'key_type' => (string) $form_state['values']['key_type'],
-    'key_type_settings' => (isset($form_state['values']['key_type_settings'])) ? serialize($form_state['values']['key_type_settings']) : '',
+    'key_type_settings' => (isset($form_state['values']['key_type_settings'])) ? serialize($form_state['values']['key_type_settings']) : array(),
     'key_provider' => (string) $form_state['values']['key_provider'],
-    'key_provider_settings' => (isset($form_state['values']['key_provider_settings'])) ? serialize($form_state['values']['key_provider_settings']) : '',
-    'created' => (string) $form_state['values']['created'],
+    'key_provider_settings' => (isset($form_state['values']['key_provider_settings'])) ? serialize($form_state['values']['key_provider_settings']) : array(),
+    'key_input' => (string) $form_state['values']['key_input'],
+    'key_input_settings' => (isset($form_state['values']['key_input_settings'])) ? serialize($form_state['values']['key_input_settings']) : array(),
   );
 
   key_save_config($fields);
@@ -355,6 +406,9 @@ function key_config_form_submit($form, &$form_state) {
  * Form submission handler for key_config_form().
  *
  * Handles the 'Delete' button on the key configuration form.
+ *
+ * @param array $form
+ * @param array $form_state
  */
 function key_config_form_delete_submit($form, &$form_state) {
   $form_state['redirect'] = KEY_MENU_PATH . '/manage/' . str_replace('_', '-', $form['id']['#default_value']) . '/delete';
@@ -362,6 +416,11 @@ function key_config_form_delete_submit($form, &$form_state) {
 
 /**
  * Menu callback to delete a key configuration.
+ *
+ * @param array $form
+ * @param array $form_state
+ * @param array $config
+ *   The configuration to delete.
  */
 function key_config_delete_confirm($form, &$form_state, $config) {
   $form['id'] = array('#type' => 'value', '#value' => $config['id']);
@@ -375,11 +434,15 @@ function key_config_delete_confirm($form, &$form_state, $config) {
 
 /**
  * Submit handler for key_config_delete_confirm().
+ *
+ * @param array $form
+ * @param array $form_state
  */
 function key_config_delete_confirm_submit($form, &$form_state) {
   $id = (isset($form_state['values']['id'])) ? $form_state['values']['id'] : NULL;
   key_delete_config($id);
   $form_state['redirect'] = KEY_MENU_PATH;
+
 }
 
 /**
@@ -391,7 +454,8 @@ function key_config_delete_confirm_submit($form, &$form_state) {
  *   - id: The machine name of the configuration.
  *   - description: A brief description of the configuration.
  *
- * @ingroup themeable
+ * @return string
+ *   The HTML for the description.
  */
 function theme_key_configs_list_description($variables) {
   $label = $variables['label'];
@@ -405,7 +469,13 @@ function theme_key_configs_list_description($variables) {
   return $output;
 }
 
-function _key_key_value_data($config = NULL) {
+/**
+ * Set the key value data.
+ *
+ * @param array $config
+ * @return array
+ */
+function _key_set_key_value_data($config = array()) {
   $key_value_data = array(
     'original' => NULL,
     'processed_original' => NULL,
@@ -414,13 +484,163 @@ function _key_key_value_data($config = NULL) {
   );
 
   // If this is a new key being added, return the defaults.
-  if (!$config) {
+  if (empty($config)) {
     return $key_value_data;
   }
 
-  // Determine the obscure options.
-  $obscure_options = [];
-  $obscure_options['key_provider_id'] = $config['key_provider'];
+  $key_type = key_get_plugin('key_type', $config['key_type']);
+  $key_provider = key_get_plugin('key_provider', $config['key_provider']);
+  $key_input = key_get_plugin('key_input', $config['key_input']);
 
-  return $key_value_data;
+  $obscure_options = [];
+
+  // Add settings from plugins.
+  $obscure_options['key_type_id'] = $key_type['name'];
+  $obscure_options['key_type_group'] = $key_type['group'];
+  $obscure_options['key_provider_id'] = $key_provider['name'];
+
+  $key_value = array();
+
+  // Get the existing key value.
+  $key_value['original'] = key_get_key_value($config['id']);
+
+  // Process the original key value.
+  if ($process_function = ctools_plugin_get_function($key_input, 'process existing key value')) {
+    $key_value['processed_original'] = $process_function($config['key_input_settings'], $key_value['original']);
+  }
+  else {
+    $key_value['processed_original'] = $key_value['original'];
+  }
+
+  // Obscure the processed key value.
+  if ($obscured_function = ctools_plugin_get_function($key_provider, 'obscure key value')) {
+    $obscured_key_value = $obscured_function($key_value['processed_original'], $obscure_options);
+  }
+  else {
+    $obscured_key_value = $key_value['processed_original'];
+  }
+  if ($obscured_key_value != $key_value['processed_original']) {
+    $key_value['obscured'] = $obscured_key_value;
+  }
+  else {
+    $key_value['obscured'] = '';
+  }
+
+  // Set the current value.
+  $key_value['current'] = (!empty($key_value['obscured'])) ? $key_value['obscured'] : $key_value['processed_original'];
+
+  return $key_value;
+}
+
+/**
+ * Update the key type plugin.
+ *
+ * @param $form_state
+ * @param array $config
+ */
+function _key_update_key_type(&$form_state, &$config) {
+  $key_type = key_get_plugin('key_type', $form_state['input']['key_type']);
+  $original_key = isset($form_state['storage']['original_key']) ? $form_state['storage']['original_key'] : NULL;
+
+  // If the original key's plugin ID matches the existing one.
+  if ($original_key['key_provider'] == $key_type['name']) {
+    // Use the configuration from the original key's plugin.
+    $plugin_config = $original_key['key_provider_settings'];
+  }
+  elseif ($default_configuration_function = ctools_plugin_get_function(key_get_plugin('key_type', $key_type), 'default configuration')) {
+    // Use the plugin's default configuration.
+    $plugin_config = call_user_func($default_configuration_function);
+  }
+  else {
+    $plugin_config = array();
+  }
+
+  $config['key_type'] = $form_state['input']['key_type'];
+  $config['key_type_settings'] = $plugin_config;
+  $form_state['values']['key_type_settings'] = $plugin_config;
+  $form_state['input']['key_type_settings'] = $plugin_config;
+}
+
+/**
+ * Update the key provider plugin.
+ *
+ * @param $form_state
+ * @param array $config
+ */
+function _key_update_key_provider(&$form_state, &$config) {
+  $key_provider = key_get_plugin('key_provider', $form_state['input']['key_provider']);
+  $original_key = isset($form_state['storage']['original_key']) ? $form_state['storage']['original_key'] : NULL;
+
+  // If the original key's plugin ID matches the existing one.
+  if ($original_key['key_provider'] == $key_provider['name']) {
+    // Use the configuration from the original key's plugin.
+    $plugin_config = $original_key['key_provider_settings'];
+  }
+  elseif ($default_configuration_function = ctools_plugin_get_function(key_get_plugin('key_provider', $key_provider), 'default configuration')) {
+    // Use the plugin's default configuration.
+    $plugin_config = call_user_func($default_configuration_function);
+  }
+  else {
+    $plugin_config = array();
+  }
+
+  $config['key_provider'] = $form_state['input']['key_provider'];
+  $config['key_provider_settings'] = $plugin_config;
+  $form_state['values']['key_provider_settings'] = $plugin_config;
+  $form_state['input']['key_provider_settings'] = $plugin_config;
+}
+
+/**
+ * Update the key input plugin.
+ *
+ * @param $form_state
+ * @param array $config
+ */
+function _key_update_key_input(&$form_state, &$config) {
+  $key_value_data = $form_state['storage']['key_value'];
+
+  // Determine which Key Input should be used.
+  $key_input_id = 'none';
+  $key_provider = key_get_plugin('key_provider', $config['key_provider']);
+  $key_type = key_get_plugin('key_type', $config['key_type']);
+
+  if ($key_provider['key value']['accepted']) {
+    $key_input_id = $key_type['key value']['plugin'];
+  }
+  $config['key_input'] = $key_input_id;
+}
+
+/**
+ * Creates a form state for a plugin.
+ *
+ * @param string $type
+ *   The plugin type ID.
+ * @param array $form_state
+ *   The form state to copy values from.
+ *
+ * @return array
+ *   A copy of the form state with values from the plugin.
+ */
+function _key_create_plugin_form_state($type, $form_state) {
+  // Copy the form state.
+  $plugin_form_state = $form_state;
+
+  // Clear the values, except for this plugin type's settings.
+  $plugin_form_state['values'] = (isset($form_state['values'][$type . '_settings'])) ? $form_state['values'][$type . '_settings'] : array();
+
+  return $plugin_form_state;
+}
+
+/**
+ * Moves storage variables from one form state to another.
+ *
+ * @param array $from
+ *   The form state to move from.
+ * @param array $to
+ *   The form state to move to.
+ */
+function _key_move_form_state_storage($from, &$to) {
+  foreach ($from['storage'] as $index => $value) {
+    $to['storage'][$index] = $value;
+  }
 }

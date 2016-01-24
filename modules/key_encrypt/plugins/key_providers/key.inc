@@ -27,7 +27,7 @@ function key_encrypt_key_get_key($settings) {
   if (empty($settings['key_config'])) {
     return FALSE;
   }
-  $key = key_get_key($settings['key_config']);
+  $key = key_get_key_value($settings['key_config']);
 
   return $key;
 }

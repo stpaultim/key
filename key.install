@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Install, update and uninstall functions for the Key module.
+ * Install, uninstall, schema, and update functions for the Key module.
  */
 
 /**
@@ -47,7 +47,7 @@ function key_schema() {
         'size' => 'big',
       ),
       'key_provider' => array(
-        'description' => 'The key provider to use.',
+        'description' => 'The key provider.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -59,23 +59,25 @@ function key_schema() {
         'not null' => FALSE,
         'size' => 'big',
       ),
-      'created' => array(
-        'description' => 'The Unix timestamp when the configuration was created.',
-        'type' => 'int',
+      'key_input' => array(
+        'description' => 'The key input.',
+        'type' => 'varchar',
+        'length' => 255,
         'not null' => TRUE,
-        'default' => 0,
+        'default' => '',
       ),
-      'changed' => array(
-        'description' => 'The Unix timestamp when the configuration was last saved.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
+      'key_input_settings' => array(
+        'description' => 'Additional settings for the key input.',
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
       ),
     ),
     'indexes' => array(
       'label' => array('label'),
       'key_type' => array('key_type'),
       'key_provider' => array('key_provider'),
+      'key_input' => array('key_input'),
     ),
     'primary key' => array('id'),
   );
