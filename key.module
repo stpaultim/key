@@ -234,24 +234,29 @@ function key_config_load($id) {
 
 /**
  * Process function to expand the key element.
+ * @param $element
+ *   The element to process.
+ *
+ * @return
+ *   The processed element.
  */
 function _key_element_expand($element) {
-//  $element['#empty_option'] = t('Select a key');
-//  $element['#options'] = key_get_configs_as_options();
-//  if (!empty($element['#filters'])) {
-//    $element['#options'] = _key_configs_filter($element['#options'], $element['#filters']);
-//  }
-//
-//  // Prefix the default description with a information about keys.
-//  if ($element['#key_description']) {
-//    $original_description = (isset($element['#description'])) ? $element['#description'] : '';
-//    $key_description = t('Choose an available key to use.');
-//    $key_description .= ' ' . t('If your key is not listed, <a href="@url">create a new key</a>.', array('@url' => '/' . KEY_MENU_PATH));
-//
-//    $element['#description'] = $key_description . ' ' . $original_description;
-//  }
-//
-//  return $element;
+  $element['#empty_option'] = t('Select a key');
+  $element['#options'] = key_get_configs_as_options();
+  if (!empty($element['#filters'])) {
+    $element['#options'] = _key_configs_filter($element['#options'], $element['#filters']);
+  }
+
+  // Prefix the default description with a information about keys.
+  if ($element['#key_description']) {
+    $original_description = (isset($element['#description'])) ? $element['#description'] : '';
+    $key_description = t('Choose an available key to use.');
+    $key_description .= ' ' . t('If your key is not listed, <a href="@url">create a new key</a>.', array('@url' => '/' . KEY_MENU_PATH));
+
+    $element['#description'] = $key_description . ' ' . $original_description;
+  }
+
+  return $element;
 }
 
 /**
