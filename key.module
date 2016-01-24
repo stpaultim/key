@@ -188,7 +188,7 @@ function key_element_info() {
     '#size' => 0,
     '#multiple' => FALSE,
     '#process' => array(
-//      '_key_element_expand',
+      '_key_element_expand',
       'form_process_select',
       'ajax_process_form',
     ),
