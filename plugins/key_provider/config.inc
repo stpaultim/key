@@ -17,7 +17,6 @@ $plugin = array(
   'build configuration form' => 'key_provider_config_build_configuration_form',
   'get key value' => 'key_provider_config_get_key_value',
   'set key value' => 'key_provider_config_set_key_value',
-  'obscure key value' => '_key_default_obscure_key_value',
 );
 
 /**
