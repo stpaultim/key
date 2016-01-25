@@ -103,7 +103,7 @@ function key_config_form($form, &$form_state, $config = array()) {
     _key_clear_plugin_cache();
 
     // Store the original key configuration.
-    $form_state['storage']['original_key'] = $config;
+    $form_state['storage']['original_key'] = empty($config['id']) ? NULL : $config;
 
     // Store the key value data in form state for use by plugins.
     $form_state['storage']['key_value'] = _key_set_key_value_data($config);
@@ -308,7 +308,7 @@ function key_config_form_validate($form, &$form_state) {
     if ($type == 'key_input') {
       // If the provider accepts a key value.
       if ($key_provider['key value']['accepted']) {
-        $process_value_function = ctools_plugin_get_function($plugin, 'process submitted key value');
+        $process_value_function = ctools_plugin_get_function($key_input, 'process submitted key value');
         $processed_values = $process_value_function($plugin_form_state);
       }
     }
@@ -597,17 +597,71 @@ function _key_update_key_provider(&$form_state, &$config) {
  * @param array $config
  */
 function _key_update_key_input(&$form_state, &$config) {
+  $key_provider = key_get_plugin('key_provider', $config['key_provider']);
+  $key_type = key_get_plugin('key_type', $config['key_type']);
+
+  // Get the current key value data.
   $key_value_data = $form_state['storage']['key_value'];
 
   // Determine which Key Input should be used.
   $key_input_id = 'none';
-  $key_provider = key_get_plugin('key_provider', $config['key_provider']);
-  $key_type = key_get_plugin('key_type', $config['key_type']);
-
   if ($key_provider['key value']['accepted']) {
     $key_input_id = $key_type['key value']['plugin'];
   }
+
+  // Set the Key Input plugin.
   $config['key_input'] = $key_input_id;
+  $key_input = key_get_plugin('key_input', $config['key_input']);
+
+  // Set the plugin's configuration to the default. It may be
+  // overridden below.
+  if ($default_configuration_function = ctools_plugin_get_function($key_input, 'default configuration')) {
+    // Use the plugin's default configuration.
+    $plugin_config = call_user_func($default_configuration_function);
+  }
+  else {
+    $plugin_config = array();
+  }
+
+  // Clear the current key value. It may be overridden below.
+  $key_value_data['current'] = '';
+
+  $use_original_key_value = FALSE;
+
+  // If an original key exists, one of the following conditions must
+  // be met in order to use the key value from it:
+  // - The key value was not obscured when the form first loaded
+  // - The original key provider is the same as the current one
+  //   AND the original key type is the same as the current one
+  if ($form_state['storage']['original_key']) {
+    $original_key = $form_state['storage']['original_key'];
+
+    // If the key value is not obscured.
+    if (empty($key_value_data['obscured'])) {
+      $use_original_key_value = TRUE;
+    }
+    // If the original key provider is the same as the current one.
+    if ($original_key['key_provider'] == $config['key_provider']) {
+      // If the original key type is the same as the current one.
+      if ($original_key['key_type'] == $config['key_type']) {
+        $use_original_key_value = TRUE;
+      }
+    }
+  }
+
+  // If the original key value can be used.
+  if ($use_original_key_value) {
+    // Use the configuration from the original key's plugin.
+    $plugin_config = $original_key['key_input_settings'];
+
+    // Set the current key value.
+    $key_value_data['current'] = (!empty($key_value_data['obscured'])) ? $key_value_data['obscured'] : $key_value_data['processed_original'];
+  }
+
+  $config['key_input_settings'] = $plugin_config;
+  $form_state['values']['key_input_settings'] = array();
+  $form_state['input']['key_input_settings'] = array();
+  $form_state['storage']['key_value'] = $key_value_data;
 }
 
 /**

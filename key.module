@@ -148,7 +148,7 @@ function key_ctools_plugin_type() {
       'submit delete form' => NULL,
       'get key value' => NULL,
       'set key value' => NULL,
-      'obscure key value' => NULL,
+      'obscure key value' => '_key_default_obscure_key_value',
       'dependency callback' => NULL,
       'dependency errors' => NULL,
       'key value form' => NULL,

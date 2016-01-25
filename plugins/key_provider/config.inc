@@ -17,6 +17,7 @@ $plugin = array(
   'build configuration form' => 'key_provider_config_build_configuration_form',
   'get key value' => 'key_provider_config_get_key_value',
   'set key value' => 'key_provider_config_set_key_value',
+  'obscure key value' => 'key_provider_config_obscure_key_value',
 );
 
 /**
@@ -101,4 +102,20 @@ function key_provider_config_set_key_value($config, &$form_state, $key_value) {
   else {
     return FALSE;
   }
+}
+
+/**
+ * Obscures the value of a key.
+ *
+ * @param $key_value
+ *   The key value to obscure.
+ * @param array $options
+ *   Options to use when obscuring the value.
+ *
+ * @return string
+ *   The obscured key value.
+ */
+function key_provider_config_obscure_key_value($key_value, $options = array()) {
+  // Key values are not obscured when this provider is used.
+  return $key_value;
 }

@@ -39,6 +39,7 @@ function key_input_text_field_default_configuration() {
 function key_input_text_field_build_configuration_form($form, &$form_state) {
   $key_value_data = $form_state['storage']['key_value'];
   $config = $form_state['storage']['key_config'];
+  $plugin_config = $config['key_input_settings'];
   $key_type = key_get_plugin('key_type', $config['key_type']);
   $key_provider = key_get_plugin('key_provider', $config['key_provider']);
 
@@ -58,7 +59,7 @@ function key_input_text_field_build_configuration_form($form, &$form_state) {
       '#type' => 'checkbox',
       '#title' => t('Base64-encoded'),
       '#description' => t('Check this if the key value being submitted has been Base64-encoded.'),
-      '#default_value' => $form_state['storage']['key_config']['key_input_settings']['base64_encoded'],
+      '#default_value' => $plugin_config['base64_encoded'],
     );
   }
 
