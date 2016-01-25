@@ -484,7 +484,7 @@ function _key_set_key_value_data($config = array()) {
   );
 
   // If this is a new key being added, return the defaults.
-  if (empty($config)) {
+  if (empty($config['id'])) {
     return $key_value_data;
   }
 
