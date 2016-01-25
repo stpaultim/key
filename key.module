@@ -743,9 +743,6 @@ function _key_default_process_existing_key_value($plugin_config, $key_value) {
  *   The obscured key value.
  */
 function _key_default_obscure_key_value($key_value, $options = array()) {
-  // Set a default obscured value.
-  $obscured_value = str_repeat('*', 16);
-
   switch ($options['key_type_group']) {
     case 'authentication':
       $options['visible_right'] = 4;
@@ -757,6 +754,9 @@ function _key_default_obscure_key_value($key_value, $options = array()) {
       $options['fixed_length'] = 30;
       $obscured_value = _key_obscure_value($key_value, $options);
       break;
+
+    default:
+      $obscured_value = $key_value;
   }
 
   return $obscured_value;
