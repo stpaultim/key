@@ -754,7 +754,7 @@ function _key_default_obscure_key_value($key_value, $options = array()) {
 
     case 'encryption':
       $options['visible_right'] = 0;
-      $options['fixed_length'] = 32;
+      $options['fixed_length'] = 30;
       $obscured_value = _key_obscure_value($key_value, $options);
       break;
   }
