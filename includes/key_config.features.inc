@@ -9,7 +9,7 @@
  * Implements hook_features_export_options().
  */
 function key_config_features_export_options() {
-  return key_get_configs_as_options(TRUE);
+  return key_get_key_names_as_options(array(), TRUE);
 }
 
 /**

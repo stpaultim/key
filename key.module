@@ -810,3 +810,20 @@ function _key_obscure_value($value, $options = array()) {
 
   return $obscured_chars . $visible_right_chars;
 }
+
+/**
+ * Implements hook_features_api().
+ *
+ * Define the components that we want to make exportable, in this case
+ * key configurations.
+ */
+function key_features_api() {
+  return array(
+    'key_config' => array(
+      'name' => 'Keys',
+      'file' => drupal_get_path('module', 'key') . '/includes/key_config.features.inc',
+      'default_hook' => 'key_default_configs',
+      'feature_source' => TRUE,
+    ),
+  );
+}
