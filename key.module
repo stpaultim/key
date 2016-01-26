@@ -229,7 +229,7 @@ function key_config_edit_title($config) {
  *   configuration does not exist.
  */
 function key_config_load($id) {
-  return key_get_config(strtr($id, array('-' => '_')));
+  return key_get_key(strtr($id, array('-' => '_')));
 }
 
 /**
@@ -340,7 +340,7 @@ function key_get_plugin($type, $plugin_id, $reset = FALSE) {
  * @return array
  *   An array of configurations.
  */
-function key_get_configs($reset = FALSE) {
+function key_get_keys($reset = FALSE) {
   $configs = &drupal_static(__FUNCTION__);
 
   if (!isset($configs) || $reset) {
@@ -374,7 +374,7 @@ function key_get_key_names_as_options($filters = array(), $reset = FALSE) {
   $options = array();
 
   // TODO: Make filtering more sophisticated.
-  $keys = key_get_configs($reset);
+  $keys = key_get_keys($reset);
 
   foreach ($keys as $id => $key) {
     if (isset($filters['type']) && isset($filters['provider'])) {
@@ -411,11 +411,11 @@ function key_get_key_names_as_options($filters = array(), $reset = FALSE) {
  * @return array
  *   A key configuration.
  */
-function key_get_config($id, $reset = FALSE) {
+function key_get_key($id, $reset = FALSE) {
   $configs = &drupal_static(__FUNCTION__);
 
   if (!isset($configs) || $reset) {
-    $configs = key_get_configs($reset);
+    $configs = key_get_keys($reset);
   }
 
   if (array_key_exists($id, $configs)) {
@@ -441,7 +441,7 @@ function key_get_config($id, $reset = FALSE) {
  * @return array|null
  *   The saved configuration or NULL if the save was unsuccessful.
  */
-function key_save_config($fields, $original_config = array(), $messages = TRUE) {
+function key_save_key($fields, $original_config = array(), $messages = TRUE) {
   // Serialize any field that is an array.
   foreach ($fields as $index => $field) {
     if (is_array($field)) {
@@ -456,7 +456,7 @@ function key_save_config($fields, $original_config = array(), $messages = TRUE) 
     ->execute();
 
   // Load the configuration to make sure it was saved.
-  $key_config = key_get_config($fields['id'], TRUE);
+  $key_config = key_get_key($fields['id'], TRUE);
   if (empty($key_config)) {
     $key_config = NULL;
   }
@@ -516,9 +516,9 @@ function key_save_config($fields, $original_config = array(), $messages = TRUE) 
  * @return bool
  *   TRUE if successful, FALSE if not.
  */
-function key_delete_config($id, $messages = TRUE) {
+function key_delete_key($id, $messages = TRUE) {
   // Load the configuration.
-  $config = key_get_config($id);
+  $config = key_get_key($id);
 
   // If the configuration could not be loaded.
   if (!$config) {
@@ -548,7 +548,7 @@ function key_delete_config($id, $messages = TRUE) {
   }
 
   // Try to load the configuration again.
-  $config = key_get_config($id);
+  $config = key_get_key($id);
 
   return ($config) ? FALSE : TRUE;
 }
@@ -578,7 +578,7 @@ function key_get_key_value($config) {
   }
 
   if (!is_array($config)) {
-    $config = key_get_config($config_id);
+    $config = key_get_key($config_id);
   }
 
   // If the configuration doesn't exist, return NULL.

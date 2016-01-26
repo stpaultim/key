@@ -35,7 +35,7 @@ function key_config_features_export_render($module_name, $data, $export = NULL) 
   $code[] = '';
 
   foreach ($data as $id) {
-    $config = key_get_config($id, TRUE);
+    $config = key_get_key($id, TRUE);
     $config_identifier = features_var_export($id);
     $config_export = features_var_export($config , '  ');
     $code[] = "  // Exported key: {$id}.";
@@ -63,6 +63,6 @@ function key_config_features_rebuild($module) {
   $configs = module_invoke($module, 'key_default_configs');
 
   foreach ($configs as $key => $config) {
-    key_save_config($config, array(), FALSE);
+    key_save_key($config, array(), FALSE);
   }
 }

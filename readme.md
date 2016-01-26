@@ -112,11 +112,11 @@ Modules can retrieve information about keys or a specific key value.
 
 ### Get all key configurations
 
-`key_get_configs()`
+`key_get_keys()`
 
 ### Get a single key configuration
 
-`key_get_config($key_id)`
+`key_get_key($key_id)`
 
 ### Get a key value
 
