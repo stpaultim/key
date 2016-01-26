@@ -255,19 +255,6 @@ function _key_process_key_select($element) {
 }
 
 /**
- * Filter an array of key configurations.
- *
- * @param $configs
- * @param $filters
- *
- * @return array
- *   The filtered array of key configurations.
- */
-function _key_configs_filter($configs, $filters) {
-  return $configs;
-}
-
-/**
  * Gets information about all key plugins of the requested type.
  *
  * @param string $type
