@@ -494,7 +494,7 @@ function _key_set_key_value_data($config = array()) {
   $key_provider = key_get_plugin('key_provider', $config['key_provider']);
   $key_input = key_get_plugin('key_input', $config['key_input']);
 
-  $obscure_options = [];
+  $obscure_options = array();
 
   // Add settings from plugins.
   $obscure_options['key_type_id'] = $key_type['name'];
