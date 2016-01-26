@@ -549,7 +549,7 @@ function _key_update_key_type(&$form_state, &$config) {
     // Use the configuration from the original key's plugin.
     $plugin_config = $original_key['key_type_settings'];
   }
-  elseif ($default_configuration_function = ctools_plugin_get_function(key_get_plugin('key_type', $key_type), 'default configuration')) {
+  elseif ($default_configuration_function = ctools_plugin_get_function($key_type, 'default configuration')) {
     // Use the plugin's default configuration.
     $plugin_config = call_user_func($default_configuration_function);
   }
@@ -578,7 +578,7 @@ function _key_update_key_provider(&$form_state, &$config) {
     // Use the configuration from the original key's plugin.
     $plugin_config = $original_key['key_provider_settings'];
   }
-  elseif ($default_configuration_function = ctools_plugin_get_function(key_get_plugin('key_provider', $key_provider), 'default configuration')) {
+  elseif ($default_configuration_function = ctools_plugin_get_function($key_provider, 'default configuration')) {
     // Use the plugin's default configuration.
     $plugin_config = call_user_func($default_configuration_function);
   }
