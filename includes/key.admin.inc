@@ -543,9 +543,9 @@ function _key_update_key_type(&$form_state, &$config) {
   $original_key = isset($form_state['storage']['original_key']) ? $form_state['storage']['original_key'] : NULL;
 
   // If the original key's plugin ID matches the existing one.
-  if ($original_key['key_provider'] == $key_type['name']) {
+  if ($original_key['key_type'] == $key_type['name']) {
     // Use the configuration from the original key's plugin.
-    $plugin_config = $original_key['key_provider_settings'];
+    $plugin_config = $original_key['key_type_settings'];
   }
   elseif ($default_configuration_function = ctools_plugin_get_function(key_get_plugin('key_type', $key_type), 'default configuration')) {
     // Use the plugin's default configuration.
