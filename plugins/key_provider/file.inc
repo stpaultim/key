@@ -28,6 +28,7 @@ $plugin = array(
 function key_provider_file_default_configuration() {
   return array(
     'file_location' => '',
+    'base64_encoded' => FALSE,
   );
 }
 
