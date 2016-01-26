@@ -432,7 +432,44 @@ function key_config_delete_confirm($form, &$form_state, $config) {
   $message = t('Are you sure you want to delete the key %label?', array('%label' => $config['label']));
   $caption = '<p>' . t('This action cannot be undone.') . '</p>';
 
+  // Allow the plugins to modify the form.
+  $plugin_types = _key_get_plugin_types();
+  $key_type = key_get_plugin('key_type', $config['key_type']);
+  $key_provider = key_get_plugin('key_provider', $config['key_provider']);
+  $key_input = key_get_plugin('key_input', $config['key_input']);
+  foreach ($plugin_types as $type) {
+    $plugin = $$type;
+    if ($delete_form_function = ctools_plugin_get_function($plugin, 'build delete form')) {
+      $delete_form_function($form, $form_state, $config, $message, $caption);
+    }
+  }
+
   return confirm_form($form, filter_xss_admin($message), KEY_MENU_PATH, filter_xss_admin($caption), t('Delete'));
+}
+
+/**
+ * Form validate handler for key_config_delete_confirm().
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function key_config_delete_confirm_validate($form, &$form_state) {
+  $id = (isset($form_state['values']['id'])) ? $form_state['values']['id'] : NULL;
+
+  // Load the configuration.
+  $config = key_get_key($id);
+
+  // Allow the plugins to perform additional validation.
+  $plugin_types = _key_get_plugin_types();
+  $key_type = key_get_plugin('key_type', $config['key_type']);
+  $key_provider = key_get_plugin('key_provider', $config['key_provider']);
+  $key_input = key_get_plugin('key_input', $config['key_input']);
+  foreach ($plugin_types as $type) {
+    $plugin = $$type;
+    if ($validate_form_function = ctools_plugin_get_function($plugin, 'validate delete form')) {
+      $validate_form_function($form, $form_state, $config);
+    }
+  }
 }
 
 /**
@@ -443,8 +480,24 @@ function key_config_delete_confirm($form, &$form_state, $config) {
  */
 function key_config_delete_confirm_submit($form, &$form_state) {
   $id = (isset($form_state['values']['id'])) ? $form_state['values']['id'] : NULL;
+
+  // Load the configuration, so the values can be used after deletion.
+  $config = key_get_key($id);
+
   key_delete_key($id);
   $form_state['redirect'] = KEY_MENU_PATH;
+
+  // Allow the plugins to perform additional actions.
+  $plugin_types = _key_get_plugin_types();
+  $key_type = key_get_plugin('key_type', $config['key_type']);
+  $key_provider = key_get_plugin('key_provider', $config['key_provider']);
+  $key_input = key_get_plugin('key_input', $config['key_input']);
+  foreach ($plugin_types as $type) {
+    $plugin = $$type;
+    if ($submit_form_function = ctools_plugin_get_function($plugin, 'submit delete form')) {
+      $submit_form_function($form, $form_state, $config);
+    }
+  }
 }
 
 /**
