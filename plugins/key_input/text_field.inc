@@ -49,7 +49,7 @@ function key_input_text_field_build_configuration_form($form, &$form_state) {
     '#required' => $key_provider['key value']['required'],
     '#default_value' => $key_value_data['current'],
     // Tell the browser not to autocomplete this field.
-    '#attributes' => ['autocomplete' => 'off'],
+    '#attributes' => array('autocomplete' => 'off'),
   );
 
   // If this key input is for an encryption key.
