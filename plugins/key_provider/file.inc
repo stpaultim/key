@@ -58,7 +58,7 @@ function key_provider_file_build_configuration_form($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  // If this key input is for an encryption key.
+  // If this is for an encryption key.
   $key_type = key_get_plugin('key_type', $config['key_type']);
   if ($key_type['group'] == 'encryption') {
     // Add an option to indicate that the value is Base64-encoded.
@@ -66,7 +66,7 @@ function key_provider_file_build_configuration_form($form, &$form_state) {
       '#type' => 'checkbox',
       '#title' => t('Base64-encoded'),
       '#description' => t('Checking this will store the key with Base64 encoding.'),
-      '#default_value' => $config['key_provider_settings']['base64_encoded'],
+      '#default_value' => $plugin_config['base64_encoded'],
     );
   }
 

@@ -39,7 +39,7 @@ function key_input_textarea_field_default_configuration() {
 function key_input_textarea_field_build_configuration_form($form, &$form_state) {
   $key_value_data = $form_state['storage']['key_value'];
   $config = $form_state['storage']['key_config'];
-  $plugin_config = $config['key_input_settings'];
+  $plugin_config = $config['key_input_settings'] + key_input_textarea_field_default_configuration();
   $key_type = key_get_plugin('key_type', $config['key_type']);
   $key_provider = key_get_plugin('key_provider', $config['key_provider']);
 
