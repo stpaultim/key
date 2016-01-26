@@ -38,6 +38,7 @@ A key provider is the means by which the key value is stored and/or provided whe
 *   **Setting Value:** If a key value is submitted, the key provider sets it.
 *   **Obscuring Value:** A key provider can perform alterations to the key value in order to obscure it when editing.
 *   **Deleting Value:** If a key is deleted or the key provider is changed, the provider can delete the key value.
+*   **Filtering:** A list of keys, in a select field for instance, can be filtered to only include keys that use a certain provider.
 
 Key includes two key providers:
 
