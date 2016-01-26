@@ -148,6 +148,7 @@ function key_ctools_plugin_type() {
       'submit delete form' => NULL,
       'get key value' => NULL,
       'set key value' => NULL,
+      'delete key value' => NULL,
       'obscure key value' => '_key_default_obscure_key_value',
       'dependency callback' => NULL,
       'dependency errors' => NULL,
@@ -445,15 +446,15 @@ function key_get_config($id, $reset = FALSE) {
  *
  * @param array $fields
  *   The fields of the configuration to save.
+ * @param array $original_config
+ *   The original configuration, if there was one.
  * @param bool $messages
  *   TRUE if messages should be displayed.
  *
  * @return array|null
+ *   The saved configuration or NULL if the save was unsuccessful.
  */
-function key_save_config($fields, $messages = TRUE) {
-  // Load the key provider.
-  $provider = key_get_plugin('key_provider', $fields['key_provider']);
-
+function key_save_config($fields, $original_config = array(), $messages = TRUE) {
   // Serialize any field that is an array.
   foreach ($fields as $index => $field) {
     if (is_array($field)) {
@@ -467,7 +468,22 @@ function key_save_config($fields, $messages = TRUE) {
     ->fields($fields)
     ->execute();
 
-  // Display message and log to watchdog.
+  // Load the configuration to make sure it was saved.
+  $key_config = key_get_config($fields['id'], TRUE);
+  if (empty($key_config)) {
+    $key_config = NULL;
+  }
+
+  // If the save was not successful, display an error and bail.
+  if (!$key_config) {
+    if ($messages) {
+      $t_args = array('%label' => $fields['label']);
+      drupal_set_message(t('The key %label could not be saved.', $t_args), 'error');
+    }
+    return FALSE;
+  }
+
+  // Display success message and log to watchdog.
   if ($messages) {
     $t_args = array('%label' => $fields['label']);
 
@@ -484,10 +500,18 @@ function key_save_config($fields, $messages = TRUE) {
     }
   }
 
-  // Load the configuration to make sure it was saved.
-  $key_config = key_get_config($fields['id'], TRUE);
-  if (empty($key_config)) {
-    $key_config = NULL;
+  // If an original key configuration exists.
+  if (!empty($original_config)) {
+    $original_key_provider = key_get_plugin('key_provider', $original_config['key_provider']);
+
+    // If the original key's provider allows setting a key value and
+    // the plugin ID is different from the one that was just saved.
+    if ($original_key_provider['key value']['accepted'] && $original_config['key_provider'] != $key_config['key_provider']) {
+      // Allow the original key's provider to delete the key value.
+      if ($delete_callback = ctools_plugin_get_function($original_key_provider, 'delete key value')) {
+        call_user_func($delete_callback, $original_config);
+      }
+    }
   }
 
   // Return the saved configuration.
@@ -520,9 +544,9 @@ function key_delete_config($id, $messages = TRUE) {
   }
 
   // Load the key provider plugin.
-  $provider = key_get_plugin('key_provider', $config['key_provider']);
+  $key_provider = key_get_plugin('key_provider', $config['key_provider']);
 
-  if ($delete_callback = ctools_plugin_get_function($provider, 'submit delete form')) {
+  if ($delete_callback = ctools_plugin_get_function($key_provider, 'delete key value')) {
     call_user_func($delete_callback, $config);
   }
 

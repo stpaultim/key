@@ -63,6 +63,6 @@ function key_config_features_rebuild($module) {
   $configs = module_invoke($module, 'key_default_configs');
 
   foreach ($configs as $key => $config) {
-    key_save_config($config, FALSE);
+    key_save_config($config, array(), FALSE);
   }
 }

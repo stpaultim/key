@@ -397,9 +397,12 @@ function key_config_form_submit($form, &$form_state) {
     'key_input_settings' => (isset($form_state['values']['key_input_settings'])) ? serialize($form_state['values']['key_input_settings']) : array(),
   );
 
-  key_save_config($fields);
+  $save_result = key_save_config($fields, $form_state['storage']['original_key']);
 
-  $form_state['redirect'] = KEY_MENU_PATH . '/list';
+  // If the save was successful, redirect to the list page.
+  if ($save_result) {
+    $form_state['redirect'] = KEY_MENU_PATH . '/list';
+  }
 }
 
 /**

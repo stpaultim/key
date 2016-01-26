@@ -17,6 +17,7 @@ $plugin = array(
   'build configuration form' => 'key_provider_config_build_configuration_form',
   'get key value' => 'key_provider_config_get_key_value',
   'set key value' => 'key_provider_config_set_key_value',
+  'delete key value' => 'key_provider_config_delete_key_value',
   'obscure key value' => 'key_provider_config_obscure_key_value',
 );
 
@@ -102,6 +103,21 @@ function key_provider_config_set_key_value($config, &$form_state, $key_value) {
   else {
     return FALSE;
   }
+}
+
+/**
+ * Deletes the value of a key.
+ *
+ * @param array $config
+ *   The key configuration whose value will be deleted.
+ *
+ * @return bool
+ *   TRUE if successful, FALSE if unsuccessful.
+ */
+function key_provider_config_delete_key_value($config) {
+  // Nothing needs to be done, since the value will have been deleted
+  // with the key configuration.
+  return TRUE;
 }
 
 /**
