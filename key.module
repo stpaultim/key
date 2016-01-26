@@ -188,7 +188,7 @@ function key_element_info() {
     '#size' => 0,
     '#multiple' => FALSE,
     '#process' => array(
-      '_key_element_expand',
+      '_key_process_key_select',
       'form_process_select',
       'ajax_process_form',
     ),
@@ -196,8 +196,7 @@ function key_element_info() {
     '#theme_wrappers' => array('form_element'),
     '#options' => array(),
     // Allow filtering of the list of key configurations.
-    // See _key_filter_configs().
-    '#filters' => array(),
+    '#key_filters' => array(),
     '#key_description' => TRUE,
   );
 
@@ -240,19 +239,14 @@ function key_config_load($id) {
  * @return
  *   The processed element.
  */
-function _key_element_expand($element) {
-  $element['#empty_option'] = t('Select a key');
-  $element['#options'] = key_get_configs_as_options();
-  if (!empty($element['#filters'])) {
-    $element['#options'] = _key_configs_filter($element['#options'], $element['#filters']);
-  }
+function _key_process_key_select($element) {
+  $options = key_get_key_names_as_options($element['#key_filters'], TRUE);
+  $element['#options'] = $options;
 
   // Prefix the default description with a information about keys.
   if ($element['#key_description']) {
     $original_description = (isset($element['#description'])) ? $element['#description'] : '';
-    $key_description = t('Choose an available key to use.');
-    $key_description .= ' ' . t('If your key is not listed, <a href="@url">create a new key</a>.', array('@url' => '/' . KEY_MENU_PATH));
-
+    $key_description = t('Choose an available key. If the desired key is not listed, <a href="@link">create a new key</a>.', array('@link' => '/' . KEY_MENU_PATH . '/add'));
     $element['#description'] = $key_description . ' ' . $original_description;
   }
 
@@ -380,20 +374,38 @@ function key_get_configs($reset = FALSE) {
 /**
  * Gets all key configurations as options, for use in forms.
  *
+ * @param array $filters
+ *   An array of filters to apply to the list of options.
  * @param bool $reset
  *   A flag to force the configurations to be retrieved from the database.
  *
  * @return array
- *   An array of configurations, with ids for keys and labels for values.
+ *   An array of key names, indexed by id.
  */
-function key_get_configs_as_options($reset = FALSE) {
-  $options = &drupal_static(__FUNCTION__);
+function key_get_key_names_as_options($filters = array(), $reset = FALSE) {
+  $options = array();
 
-  if (!isset($options) || $reset) {
-    $configs = key_get_configs($reset);
-    $options = array();
-    foreach($configs as $id => $config) {
-      $options[$id] = $config['label'];
+  // TODO: Make filtering more sophisticated.
+  $keys = key_get_configs($reset);
+
+  foreach ($keys as $id => $key) {
+    if (isset($filters['type']) && isset($filters['provider'])) {
+      if ($key['key_type'] == $filters['type'] && $key['key_provider'] == $filters['provider']) {
+        $options[$id] = $key['label'];
+      }
+    }
+    elseif (isset($filters['type'])) {
+      if ($key['key_type'] == $filters['type']) {
+        $options[$id] = $key['label'];
+      }
+    }
+    elseif (isset($filters['provider'])) {
+      if ($key['key_provider'] == $filters['provider']) {
+        $options[$id] = $key['label'];
+      }
+    }
+    else {
+      $options[$id] = $key['label'];
     }
   }
 
