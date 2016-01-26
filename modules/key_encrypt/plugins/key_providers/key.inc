@@ -43,7 +43,7 @@ function key_encrypt_key_settings_form($defaults) {
     '#title' => t('Key'),
     '#description' => t('Keys listed here are defined in the <a href="@path">Key module</a>.', array('@path' => url('admin/config/system/keys'))),
     '#empty_option' => t('- Select a key -'),
-    '#options' => key_get_configs_as_options(),
+    '#options' => key_get_key_names_as_options(),
     '#default_value' => isset($defaults['key_config']) ? $defaults['key_config'] : '',
     '#required' => TRUE,
   );
