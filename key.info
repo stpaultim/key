@@ -2,5 +2,5 @@ name = Key
 description = Provides the ability to manage site-wide keys.
 package = Security
 core = 7.x
-
+configure = admin/config/system/keys
 dependencies[] = ctools
