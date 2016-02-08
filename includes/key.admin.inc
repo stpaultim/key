@@ -375,8 +375,7 @@ function key_config_form_submit($form, &$form_state) {
     // If either the key provider has changed or the submitted value
     // is not the same as the obscured value.
     if (($original_key && $original_key['key_provider'] != $form_state['values']['key_provider'])
-      || ($key_value_data['submitted'] != $key_value_data['obscured']))
-    {
+      || ($key_value_data['submitted'] != $key_value_data['obscured'])) {
       // Set the key value.
       $plugin_form_state = _key_create_plugin_form_state('key_provider', $form_state);
       $set_key_value_function($config, $plugin_form_state, $key_value_data['processed_submitted']);

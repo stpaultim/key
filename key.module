@@ -301,7 +301,7 @@ function key_get_plugins_as_options($type, $all = TRUE, $reset = FALSE) {
   $plugins = key_get_plugins($type, $all, $reset);
   $options = array();
 
-  foreach($plugins as $id => $plugin) {
+  foreach ($plugins as $id => $plugin) {
     $options[$id] = $plugin['label'];
   }
 
@@ -568,7 +568,8 @@ function key_get_key_value($config) {
   // If $config is an array, it must be a configuration ID.
   if (!is_array($config)) {
     $config_id = $config;
-  } else {
+  }
+  else {
     $config_id = isset($config['id']) ? $config['id'] : '';
   }
 
@@ -805,7 +806,7 @@ function _key_obscure_value($value, $options = array()) {
   );
 
   if ($options['visible_right'] > 0) {
-    $visible_right_chars = substr($value, $options['visible_right'] * -1);
+    $visible_right_chars = drupal_substr($value, $options['visible_right'] * -1);
   }
   else {
     $visible_right_chars = '';
@@ -815,8 +816,8 @@ function _key_obscure_value($value, $options = array()) {
   if ($options['fixed_length']) {
     $obscured_chars = str_repeat($options['replacement_character'], $options['fixed_length'] - $options['visible_right']);
   }
-  elseif (strlen($value) - $options['visible_right'] > 0) {
-    $obscured_chars = str_repeat($options['replacement_character'], strlen($value) - $options['visible_right']);
+  elseif (drupal_strlen($value) - $options['visible_right'] > 0) {
+    $obscured_chars = str_repeat($options['replacement_character'], drupal_strlen($value) - $options['visible_right']);
   }
 
   return $obscured_chars . $visible_right_chars;

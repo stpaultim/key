@@ -68,7 +68,7 @@ function key_type_aes_encryption_build_configuration_form($form, &$form_state) {
  *   A random key.
  */
 function key_type_aes_encryption_generate_key_value(array $configuration) {
-  $bytes = substr($configuration['key_size'], 0, 3) / 8;
+  $bytes = drupal_substr($configuration['key_size'], 0, 3) / 8;
   $random_key = drupal_random_bytes($bytes);
 
   return $random_key;
@@ -84,8 +84,8 @@ function key_type_aes_encryption_generate_key_value(array $configuration) {
  */
 function key_type_aes_encryption_validate_key_value($form, &$form_state, $key_value) {
   // Validate the key size.
-  $bytes = substr($form_state['values']['key_size'], 0, 3) / 8;
-  if (strlen($key_value) != $bytes) {
+  $bytes = drupal_substr($form_state['values']['key_size'], 0, 3) / 8;
+  if (drupal_strlen($key_value) != $bytes) {
     form_set_error('key_size', t('The selected key size does not match the actual size of the key.'));
     return;
   }
