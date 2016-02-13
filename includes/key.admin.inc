@@ -88,6 +88,14 @@ function key_config_form($form, &$form_state, $config = array()) {
       // Update the type and input plugins.
       _key_update_key_type($form_state, $config);
       _key_update_key_input($form_state, $config);
+
+      // Use the current key provider values from the form.
+      if (isset($form_state['input']['key_provider'])) {
+        $config['key_provider'] = $form_state['input']['key_provider'];
+      }
+      if (isset($form_state['input']['key_provider_settings'])) {
+        $config['key_provider_settings'] = $form_state['input']['key_provider_settings'];
+      }
     }
 
     // If a key provider change triggered the rebuild.
@@ -95,6 +103,14 @@ function key_config_form($form, &$form_state, $config = array()) {
       // Update the provider and input plugins.
       _key_update_key_provider($form_state, $config);
       _key_update_key_input($form_state, $config);
+
+      // Use the current key type values from the form.
+      if (isset($form_state['input']['key_type'])) {
+        $config['key_type'] = $form_state['input']['key_type'];
+      }
+      if (isset($form_state['input']['key_type_settings'])) {
+        $config['key_type_settings'] = $form_state['input']['key_type_settings'];
+      }
     }
   }
   // If the form is not rebuilding.
