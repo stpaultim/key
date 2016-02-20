@@ -10,7 +10,7 @@
  * Implements hook_ctools_plugin_directory().
  */
 function key_encrypt_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'encrypt' && !empty($plugin)) {
+  if (in_array($module, array('encrypt', 'key')) && !empty($plugin)) {
     return "plugins/$plugin";
   }
 }
