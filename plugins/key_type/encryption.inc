@@ -91,7 +91,7 @@ function key_type_encryption_validate_key_value($form, &$form_state, $key_value)
 
   // Validate the key size.
   $bytes = $form_state['values']['key_size'] / 8;
-  if (drupal_strlen($key_value) != $bytes) {
+  if (strlen($key_value) != $bytes) {
     form_set_error('key_size', t('The selected key size does not match the actual size of the key.'));
     return;
   }
