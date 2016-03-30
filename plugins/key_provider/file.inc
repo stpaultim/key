@@ -35,9 +35,6 @@ function key_provider_file_default_configuration() {
 /**
  * Build the plugin configuration form.
  *
- * @param array $form
- * @param array $form_state
- *
  * @return array
  *   The plugin configuration form.
  */
@@ -48,7 +45,8 @@ function key_provider_file_build_configuration_form($form, &$form_state) {
   $form['file_location'] = array(
     '#type' => 'textfield',
     '#title' => t('File location'),
-    '#description' => t('The location of the file in which the key will be stored. The path may be absolute (e.g., %abs), relative to the Drupal directory (e.g., %rel), or defined using a stream wrapper (e.g., %str).', array(
+    '#description' => t('The location of the file in which the key will be stored. The path may be absolute (e.g., %abs), relative to the Drupal directory (e.g., %rel), or defined using a stream wrapper (e.g., %str).',
+      array(
         '%abs' => '/etc/keys/foobar.key',
         '%rel' => '../keys/foobar.key',
         '%str' => 'private://keys/foobar.key',
@@ -75,9 +73,6 @@ function key_provider_file_build_configuration_form($form, &$form_state) {
 
 /**
  * Validate callback for the configuration form.
- *
- * @param array $form
- * @param array $form_state
  */
 function key_provider_file_validate_configuration_form($form, &$form_state) {
   $key_provider_settings = $form_state['values'];

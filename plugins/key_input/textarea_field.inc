@@ -30,9 +30,6 @@ function key_input_textarea_field_default_configuration() {
 /**
  * Build the plugin configuration form.
  *
- * @param array $form
- * @param array $form_state
- *
  * @return array
  *   The plugin configuration form.
  */

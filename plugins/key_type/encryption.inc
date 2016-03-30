@@ -10,7 +10,7 @@ $plugin = array(
   'description' => t('A generic key type to use for an encryption key that does not belong to any other defined key type.'),
   'group' => 'encryption',
   'key value' => array(
-    'plugin' => 'text_field'
+    'plugin' => 'text_field',
   ),
   'default configuration' => 'key_type_encryption_default_configuration',
   'build configuration form' => 'key_type_encryption_build_configuration_form',
@@ -32,9 +32,6 @@ function key_type_encryption_default_configuration() {
 
 /**
  * Build the plugin configuration form.
- *
- * @param array $form
- * @param array $form_state
  *
  * @return array
  *   The plugin configuration form.
@@ -59,6 +56,7 @@ function key_type_encryption_build_configuration_form($form, &$form_state) {
  * Generate a key value.
  *
  * @param array $configuration
+ *   The key configuration.
  *
  * @return string
  *   A random key.
@@ -79,10 +77,8 @@ function key_type_encryption_generate_key_value(array $configuration) {
 /**
  * Validate the key value.
  *
- * @param $form
- * @param $form_state
- * @param $key_value
- *   The key value to validate
+ * @param string $key_value
+ *   The key value to validate.
  */
 function key_type_encryption_validate_key_value($form, &$form_state, $key_value) {
   if (empty($form_state['values']['key_size'])) {

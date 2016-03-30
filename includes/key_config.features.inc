@@ -6,8 +6,8 @@
  */
 
 /**
- * Implements hook_features_export_options().
- */
+ * Implements hook_features_export_options().
+ */
 function key_config_features_export_options() {
   return key_get_key_names_as_options(array(), TRUE);
 }
@@ -37,7 +37,7 @@ function key_config_features_export_render($module_name, $data, $export = NULL) 
   foreach ($data as $id) {
     $config = key_get_key($id, TRUE);
     $config_identifier = features_var_export($id);
-    $config_export = features_var_export($config , '  ');
+    $config_export = features_var_export($config, '  ');
     $code[] = "  // Exported key: {$id}.";
     $code[] = "  \$configs[{$config_identifier}] = {$config_export};";
     $code[] = "";
@@ -62,7 +62,7 @@ function key_config_features_revert($module) {
 function key_config_features_rebuild($module) {
   $configs = module_invoke($module, 'key_default_configs');
 
-  foreach ($configs as $key => $config) {
+  foreach ($configs as $config) {
     key_save_key($config, array(), FALSE);
   }
 }

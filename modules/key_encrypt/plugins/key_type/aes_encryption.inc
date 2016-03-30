@@ -13,7 +13,7 @@ $plugin = array(
   'description' => t('Used for encrypting and decrypting data with the Advanced Encryption Standard (AES) cipher.'),
   'group' => 'encryption',
   'key value' => array(
-    'plugin' => 'text_field'
+    'plugin' => 'text_field',
   ),
   'default configuration' => 'key_type_encryption_default_configuration',
   'build configuration form' => 'key_type_aes_encryption_build_configuration_form',
@@ -23,9 +23,6 @@ $plugin = array(
 
 /**
  * Build the plugin configuration form.
- *
- * @param array $form
- * @param array $form_state
  *
  * @return array
  *   The plugin configuration form.

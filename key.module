@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Administrative functionality for managing key configurations.
+ * Main Key functionality and hook implementations.
  */
 
 define('KEY_MENU_PATH', 'admin/config/system/keys');
@@ -86,10 +86,6 @@ function key_theme() {
  * Implements hook_ctools_plugin_directory().
  *
  * Tell CTools where to find plugins for this module.
- * @param $module
- * @param $plugin
- *
- * @return string
  */
 function key_ctools_plugin_directory($module, $plugin) {
   if ($module == 'key' && !empty($plugin)) {
@@ -106,7 +102,7 @@ function key_ctools_plugin_type() {
   $plugins['key_type'] = array(
     'cache' => TRUE,
     'cache table' => 'cache',
-    'process' => '_key_type_plugin_process',
+    'process' => '_key_plugin_process',
     'defaults' => array(
       'label' => '',
       'description' => '',
@@ -129,7 +125,7 @@ function key_ctools_plugin_type() {
   $plugins['key_provider'] = array(
     'cache' => TRUE,
     'cache table' => 'cache',
-    'process' => '_key_provider_plugin_process',
+    'process' => '_key_plugin_process',
     'defaults' => array(
       'label' => '',
       'description' => '',
@@ -161,7 +157,7 @@ function key_ctools_plugin_type() {
   $plugins['key_input'] = array(
     'cache' => TRUE,
     'cache table' => 'cache',
-    'process' => '_key_type_plugin_process',
+    'process' => '_key_plugin_process',
     'defaults' => array(
       'label' => '',
       'description' => '',
@@ -234,10 +230,11 @@ function key_config_load($id) {
 
 /**
  * Process function to expand the key element.
- * @param $element
+ *
+ * @param array $element
  *   The element to process.
  *
- * @return
+ * @return array
  *   The processed element.
  */
 function _key_process_key_select($element) {
@@ -617,12 +614,14 @@ function _key_clear_plugin_cache($type = NULL) {
 }
 
 /**
- * Callback function to process key provider plugins.
+ * Callback function to process key plugins.
  *
- * @param $plugin
- * @param $info
+ * @param array $plugin
+ *   A key plugin.
+ * @param array $info
+ *   Information about the plugin.
  */
-function _key_provider_plugin_process(&$plugin, $info) {
+function _key_plugin_process(&$plugin, $info) {
   // Check dependencies and attach any errors to the plugin.
   if ($dependency_function = ctools_plugin_get_function($plugin, 'dependency callback')) {
     $plugin['dependency errors'] = call_user_func($dependency_function);
@@ -680,7 +679,7 @@ function _key_config_defaults() {
     'key_type' => $key_type_id,
     'key_type_settings' => $key_type_defaults,
     'key_provider' => $key_provider_id,
-    'key_provider_settings' =>  $key_provider_defaults,
+    'key_provider_settings' => $key_provider_defaults,
   );
 
   return $defaults;
@@ -689,7 +688,8 @@ function _key_config_defaults() {
 /**
  * Default function to process a submitted key value.
  *
- * @param $form_state
+ * @param array $form_state
+ *   The form state.
  *
  * @return string
  *   The processed key value.
@@ -733,9 +733,9 @@ function _key_default_process_submitted_key_value(&$form_state) {
 /**
  * Default function to process an existing key value.
  *
- * @param $plugin_config
+ * @param array $plugin_config
  *   The plugin configuration.
- * @param $key_value
+ * @param string $key_value
  *   The value to be processed.
  *
  * @return string
@@ -758,7 +758,7 @@ function _key_default_process_existing_key_value($plugin_config, $key_value) {
 /**
  * Default function to obscure a key value.
  *
- * @param $key_value
+ * @param string $key_value
  *   The key value to obscure.
  * @param array $options
  *   Options to use when obscuring the value.
@@ -789,7 +789,7 @@ function _key_default_obscure_key_value($key_value, $options = array()) {
 /**
  * Helper function to obscure a value.
  *
- * @param $value
+ * @param string $value
  *   The value to obscure.
  * @param array $options
  *   Options to use when obscuring the value.

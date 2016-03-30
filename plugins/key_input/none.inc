@@ -14,9 +14,6 @@ $plugin = array(
 /**
  * Build the plugin configuration form.
  *
- * @param array $form
- * @param array $form_state
- *
  * @return array
  *   The plugin configuration form.
  */

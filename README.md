@@ -107,7 +107,12 @@ Modules can add a key field to a form using the key_select API element,
 which behaves like a select element, but is populated with available 
 keys as options.
 
-`$form['secret_key'] = [ '#type' => 'key_select', '#title' => $this->t('Secret key'), ];`
+```
+$form['secret_key'] = array(
+  '#type' => 'key_select',
+  '#title' => t('Secret key'),
+);
+```
 
 There are a couple of additional properties that can be used:
 

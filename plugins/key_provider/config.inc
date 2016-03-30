@@ -36,9 +36,6 @@ function key_provider_config_default_configuration() {
 /**
  * The settings form.
  *
- * @param array $form
- * @param array $form_state
- *
  * @return array
  *   The settings form.
  */
@@ -64,7 +61,7 @@ function key_provider_config_build_configuration_form($form, &$form_state) {
 /**
  * Return a key stored with the configuration.
  *
- * @param $config
+ * @param array $config
  *   The key configuration for which to retrieve the value.
  *
  * @return string
@@ -86,8 +83,9 @@ function key_provider_config_get_key_value($config) {
  * @param array $config
  *   The key configuration for which to set the value.
  * @param array $form_state
+ *   The form state.
  * @param string $key_value
- *   The key value
+ *   The key value.
  *
  * @return bool
  *   TRUE if successful, FALSE if unsuccessful.
@@ -123,7 +121,7 @@ function key_provider_config_delete_key_value($config) {
 /**
  * Obscures the value of a key.
  *
- * @param $key_value
+ * @param string $key_value
  *   The key value to obscure.
  * @param array $options
  *   Options to use when obscuring the value.

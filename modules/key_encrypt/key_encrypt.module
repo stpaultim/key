@@ -2,8 +2,7 @@
 
 /**
  * @file
- * Provides integration with Encrypt 2.x to allow keys managed within
- * Key to be used for encryption.
+ * Allows Key to manage keys in Encrypt 7.x-2.x.
  */
 
 /**
