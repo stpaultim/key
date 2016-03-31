@@ -129,7 +129,6 @@ function key_config_form($form, &$form_state, $config = array()) {
   // Load the plugins.
   $key_type = key_get_plugin('key_type', $config['key_type']);
   $key_provider = key_get_plugin('key_provider', $config['key_provider']);
-  $key_input = key_get_plugin('key_input', $config['key_input']);
 
   $form['label'] = array(
     '#title' => t('Key name'),
