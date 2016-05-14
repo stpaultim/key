@@ -7,6 +7,8 @@
 
 define('KEY_MENU_PATH', 'admin/config/system/keys');
 
+require_once __DIR__ . '/includes/key.exception.inc';
+
 /**
  * Implements hook_permission().
  */
