@@ -14,6 +14,7 @@ $plugin = array(
   ),
   'default configuration' => 'key_type_encryption_default_configuration',
   'build configuration form' => 'key_type_encryption_build_configuration_form',
+  'validate configuration form' => 'key_type_encryption_validate_configuration_form',
   'generate key value' => 'key_type_encryption_generate_key_value',
   'validate key value' => 'key_type_encryption_validate_key_value',
 );
@@ -40,16 +41,57 @@ function key_type_encryption_build_configuration_form($form, &$form_state) {
   $config = $form_state['storage']['key_config'];
   $plugin_config = $config['key_type_settings'] + key_type_encryption_default_configuration();
 
+  // Define the most common key size options.
+  $key_size_options = array(
+    '128' => 128,
+    '256' => 256,
+  );
+
+  $key_size = $plugin_config['key_size'];
+  $key_size_other_value = '';
+  if (!in_array($key_size, $key_size_options)) {
+    $key_size_other_value = $key_size;
+    $key_size = 'other';
+  }
+
   $form['key_size'] = array(
     '#type' => 'select',
     '#title' => t('Key size'),
     '#description' => t('The size of the key in bits, with 8 bits per byte.'),
-    '#options' => array_combine(range(32, 512, 32), range(32, 512, 32)),
-    '#default_value' => $plugin_config['key_size'],
+    '#options' => $key_size_options + array('other' => t('Other')),
+    '#default_value' => $key_size,
     '#required' => TRUE,
+  );
+  $form['key_size_other_value'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Key size (other value)'),
+    '#title_display' => 'invisible',
+    '#description' => t('Enter a custom key size in bits.'),
+    '#default_value' => $key_size_other_value,
+    '#maxlength'=> 20,
+    '#size'=> 20,
+    '#states' => array(
+      'visible' => array(
+        'select[name="key_type_settings[key_size]"]' => array('value' => 'other'),
+      ),
+      'required' => array(
+        'select[name="key_type_settings[key_size]"]' => array('value' => 'other'),
+      ),
+    ),
   );
 
   return $form;
+}
+
+/**
+ * Validate the plugin configuration form.
+ */
+function key_type_encryption_validate_configuration_form($form, &$form_state) {
+  // If 'Other' was selected for the key size, use the custom entered value.
+  if ($form_state['values']['key_size'] == 'other') {
+    $form_state['values']['key_size'] = $form_state['values']['key_size_other_value'];
+  }
+  unset($form_state['values']['key_size_other_value']);
 }
 
 /**
