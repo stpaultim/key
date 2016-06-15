@@ -31,7 +31,7 @@ function key_type_aes_encryption_build_configuration_form($form, &$form_state) {
   $form = key_type_encryption_build_configuration_form($form, $form_state);
 
   // Restrict the key sizes to the ones that AES supports.
-  $form['key_size']['#options'] = drupal_map_assoc([128, 192, 256]);
+  $form['key_size']['#options'] = drupal_map_assoc(array(128, 192, 256));
 
   return $form;
 }
