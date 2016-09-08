@@ -359,6 +359,104 @@ function key_get_keys($reset = FALSE) {
 }
 
 /**
+ * Get keys that use the specified key provider.
+ *
+ * @param string $key_provider_id
+ *   The key provider ID to use.
+ * @param bool $reset
+ *   A flag to force the configurations to be retrieved from the database.
+ *
+ * @return array
+ *   An array of keys indexed by their IDs.
+ */
+function key_get_keys_by_provider($key_provider_id, $reset = FALSE) {
+  $filtered_keys = array();
+  $keys = key_get_keys($reset);
+
+  foreach ($keys as $id => $key) {
+    if ($key['key_provider'] == $key_provider_id) {
+      $filtered_keys[$id] = $key;
+    }
+  }
+
+  return $filtered_keys;
+}
+
+/**
+ * Get keys that use the specified key type.
+ *
+ * @param string $key_type_id
+ *   The key type ID to use.
+ * @param bool $reset
+ *   A flag to force the configurations to be retrieved from the database.
+ *
+ * @return array
+ *   An array of keys indexed by their IDs.
+ */
+function key_get_keys_by_type($key_type_id, $reset = FALSE) {
+  $filtered_keys = array();
+  $keys = key_get_keys($reset);
+
+  foreach ($keys as $id => $key) {
+    if ($key['key_type'] == $key_type_id) {
+      $filtered_keys[$id] = $key;
+    }
+  }
+
+  return $filtered_keys;
+}
+
+/**
+ * Get keys that use the specified storage method.
+ *
+ * @param string $storage_method
+ *   The storage method of the key provider.
+ * @param bool $reset
+ *   A flag to force the configurations to be retrieved from the database.
+ *
+ * @return array
+ *   An array of keys indexed by their IDs.
+ */
+function key_get_keys_by_storage_method($storage_method, $reset = FALSE) {
+  $filtered_keys = array();
+  $keys = key_get_keys($reset);
+  $providers = key_get_plugins('key_provider', TRUE, $reset);
+
+  foreach ($keys as $id => $key) {
+    if ($providers[$key['key_provider']]['storage method'] == $storage_method) {
+      $filtered_keys[$id] = $key;
+    }
+  }
+
+  return $filtered_keys;
+}
+
+/**
+ * Get keys that use a key type in the specified group.
+ *
+ * @param string $type_group
+ *   The key type group on which to filter.
+ * @param bool $reset
+ *   A flag to force the configurations to be retrieved from the database.
+ *
+ * @return array
+ *   An array of keys indexed by their IDs.
+ */
+function key_get_keys_by_type_group($type_group, $reset = FALSE) {
+  $filtered_keys = array();
+  $keys = key_get_keys($reset);
+  $types = key_get_plugins('key_type', TRUE, $reset);
+
+  foreach ($keys as $id => $key) {
+    if ($types[$key['key_type']]['group'] == $type_group) {
+      $filtered_keys[$id] = $key;
+    }
+  }
+
+  return $filtered_keys;
+}
+
+/**
  * Gets all key configurations as options, for use in forms.
  *
  * @param array $filters
@@ -372,28 +470,26 @@ function key_get_keys($reset = FALSE) {
 function key_get_key_names_as_options($filters = array(), $reset = FALSE) {
   $options = array();
 
-  // TODO: Make filtering more sophisticated.
   $keys = key_get_keys($reset);
 
-  foreach ($keys as $id => $key) {
-    if (isset($filters['type']) && isset($filters['provider'])) {
-      if ($key['key_type'] == $filters['type'] && $key['key_provider'] == $filters['provider']) {
-        $options[$id] = $key['label'];
-      }
+  foreach ($filters as $index => $filter) {
+    switch ($index) {
+      case 'type':
+        $keys = array_intersect_key(key_get_keys_by_type($filter, $reset), $keys);
+        break;
+      case 'provider':
+        $keys = array_intersect_key(key_get_keys_by_provider($filter, $reset), $keys);
+        break;
+      case 'type_group':
+        $keys = array_intersect_key(key_get_keys_by_type_group($filter, $reset), $keys);
+        break;
     }
-    elseif (isset($filters['type'])) {
-      if ($key['key_type'] == $filters['type']) {
-        $options[$id] = $key['label'];
-      }
-    }
-    elseif (isset($filters['provider'])) {
-      if ($key['key_provider'] == $filters['provider']) {
-        $options[$id] = $key['label'];
-      }
-    }
-    else {
-      $options[$id] = $key['label'];
-    }
+  }
+
+  foreach ($keys as $key) {
+    $key_id = $key['id'];
+    $key_title = $key['label'];
+    $options[$key_id] = (string) $key_title;
   }
 
   return $options;
