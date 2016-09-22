@@ -97,15 +97,15 @@ function key_type_encryption_validate_configuration_form($form, &$form_state) {
 /**
  * Generate a key value.
  *
- * @param array $configuration
+ * @param array $config
  *   The key configuration.
  *
  * @return string
  *   A random key.
  */
-function key_type_encryption_generate_key_value(array $configuration) {
-  if (!empty($configuration['key_size'])) {
-    $bytes = $configuration['key_size'] / 8;
+function key_type_encryption_generate_key_value($config) {
+  if (isset($config['key_type_settings']['key_size'])) {
+    $bytes = $config['key_type_settings']['key_size'] / 8;
   }
   else {
     // If no key size has been defined, use 32 bytes as the default.
