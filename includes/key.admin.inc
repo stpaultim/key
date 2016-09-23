@@ -292,6 +292,13 @@ function key_config_form_validate($form, &$form_state) {
   $key_provider = key_get_plugin('key_provider', $form_state['values']['key_provider']);
   $key_input = key_get_plugin('key_input', $form_state['values']['key_input']);
 
+  // Update the key configuration in form state storage.
+  foreach (array_keys($form_state['storage']['key_config']) as $id) {
+    if (isset($form_state['values'][$id])) {
+      $form_state['storage']['key_config'][$id] = $form_state['values'][$id];
+    }
+  }
+
   // Make sure each plugin settings field is an array.
   foreach (_key_get_plugin_types() as $type) {
     if (empty($form_state['values'][$type . '_settings'])) {
