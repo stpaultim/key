@@ -27,7 +27,7 @@ $plugin = array(
  */
 function key_type_encryption_default_configuration() {
   return array(
-    'key_size' => '128',
+    'key_size' => '256',
   );
 }
 
