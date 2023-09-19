@@ -1,7 +1,7 @@
 name = Key
 description = Provides the ability to manage site-wide keys.
 package = Security
-core = 7.x
+backdrop = 1.x
+type = module
 configure = admin/config/system/keys
-dependencies[] = ctools
-files[] = key.test
+dependencies[] = plugin_manager

@@ -1,0 +1,5 @@
+[KeyBasicAdminTest]
+name = Basic key administration,
+description = Test basic administration of keys.
+group = Key
+file = key.test

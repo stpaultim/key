@@ -111,7 +111,7 @@ function key_type_encryption_generate_key_value($config) {
     // If no key size has been defined, use 32 bytes as the default.
     $bytes = 32;
   }
-  $random_key = drupal_random_bytes($bytes);
+  $random_key = backdrop_random_bytes($bytes);
 
   return $random_key;
 }

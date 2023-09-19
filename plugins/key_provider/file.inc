@@ -45,7 +45,7 @@ function key_provider_file_build_configuration_form($form, &$form_state) {
   $form['file_location'] = array(
     '#type' => 'textfield',
     '#title' => t('File location'),
-    '#description' => t('The location of the file in which the key will be stored. The path may be absolute (e.g., %abs), relative to the Drupal directory (e.g., %rel), or defined using a stream wrapper (e.g., %str).',
+    '#description' => t('The location of the file in which the key will be stored. The path may be absolute (e.g., %abs), relative to the Backdrop directory (e.g., %rel), or defined using a stream wrapper (e.g., %str).',
       array(
         '%abs' => '/etc/keys/foobar.key',
         '%rel' => '../keys/foobar.key',

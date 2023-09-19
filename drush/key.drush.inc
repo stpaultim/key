@@ -29,7 +29,7 @@ function key_drush_command() {
     ),
     'required-arguments' => 1,
     'options' => key_drush_save_options(),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
   );
 
   $items['key-delete'] = array(
@@ -38,7 +38,7 @@ function key_drush_command() {
       'id' => dt('The ID (machine name) of the key to delete.'),
     ),
     'required-arguments' => TRUE,
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
   );
 
   $items['key-list'] = array(
@@ -53,7 +53,7 @@ function key_drush_command() {
         'example-value' => 'config,file',
       ),
     ),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'outputformat' => array(
       'default' => 'table',
       'pipe-format' => 'list',
@@ -75,7 +75,7 @@ function key_drush_command() {
         'example-value' => 'authentication,encryption',
       ),
     ),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'outputformat' => array(
       'default' => 'table',
       'pipe-format' => 'list',
@@ -95,7 +95,7 @@ function key_drush_command() {
         'example-value' => 'config,file',
       ),
     ),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'outputformat' => array(
       'default' => 'table',
       'pipe-format' => 'list',
@@ -118,7 +118,7 @@ function key_drush_command() {
       'pipe' => dt('Print just the key value, and nothing else.'),
     ),
     'aliases' => array('key-value'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'outputformat' => array(
       'default' => 'key-value',
       'pipe-format' => 'string',

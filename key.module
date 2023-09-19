@@ -7,7 +7,29 @@
 
 define('KEY_MENU_PATH', 'admin/config/system/keys');
 
-require_once __DIR__ . '/includes/key.exception.inc';
+/**
+ * Implements hook_autoload_info().
+ */
+function key_autoload_info() {
+  return array(
+    'KeyException' => 'includes/key.exception.inc',
+    'KeyValueNotSetException' => 'includes/key.exception.inc',
+    'KeyValueNotRetrievedException' => 'includes/key.exception.inc',
+    'KeyValueNotDeletedException' => 'includes/key.exception.inc',
+  );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function key_config_info() {
+  $prefixes['key.key'] = array(
+    'name_key' => 'name',
+    'label_key' => 'label',
+    'group' => t('Keys'),
+  );
+  return $prefixes;
+}
 
 /**
  * Implements hook_permission().
@@ -42,7 +64,7 @@ function key_menu() {
   );
   $items[KEY_MENU_PATH . '/add'] = array(
     'title' => 'Add key',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('key_config_form'),
     'access arguments' => array('administer keys'),
     'file' => 'includes/key.admin.inc',
@@ -52,14 +74,14 @@ function key_menu() {
     'title' => 'Edit key',
     'title callback' => 'key_config_edit_title',
     'title arguments' => array(5),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('key_config_form', 5),
     'access arguments' => array('administer keys'),
     'file' => 'includes/key.admin.inc',
   );
   $items[KEY_MENU_PATH . '/manage/%key_config/delete'] = array(
     'title' => 'Delete key',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('key_config_delete_confirm', 5),
     'access arguments' => array('administer keys'),
     'file' => 'includes/key.admin.inc',
@@ -85,22 +107,18 @@ function key_theme() {
 }
 
 /**
- * Implements hook_ctools_plugin_directory().
- *
- * Tell CTools where to find plugins for this module.
+ * Implements hook_plugin_manager_directory().
  */
-function key_ctools_plugin_directory($module, $plugin) {
+function key_plugin_manager_directory($module, $plugin) {
   if ($module == 'key' && !empty($plugin)) {
     return "plugins/$plugin";
   }
 }
 
 /**
- * Implements hook_ctools_plugin_type().
- *
- * Tell CTools about plugins the module uses.
+ * Implements hook_plugin_manager_plugin_type().
  */
-function key_ctools_plugin_type() {
+function key_plugin_manager_plugin_type() {
   $plugins['key_type'] = array(
     'cache' => TRUE,
     'cache table' => 'cache',
@@ -276,8 +294,7 @@ function key_get_plugins($type, $all = TRUE, $reset = FALSE) {
     _key_clear_plugin_cache($type);
   }
 
-  ctools_include('plugins');
-  $plugins = ctools_get_plugins('key', $type);
+  $plugins = plugin_manager_get_plugins('key', $type);
 
   return $all ? $plugins : array_filter($plugins, '_key_plugin_is_valid');
 }
@@ -326,8 +343,7 @@ function key_get_plugin($type, $plugin_id, $reset = FALSE) {
     return array();
   }
 
-  ctools_include('plugins');
-  return ctools_get_plugins('key', $type, $plugin_id);
+  return plugin_manager_get_plugins('key', $type, $plugin_id);
 }
 
 /**
@@ -340,18 +356,13 @@ function key_get_plugin($type, $plugin_id, $reset = FALSE) {
  *   An array of configurations.
  */
 function key_get_keys($reset = FALSE) {
-  $configs = &drupal_static(__FUNCTION__);
+  $configs = &backdrop_static(__FUNCTION__);
 
   if (!isset($configs) || $reset) {
-    $configs = db_query("SELECT * FROM {key_config} ORDER BY label ASC")->fetchAllAssoc('id', PDO::FETCH_ASSOC);
-
-    // Unserialize plugin settings fields.
-    foreach ($configs as $id => $config) {
-      foreach (array('key_type', 'key_provider', 'key_input') as $type) {
-        if (!empty($config[$type . '_settings'])) {
-          $configs[$id][$type . '_settings'] = unserialize($config[$type . '_settings']);
-        }
-      }
+    $config_keys = config_get_names_with_prefix('key.key');
+    foreach ($config_keys as $config_key) {
+      $key_config = config_get($config_key);
+      $configs[$key_config['id']] = $key_config;
     }
   }
 
@@ -507,7 +518,7 @@ function key_get_key_names_as_options($filters = array(), $reset = FALSE) {
  *   A key configuration.
  */
 function key_get_key($id, $reset = FALSE) {
-  $configs = &drupal_static(__FUNCTION__);
+  $configs = &backdrop_static(__FUNCTION__);
 
   if (!isset($configs) || $reset) {
     $configs = key_get_keys($reset);
@@ -537,18 +548,9 @@ function key_get_key($id, $reset = FALSE) {
  *   The saved configuration or NULL if the save was unsuccessful.
  */
 function key_save_key($fields, $original_config = array(), $messages = TRUE) {
-  // Serialize any field that is an array.
-  foreach ($fields as $index => $field) {
-    if (is_array($field)) {
-      $fields[$index] = serialize($field);
-    }
-  }
-
-  // Save the configuration.
-  $merge_status = db_merge('key_config')
-    ->key(array('id' => $fields['id']))
-    ->fields($fields)
-    ->execute();
+  $save_config = config('key.key.' . $fields['id']);
+  $save_config->setMultiple($fields);
+  $save_config->save();
 
   // Load the configuration to make sure it was saved.
   $key_config = key_get_key($fields['id'], TRUE);
@@ -560,7 +562,7 @@ function key_save_key($fields, $original_config = array(), $messages = TRUE) {
   if (!$key_config) {
     if ($messages) {
       $t_args = array('%label' => $fields['label']);
-      drupal_set_message(t('The key %label could not be saved.', $t_args), 'error');
+      backdrop_set_message(t('The key %label could not be saved.', $t_args), 'error');
     }
     return FALSE;
   }
@@ -569,14 +571,14 @@ function key_save_key($fields, $original_config = array(), $messages = TRUE) {
   if ($messages) {
     $t_args = array('%label' => $fields['label']);
 
-    switch ($merge_status) {
+    switch ($save_config->isNew()) {
       case MergeQuery::STATUS_INSERT:
-        drupal_set_message(t('The key %label has been added.', $t_args));
+        backdrop_set_message(t('The key %label has been added.', $t_args));
         watchdog('key', 'Added key %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), KEY_MENU_PATH . '/list'));
         break;
 
       case MergeQuery::STATUS_UPDATE:
-        drupal_set_message(t('The key %label has been updated.', $t_args));
+        backdrop_set_message(t('The key %label has been updated.', $t_args));
         watchdog('key', 'Updated key %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), KEY_MENU_PATH . '/list'));
         break;
     }
@@ -590,7 +592,7 @@ function key_save_key($fields, $original_config = array(), $messages = TRUE) {
     // the plugin ID is different from the one that was just saved.
     if ($original_key_provider['key value']['accepted'] && $original_config['key_provider'] != $key_config['key_provider']) {
       // Allow the original key's provider to delete the key value.
-      if ($delete_callback = ctools_plugin_get_function($original_key_provider, 'delete key value')) {
+      if ($delete_callback = plugin_manager_get_function($original_key_provider, 'delete key value')) {
         call_user_func($delete_callback, $original_config);
       }
     }
@@ -619,7 +621,7 @@ function key_delete_key($id, $messages = TRUE) {
   if (!$config) {
     // Display message and log to watchdog.
     if ($messages) {
-      drupal_set_message(t('The key was not deleted because it could not be found.'));
+      backdrop_set_message(t('The key was not deleted because it could not be found.'));
       watchdog('key', 'The key was not deleted because it could not be found.', array(), WATCHDOG_NOTICE, l(t('view'), KEY_MENU_PATH . '/list'));
     }
     return FALSE;
@@ -628,17 +630,16 @@ function key_delete_key($id, $messages = TRUE) {
   // Load the key provider plugin.
   $key_provider = key_get_plugin('key_provider', $config['key_provider']);
 
-  if ($delete_callback = ctools_plugin_get_function($key_provider, 'delete key value')) {
+  if ($delete_callback = plugin_manager_get_function($key_provider, 'delete key value')) {
     call_user_func($delete_callback, $config);
   }
 
-  db_delete('key_config')
-    ->condition('id', $id)
-    ->execute();
+  $key_config = config('key.key.' . $id);
+  $key_config->delete();
 
   if ($messages) {
     $t_args = array('%label' => $config['label']);
-    drupal_set_message(t('The key %label has been deleted.', $t_args));
+    backdrop_set_message(t('The key %label has been deleted.', $t_args));
     watchdog('key', 'Deleted key %label.', $t_args, WATCHDOG_NOTICE);
   }
 
@@ -658,7 +659,7 @@ function key_delete_key($id, $messages = TRUE) {
  *   The key value.
  */
 function key_get_key_value($config) {
-  $keys = &drupal_static(__FUNCTION__);
+  $keys = &backdrop_static(__FUNCTION__);
 
   // If $config is an array, it must be a configuration ID.
   if (!is_array($config)) {
@@ -685,7 +686,7 @@ function key_get_key_value($config) {
   $provider = key_get_plugin('key_provider', $config['key_provider']);
 
   // Get the function to retrieve the key.
-  $key_function = ctools_plugin_get_function($provider, 'get key value');
+  $key_function = plugin_manager_get_function($provider, 'get key value');
 
   // Retrieve the key.
   $key = call_user_func($key_function, $config);
@@ -721,7 +722,7 @@ function _key_clear_plugin_cache($type = NULL) {
  */
 function _key_plugin_process(&$plugin, $info) {
   // Check dependencies and attach any errors to the plugin.
-  if ($dependency_function = ctools_plugin_get_function($plugin, 'dependency callback')) {
+  if ($dependency_function = plugin_manager_get_function($plugin, 'dependency callback')) {
     $plugin['dependency errors'] = call_user_func($dependency_function);
   }
 }
@@ -767,8 +768,8 @@ function _key_config_defaults() {
   $key_type = key_get_plugin('key_type', $key_type_id);
   $key_provider = key_get_plugin('key_provider', $key_provider_id);
 
-  $key_type_defaults = ($key_type_defaults_function = ctools_plugin_get_function($key_type, 'default configuration')) ? call_user_func($key_type_defaults_function) : array();
-  $key_provider_defaults = ($key_provider_defaults_function = ctools_plugin_get_function($key_provider, 'default configuration')) ? call_user_func($key_provider_defaults_function) : array();
+  $key_type_defaults = ($key_type_defaults_function = plugin_manager_get_function($key_type, 'default configuration')) ? call_user_func($key_type_defaults_function) : array();
+  $key_provider_defaults = ($key_provider_defaults_function = plugin_manager_get_function($key_provider, 'default configuration')) ? call_user_func($key_provider_defaults_function) : array();
 
   $defaults = array(
     'id' => '',
@@ -904,7 +905,7 @@ function _key_obscure_value($value, $options = array()) {
   );
 
   if ($options['visible_right'] > 0) {
-    $visible_right_chars = drupal_substr($value, $options['visible_right'] * -1);
+    $visible_right_chars = backdrop_substr($value, $options['visible_right'] * -1);
   }
   else {
     $visible_right_chars = '';
@@ -914,26 +915,9 @@ function _key_obscure_value($value, $options = array()) {
   if ($options['fixed_length']) {
     $obscured_chars = str_repeat($options['replacement_character'], $options['fixed_length'] - $options['visible_right']);
   }
-  elseif (drupal_strlen($value) - $options['visible_right'] > 0) {
-    $obscured_chars = str_repeat($options['replacement_character'], drupal_strlen($value) - $options['visible_right']);
+  elseif (backdrop_strlen($value) - $options['visible_right'] > 0) {
+    $obscured_chars = str_repeat($options['replacement_character'], backdrop_strlen($value) - $options['visible_right']);
   }
 
   return $obscured_chars . $visible_right_chars;
-}
-
-/**
- * Implements hook_features_api().
- *
- * Define the components that we want to make exportable, in this case
- * key configurations.
- */
-function key_features_api() {
-  return array(
-    'key_config' => array(
-      'name' => 'Keys',
-      'file' => drupal_get_path('module', 'key') . '/includes/key_config.features.inc',
-      'default_hook' => 'key_default_configs',
-      'feature_source' => TRUE,
-    ),
-  );
 }

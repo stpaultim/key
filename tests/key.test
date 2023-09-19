@@ -8,7 +8,7 @@
 /**
  * Test basic key administration.
  */
-class KeyBasicAdminTest extends DrupalWebTestCase {
+class KeyBasicAdminTest extends BackdropWebTestCase {
 
   /**
    * An administrative user with the 'administer keys' privilege.
@@ -20,25 +20,14 @@ class KeyBasicAdminTest extends DrupalWebTestCase {
   /**
    * {@inheritdoc}
    */
-  public static function getInfo() {
-    return array(
-      'name' => 'Basic key administration',
-      'description' => 'Test basic administration of keys.',
-      'group' => 'Key',
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function setUp() {
     parent::setUp(array('key'));
 
-    $this->adminUser = $this->drupalCreateUser(array(
+    $this->adminUser = $this->backdropCreateUser(array(
       'access administration pages',
       'administer keys',
     ));
-    $this->drupalLogin($this->adminUser);
+    $this->backdropLogin($this->adminUser);
   }
 
   /**
@@ -46,11 +35,11 @@ class KeyBasicAdminTest extends DrupalWebTestCase {
    */
   public function testConfigKeyProvider() {
     // Create a random label.
-    $original_label = DrupalWebTestCase::randomName(8);
+    $original_label = BackdropWebTestCase::randomName(8);
     $original_id = strtolower($original_label);
 
     // Create a random key value.
-    $original_key_value = DrupalWebTestCase::randomString(32);
+    $original_key_value = BackdropWebTestCase::randomString(32);
 
     // Define a configuration.
     $original_config = array(
@@ -74,16 +63,16 @@ class KeyBasicAdminTest extends DrupalWebTestCase {
     $data['key_input_settings[key_value]'] = $original_key_value;
 
     // Add the configuration.
-    $this->drupalGet(KEY_MENU_PATH . '/add');
-    $this->drupalPostAJAX(NULL, array('key_type' => $data['key_type']), 'key_type');
-    $this->drupalPostAJAX(NULL, array('key_provider' => $data['key_provider']), 'key_provider');
-    $this->drupalPost(NULL, $data, t('Save key'));
+    $this->backdropGet(KEY_MENU_PATH . '/add');
+    $this->backdropPostAJAX(NULL, array('key_type' => $data['key_type']), 'key_type');
+    $this->backdropPostAJAX(NULL, array('key_provider' => $data['key_provider']), 'key_provider');
+    $this->backdropPost(NULL, $data, t('Save key'));
 
     // Confirm that the confirmation text appears.
     $this->assertText(t('The key @label has been added.', array('@label' => $original_label)), 'Confirmation text appears after adding the configuration/authentication key.');
 
     // Confirm that the key appears on the listing page.
-    $this->drupalGet(KEY_MENU_PATH);
+    $this->backdropGet(KEY_MENU_PATH);
     $this->assertText($original_label, 'The configuration/authentication key appears on the key listing page.');
 
     // Confirm that the key was added successfully.
@@ -108,16 +97,16 @@ class KeyBasicAdminTest extends DrupalWebTestCase {
     $data['key_input_settings[key_value]'] = $original_key_value;
 
     // Edit the configuration.
-    $this->drupalGet(KEY_MENU_PATH . "/manage/$original_id");
-    $this->drupalPostAJAX(NULL, array('key_type' => $data['key_type']), 'key_type');
-    $this->drupalPostAJAX(NULL, array('key_provider' => $data['key_provider']), 'key_provider');
-    $this->drupalPost(NULL, $data, t('Save key'));
+    $this->backdropGet(KEY_MENU_PATH . "/manage/$original_id");
+    $this->backdropPostAJAX(NULL, array('key_type' => $data['key_type']), 'key_type');
+    $this->backdropPostAJAX(NULL, array('key_provider' => $data['key_provider']), 'key_provider');
+    $this->backdropPost(NULL, $data, t('Save key'));
 
     // Confirm that the confirmation text appears.
     $this->assertText(t('The key @label has been updated.', array('@label' => $original_label)), 'Confirmation text appears after editing the configuration/authentication key.');
 
     // Confirm that the key still appears on the listing page.
-    $this->drupalGet(KEY_MENU_PATH);
+    $this->backdropGet(KEY_MENU_PATH);
     $this->assertText($original_label, 'The configuration/authentication key still appears on the key listing page.');
 
     // Confirm that the key was edited successfully.
@@ -129,8 +118,8 @@ class KeyBasicAdminTest extends DrupalWebTestCase {
     $this->assertEqual($key_value, $original_key_value, 'The configuration/authentication key value was set successfully.');
 
     // Delete the key.
-    $this->drupalGet(KEY_MENU_PATH . "/manage/$original_id/delete");
-    $this->drupalPost(NULL, NULL, t('Delete'));
+    $this->backdropGet(KEY_MENU_PATH . "/manage/$original_id/delete");
+    $this->backdropPost(NULL, NULL, t('Delete'));
 
     // Confirm that the confirmation text appears.
     $this->assertText(t('The key @label has been deleted.', array('@label' => $original_label)), 'Confirmation text appears after deleting the configuration/authentication key.');
@@ -140,7 +129,7 @@ class KeyBasicAdminTest extends DrupalWebTestCase {
     $this->assertFalse($config, 'The configuration/authentication key was deleted successfully.');
 
     // Confirm that the key no longer appears on the listing page.
-    $this->drupalGet(KEY_MENU_PATH);
+    $this->backdropGet(KEY_MENU_PATH);
     $this->assertNoText($original_label, 'The configuration/authentication key no longer appears on the key listing page.');
   }
 
@@ -149,7 +138,7 @@ class KeyBasicAdminTest extends DrupalWebTestCase {
    */
   public function testFileKeyProvider() {
     // Create a random label.
-    $original_label = DrupalWebTestCase::randomName(8);
+    $original_label = BackdropWebTestCase::randomName(8);
     $original_id = strtolower($original_label);
 
     // Define a file location for the test key.
@@ -186,16 +175,16 @@ class KeyBasicAdminTest extends DrupalWebTestCase {
     unset($data['key_provider_settings[base64_encoded]']);
 
     // Add the configuration.
-    $this->drupalGet(KEY_MENU_PATH . '/add');
-    $this->drupalPostAJAX(NULL, array('key_type' => $data['key_type']), 'key_type');
-    $this->drupalPostAJAX(NULL, array('key_provider' => $data['key_provider']), 'key_provider');
-    $this->drupalPost(NULL, $data, t('Save key'));
+    $this->backdropGet(KEY_MENU_PATH . '/add');
+    $this->backdropPostAJAX(NULL, array('key_type' => $data['key_type']), 'key_type');
+    $this->backdropPostAJAX(NULL, array('key_provider' => $data['key_provider']), 'key_provider');
+    $this->backdropPost(NULL, $data, t('Save key'));
 
     // Confirm that the confirmation text appears.
     $this->assertText(t('The key @label has been added.', array('@label' => $original_label)), 'Confirmation text appears after adding the file/encryption key.');
 
     // Confirm that the key appears on the listing page.
-    $this->drupalGet(KEY_MENU_PATH);
+    $this->backdropGet(KEY_MENU_PATH);
     $this->assertText($original_label, 'The file/encryption key appears on the key listing page.');
 
     // Confirm that the key was added successfully.
@@ -231,16 +220,16 @@ class KeyBasicAdminTest extends DrupalWebTestCase {
     }
 
     // Edit the configuration.
-    $this->drupalGet(KEY_MENU_PATH . "/manage/$original_id");
-    $this->drupalPostAJAX(NULL, array('key_type' => $data['key_type']), 'key_type');
-    $this->drupalPostAJAX(NULL, array('key_provider' => $data['key_provider']), 'key_provider');
-    $this->drupalPost(NULL, $data, t('Save key'));
+    $this->backdropGet(KEY_MENU_PATH . "/manage/$original_id");
+    $this->backdropPostAJAX(NULL, array('key_type' => $data['key_type']), 'key_type');
+    $this->backdropPostAJAX(NULL, array('key_provider' => $data['key_provider']), 'key_provider');
+    $this->backdropPost(NULL, $data, t('Save key'));
 
     // Confirm that the confirmation text appears.
     $this->assertText(t('The key @label has been updated.', array('@label' => $original_label)), 'Confirmation text appears after editing the file/encryption key.');
 
     // Confirm that the key still appears on the listing page.
-    $this->drupalGet(KEY_MENU_PATH);
+    $this->backdropGet(KEY_MENU_PATH);
     $this->assertText($original_label, 'The file/encryption key still appears on the key listing page.');
 
     // Confirm that the key was edited successfully.
@@ -252,8 +241,8 @@ class KeyBasicAdminTest extends DrupalWebTestCase {
     $this->assertEqual($key_value, base64_decode(file_get_contents($new_file_location)), 'The file/encryption key value was retrieved successfully.');
 
     // Delete the key.
-    $this->drupalGet(KEY_MENU_PATH . "/manage/$original_id/delete");
-    $this->drupalPost(NULL, NULL, t('Delete'));
+    $this->backdropGet(KEY_MENU_PATH . "/manage/$original_id/delete");
+    $this->backdropPost(NULL, NULL, t('Delete'));
 
     // Confirm that the confirmation text appears.
     $this->assertText(t('The key @label has been deleted.', array('@label' => $original_label)), 'Confirmation text appears after deleting the file/encryption key.');
@@ -263,7 +252,7 @@ class KeyBasicAdminTest extends DrupalWebTestCase {
     $this->assertFalse($config, 'The file/encryption key was deleted successfully.');
 
     // Confirm that the key no longer appears on the listing page.
-    $this->drupalGet(KEY_MENU_PATH);
+    $this->backdropGet(KEY_MENU_PATH);
     $this->assertNoText($original_label, 'The file/encryption key no longer appears on the key listing page.');
   }
 

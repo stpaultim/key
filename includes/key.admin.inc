@@ -18,7 +18,7 @@ function key_configs_list() {
     t('Key'),
     t('Type'),
     t('Provider'),
-    array('data' => t('Operations'), 'colspan' => '2'),
+    t('Operations'),
   );
   $rows = array();
 
@@ -46,11 +46,20 @@ function key_configs_list() {
     // Set the key provider column.
     $row[] = array('data' => $key_provider['label']);
 
-    // Set the edit column.
-    $row[] = array('data' => l(t('edit'), KEY_MENU_PATH . '/manage/' . $config_url_string));
-
-    // Set the delete column.
-    $row[] = array('data' => l(t('delete'), KEY_MENU_PATH . '/manage/' . $config_url_string . '/delete'));
+    $links = array();
+    $links['configure'] = array(
+      'title' => t('Configure'),
+      'href' => KEY_MENU_PATH . '/manage/' . $config_url_string,
+    );
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => KEY_MENU_PATH . '/manage/' . $config_url_string . '/delete',
+    );
+    $operations = array(
+      '#type' => 'operations',
+      '#links' => $links,
+    );
+    $row[] = array('data' => $operations);
 
     $rows[] = $row;
   }
@@ -189,7 +198,7 @@ function key_config_form($form, &$form_state, $config = array()) {
     '#title_display' => FALSE,
     '#tree' => TRUE,
   );
-  if ($key_type_settings_form = ctools_plugin_get_function(key_get_plugin('key_type', $config['key_type']), 'build configuration form')) {
+  if ($key_type_settings_form = plugin_manager_get_function(key_get_plugin('key_type', $config['key_type']), 'build configuration form')) {
     $plugin_form_state = _key_create_plugin_form_state('key_type', $form_state);
     $form['settings']['type_section']['key_type_settings'] += $key_type_settings_form(array(), $plugin_form_state);
     $form_state['values']['key_type_settings'] = $plugin_form_state['values'];
@@ -222,7 +231,7 @@ function key_config_form($form, &$form_state, $config = array()) {
     '#title_display' => FALSE,
     '#tree' => TRUE,
   );
-  if ($key_provider_settings_form = ctools_plugin_get_function(key_get_plugin('key_provider', $config['key_provider']), 'build configuration form')) {
+  if ($key_provider_settings_form = plugin_manager_get_function(key_get_plugin('key_provider', $config['key_provider']), 'build configuration form')) {
     $plugin_form_state = _key_create_plugin_form_state('key_provider', $form_state);
     $form['settings']['provider_section']['key_provider_settings'] += $key_provider_settings_form(array(), $plugin_form_state);
     $form_state['values']['key_provider_settings'] = $plugin_form_state['values'];
@@ -244,7 +253,7 @@ function key_config_form($form, &$form_state, $config = array()) {
     '#title_display' => FALSE,
     '#tree' => TRUE,
   );
-  if ($key_input_settings_form = ctools_plugin_get_function(key_get_plugin('key_input', $config['key_input']), 'build configuration form')) {
+  if ($key_input_settings_form = plugin_manager_get_function(key_get_plugin('key_input', $config['key_input']), 'build configuration form')) {
     $plugin_form_state = _key_create_plugin_form_state('key_input', $form_state);
     $form['settings']['input_section']['key_input_settings'] += $key_input_settings_form(array(), $plugin_form_state);
     $form_state['values']['key_input_settings'] = $plugin_form_state['values'];
@@ -318,12 +327,12 @@ function key_config_form_validate($form, &$form_state) {
     if ($type == 'key_input') {
       // If the provider accepts a key value.
       if ($key_provider['key value']['accepted']) {
-        $process_value_function = ctools_plugin_get_function($key_input, 'process submitted key value');
+        $process_value_function = plugin_manager_get_function($key_input, 'process submitted key value');
         $processed_values = $process_value_function($plugin_form_state);
       }
     }
 
-    if ($validate_function = ctools_plugin_get_function($plugin, 'validate configuration form')) {
+    if ($validate_function = plugin_manager_get_function($plugin, 'validate configuration form')) {
       $validate_function($form, $plugin_form_state);
     }
     $form_state['values'][$type . '_settings'] = $plugin_form_state['values'];
@@ -337,7 +346,7 @@ function key_config_form_validate($form, &$form_state) {
   // Allow the Key Type plugin to validate the key value. Use the processed
   // key value if there is one. Otherwise, retrieve the key value using the
   // key provider.
-  if ($validate_function = ctools_plugin_get_function($key_type, 'validate key value')) {
+  if ($validate_function = plugin_manager_get_function($key_type, 'validate key value')) {
     if (!empty($processed_values['processed_submitted'])) {
       $key_value = $processed_values['processed_submitted'];
     }
@@ -374,7 +383,7 @@ function key_config_form_submit($form, &$form_state) {
     $plugin = key_get_plugin($type, $config[$type]);
     $plugin_form_state = _key_create_plugin_form_state($type, $form_state);
 
-    if ($submit_function = ctools_plugin_get_function($plugin, 'submit configuration form')) {
+    if ($submit_function = plugin_manager_get_function($plugin, 'submit configuration form')) {
       $submit_function($form, $plugin_form_state);
       $form_state['values'][$type . '_settings'] = $plugin_form_state['values'];
       _key_move_form_state_storage($plugin_form_state, $form_state);
@@ -382,7 +391,7 @@ function key_config_form_submit($form, &$form_state) {
   }
 
   // If the key provider allows a key value to be set.
-  if ($key_provider['key value']['accepted'] && $set_key_value_function = ctools_plugin_get_function($key_provider, 'set key value')) {
+  if ($key_provider['key value']['accepted'] && $set_key_value_function = plugin_manager_get_function($key_provider, 'set key value')) {
     // If either the key provider has changed or the submitted value
     // is not the same as the obscured value.
     if (($original_key && $original_key['key_provider'] != $form_state['values']['key_provider'])
@@ -443,7 +452,7 @@ function key_config_delete_confirm($form, &$form_state, $config) {
   // Allow the plugins to modify the form.
   foreach (_key_get_plugin_types() as $type) {
     $plugin = key_get_plugin($type, $config[$type]);
-    if ($delete_form_function = ctools_plugin_get_function($plugin, 'build delete form')) {
+    if ($delete_form_function = plugin_manager_get_function($plugin, 'build delete form')) {
       $delete_form_function($form, $form_state, $config, $message, $caption);
     }
   }
@@ -463,7 +472,7 @@ function key_config_delete_confirm_validate($form, &$form_state) {
   // Allow the plugins to perform additional validation.
   foreach (_key_get_plugin_types() as $type) {
     $plugin = key_get_plugin($type, $config[$type]);
-    if ($validate_form_function = ctools_plugin_get_function($plugin, 'validate delete form')) {
+    if ($validate_form_function = plugin_manager_get_function($plugin, 'validate delete form')) {
       $validate_form_function($form, $form_state, $config);
     }
   }
@@ -484,7 +493,7 @@ function key_config_delete_confirm_submit($form, &$form_state) {
   // Allow the plugins to perform additional actions.
   foreach (_key_get_plugin_types() as $type) {
     $plugin = key_get_plugin($type, $config[$type]);
-    if ($submit_form_function = ctools_plugin_get_function($plugin, 'submit delete form')) {
+    if ($submit_form_function = plugin_manager_get_function($plugin, 'submit delete form')) {
       $submit_form_function($form, $form_state, $config);
     }
   }
@@ -553,7 +562,7 @@ function _key_set_key_value_data($config = array()) {
   $key_value['original'] = key_get_key_value($config['id']);
 
   // Process the original key value.
-  if ($process_function = ctools_plugin_get_function($key_input, 'process existing key value')) {
+  if ($process_function = plugin_manager_get_function($key_input, 'process existing key value')) {
     $key_value['processed_original'] = $process_function($config['key_input_settings'], $key_value['original']);
   }
   else {
@@ -561,7 +570,7 @@ function _key_set_key_value_data($config = array()) {
   }
 
   // Obscure the processed key value.
-  if ($obscured_function = ctools_plugin_get_function($key_provider, 'obscure key value')) {
+  if ($obscured_function = plugin_manager_get_function($key_provider, 'obscure key value')) {
     $obscured_key_value = $obscured_function($key_value['processed_original'], $obscure_options);
   }
   else {
@@ -591,11 +600,11 @@ function _key_update_key_type(&$form_state, &$config) {
   $original_key = isset($form_state['storage']['original_key']) ? $form_state['storage']['original_key'] : NULL;
 
   // If the original key's plugin ID matches the existing one.
-  if ($original_key['key_type'] == $key_type['name']) {
+  if ($original_key && ($original_key['key_type'] == $key_type['name'])) {
     // Use the configuration from the original key's plugin.
     $plugin_config = $original_key['key_type_settings'];
   }
-  elseif ($default_configuration_function = ctools_plugin_get_function($key_type, 'default configuration')) {
+  elseif ($default_configuration_function = plugin_manager_get_function($key_type, 'default configuration')) {
     // Use the plugin's default configuration.
     $plugin_config = call_user_func($default_configuration_function);
   }
@@ -620,11 +629,11 @@ function _key_update_key_provider(&$form_state, &$config) {
   $original_key = isset($form_state['storage']['original_key']) ? $form_state['storage']['original_key'] : NULL;
 
   // If the original key's plugin ID matches the existing one.
-  if ($original_key['key_provider'] == $key_provider['name']) {
+  if ($original_key && ($original_key['key_provider'] == $key_provider['name'])) {
     // Use the configuration from the original key's plugin.
     $plugin_config = $original_key['key_provider_settings'];
   }
-  elseif ($default_configuration_function = ctools_plugin_get_function($key_provider, 'default configuration')) {
+  elseif ($default_configuration_function = plugin_manager_get_function($key_provider, 'default configuration')) {
     // Use the plugin's default configuration.
     $plugin_config = call_user_func($default_configuration_function);
   }
@@ -663,7 +672,7 @@ function _key_update_key_input(&$form_state, &$config) {
 
   // Set the plugin's configuration to the default. It may be
   // overridden below.
-  if ($default_configuration_function = ctools_plugin_get_function($key_input, 'default configuration')) {
+  if ($default_configuration_function = plugin_manager_get_function($key_input, 'default configuration')) {
     // Use the plugin's default configuration.
     $plugin_config = call_user_func($default_configuration_function);
   }

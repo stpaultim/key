@@ -1,7 +1,8 @@
 name = Key Encrypt
-description = Provides integration with Encrypt 2.x to allow keys managed within Key to be used for encryption.
+description = Provides integration with Encrypt to allow keys managed within Key to be used for encryption.
 package = Security
-core = 7.x
+backdrop = 1.x
+type = module
 
 dependencies[] = key
-dependencies[] = encrypt (2.x)
+dependencies[] = encrypt

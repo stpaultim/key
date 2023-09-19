@@ -1,4 +1,4 @@
-## INTRODUCTION
+# Key
 
 Key provides the ability to manage keys, which can be employed by other
 modules. It gives site administrators the ability to define how and
@@ -13,12 +13,12 @@ PayPal, MailChimp, Authorize.net, UPS, an SMTP mail server, or Amazon
 Web Services
 * A key used for encrypting data
 
-## REQUIREMENTS
+## Requirements
 
-Key requires the [CTools](https://www.drupal.org/project/ctools)
+Key requires the [Plugin Manager](https://www.backdropcms.org/project/plugin_manager)
 module.
 
-## RECOMMENDED MODULES
+## Recommended Modules
 
 The following module extends Key's functionality:
 
@@ -26,12 +26,12 @@ The following module extends Key's functionality:
 Connection](https://www.drupal.org/project/townsec_key)** Allows keys
 to be stored on a designated external key management server.
 
-## INSTALLATION
+## Installation
 
-Install Key using a standard method for installing a contributed Drupal
+Install Key using a standard method for installing a contributed Backdrop
 module.
 
-## CONFIGURATION
+## Configuration
 
 Key provides an administration page where users with the "administer
 keys" permission can add, edit, and delete keys.
@@ -48,7 +48,7 @@ default.
 key type has a field for selecting a key size, which is used to
 validate the size of the key value.
 
-Key types are CTools plugins, so new types can be defined easily.
+Key types are Plugin Manager plugins, so new types can be defined easily.
 
 ### Key provider
 
@@ -71,7 +71,7 @@ secure than storing it in the database.
 Both the Configuration and File provider plugins support storing the
 key with Base64 encoding.
 
-Key providers are CTools plugins, so new providers can be defined
+Key providers are Plugin Manager plugins, so new providers can be defined
 easily.
 
 ### Key input
@@ -93,9 +93,20 @@ such as SSH keys.
 The Text Field and Textarea Field input plugins support the submission
 of keys that are Base64-encoded.
 
-Key inputs are CTools plugins, so new inputs can be defined easily.
+Key inputs are Plugin Manager plugins, so new inputs can be defined easily.
 
-## USING A KEY
+## Generating a Random Encryption Key
+
+An easy way to generate a random encryption key in a Unix environment is to
+enter the following command (changing the path and file name to suit your
+needs):
+
+`dd if=/dev/urandom bs=32 count=1 > /path/to/secret.key`
+
+This will create a binary file with a random 256-bit key. For a 128-bit key,
+change the 32 to 16 in the command.
+
+## Using a Key
 
 Creating a key will have no effect unless another module makes use of
 it. That integration would typically present itself to the end user in
@@ -104,7 +115,7 @@ choose one. This could appear, for instance, on the integrating
 module's configuration page.
 
 Modules can add a key field to a form using the key_select API element,
-which behaves like a select element, but is populated with available 
+which behaves like a select element, but is populated with available
 keys as options.
 
 ```
@@ -116,22 +127,22 @@ $form['secret_key'] = array(
 
 There are a couple of additional properties that can be used:
 
-* `#key_filters` An array of filters to apply to the list of keys. 
+* `#key_filters` An array of filters to apply to the list of keys.
 Currently, filtering is quite basic, though it will be improved. You can
 filter on key type and/or key provider. Examples:
-  * `#key_filters = ['type' => 'mailchimp']` This would only display 
+  * `#key_filters = ['type' => 'mailchimp']` This would only display
     MailChimp keys.
-  * `#key_filters = ['provider' => 'file']` This would only display keys 
+  * `#key_filters = ['provider' => 'file']` This would only display keys
     that use the File key provider.
   * `#key_filters = ['type' => 'mailchimp', 'provider' => 'file']`
     This would only display MailChimp keys that use the File key provider.
 * `#key_description` This is a boolean value that determines if information
   about keys is added to the element's description. It is TRUE by default
-  and it prepends the description with the following text (with a link to 
+  and it prepends the description with the following text (with a link to
   the add key form), which can be disabled by setting #key_description to 
   FALSE:
 
-  > Choose an available key. If the desired key is not listed, create a new 
+  > Choose an available key. If the desired key is not listed, create a new
     key.
 
 Modules can retrieve configuration for all keys, configuration for a specific
@@ -148,3 +159,25 @@ key or the value of a specific key:
 ### Get a specific key value
 
 `key_get_key_value($key_id)`
+
+## License
+
+This project is GPL v2 software. See the LICENSE.txt file in this directory for
+complete text.
+
+## Maintainers
+
+* [Herb v/d Dool](https://github.com/herbdool)
+* [Justin Keiser](https://github.com/keiserjb)
+
+## Credits
+
+Ported to Backdrop by [Herb v/d Dool](https://github.com/herbdool) and
+[Justin Keiser](https://github.com/keiserjb).
+
+Drupal version currently maintained by:
+
+* <https://www.drupal.org/u/cellar-door>
+* <https://www.drupal.org/u/crashtest_>
+* <https://www.drupal.org/u/nerdstein>
+* <https://www.drupal.org/u/rlhawk>

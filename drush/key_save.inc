@@ -1,7 +1,7 @@
 <?php
 
 use Drush\Log\LogLevel;
-require_once drupal_get_path('module', 'key') . '/includes/key.admin.inc';
+require_once backdrop_get_path('module', 'key') . '/includes/key.admin.inc';
 
 /**
  * Save a key.
@@ -59,7 +59,7 @@ function _drush_key_save($id, $key_value = NULL) {
         'key-provider-settings',
         'key-input-settings',
       ))) {
-        $values[str_replace('-', '_', $option)] = drupal_json_decode($value);
+        $values[str_replace('-', '_', $option)] = backdrop_json_decode($value);
       }
       else {
         $values[str_replace('-', '_', $option)] = $value;
@@ -84,7 +84,7 @@ function _drush_key_save($id, $key_value = NULL) {
     $key_provider = key_get_plugin('key_provider', $values['key_provider']);
 
     // If the key provider supports setting a key value.
-    if ($key_provider['key value']['accepted'] && $set_key_value_function = ctools_plugin_get_function($key_provider, 'set key value')) {
+    if ($key_provider['key value']['accepted'] && $set_key_value_function = plugin_manager_get_function($key_provider, 'set key value')) {
       // Create a dummy form state.
       $form_state = array('values' => $values);
 
