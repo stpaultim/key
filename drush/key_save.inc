@@ -20,7 +20,7 @@ function _drush_key_save($id, $key_value = NULL) {
 
   // Look for a key with the specified ID. If one exists, and the overwrite
   // option was not specified, set an error and abort.
-  $existing_key = key_get_key($id, TRUE);
+  $existing_key = key_get_key($id);
   $overwrite = drush_get_option('overwrite');
   if ($existing_key && !$overwrite) {
     return drush_set_error('DRUSH_KEY_EXISTS', dt('Key !id exists; specify --overwrite to overwrite.', array('!id' => $values['id'])));
@@ -101,7 +101,7 @@ function _drush_key_save($id, $key_value = NULL) {
   key_save_key($values, $existing_key, FALSE);
 
   // Load the key to confirm that it was saved.
-  $key_check = key_get_key($values['id'], TRUE);
+  $key_check = key_get_key($values['id']);
 
   if (!$key_check) {
     return drush_set_error('DRUSH_KEY_NOT_SAVED', dt('Key !id was not saved.', array('!id' => $values['id'])));

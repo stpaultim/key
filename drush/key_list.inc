@@ -6,7 +6,7 @@
 function _drush_key_list() {
   $result = array();
 
-  $keys = key_get_keys(TRUE);
+  $keys = key_get_keys();
   $key_types = key_get_plugins_as_options('key_type', TRUE, TRUE);
   $key_providers = key_get_plugins_as_options('key_provider', TRUE, TRUE);
 

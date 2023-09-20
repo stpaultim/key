@@ -13,7 +13,7 @@
 function _drush_key_value_get($id) {
   // Look for a key with the specified ID. If one does not exist, set an
   // error and abort.
-  $key = key_get_key($id, TRUE);
+  $key = key_get_key($id);
   if (!$key) {
     return drush_set_error('DRUSH_KEY_DOES_NOT_EXIST', dt('Key !id does not exist.', array('!id' => $id)));
   }

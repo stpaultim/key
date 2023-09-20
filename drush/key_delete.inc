@@ -14,7 +14,7 @@ use Drush\Log\LogLevel;
 function _drush_key_delete($id) {
   // Look for a key with the specified ID. If one does not exist, set an
   // error and abort.
-  $key = key_get_key($id, TRUE);
+  $key = key_get_key($id);
   if (!$key) {
     return drush_set_error('DRUSH_KEY_DOES_NOT_EXIST', dt('Key !id does not exist.', array('!id' => $id)));
   }
@@ -30,7 +30,7 @@ function _drush_key_delete($id) {
   key_delete_key($id, FALSE);
 
   // Try to load the key to confirm that it was deleted.
-  $key_check = key_get_key($id, TRUE);
+  $key_check = key_get_key($id);
 
   // If the key still exists, set an error and abort.
   if ($key_check) {

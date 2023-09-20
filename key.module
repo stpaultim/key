@@ -349,24 +349,17 @@ function key_get_plugin($type, $plugin_id, $reset = FALSE) {
 /**
  * Gets information about all key configurations.
  *
- * @param bool $reset
- *   A flag to force the configurations to be retrieved from the database.
- *
  * @return array
  *   An array of configurations.
  */
-function key_get_keys($reset = FALSE) {
-  $configs = &backdrop_static(__FUNCTION__);
-
-  if (!isset($configs) || $reset) {
-    $config_keys = config_get_names_with_prefix('key.key');
-    foreach ($config_keys as $config_key) {
-      $key_config = config_get($config_key);
-      $configs[$key_config['id']] = $key_config;
-    }
+function key_get_keys() {
+  $config_keys = config_get_names_with_prefix('key.key.');
+  foreach ($config_keys as $config_key) {
+    $key_config = config_get($config_key);
+    $configs[$key_config['id']] = $key_config;
   }
 
-  return $configs;
+  return is_array($configs) ? $configs : array();
 }
 
 /**
@@ -382,7 +375,7 @@ function key_get_keys($reset = FALSE) {
  */
 function key_get_keys_by_provider($key_provider_id, $reset = FALSE) {
   $filtered_keys = array();
-  $keys = key_get_keys($reset);
+  $keys = key_get_keys();
 
   foreach ($keys as $id => $key) {
     if ($key['key_provider'] == $key_provider_id) {
@@ -406,7 +399,7 @@ function key_get_keys_by_provider($key_provider_id, $reset = FALSE) {
  */
 function key_get_keys_by_type($key_type_id, $reset = FALSE) {
   $filtered_keys = array();
-  $keys = key_get_keys($reset);
+  $keys = key_get_keys();
 
   foreach ($keys as $id => $key) {
     if ($key['key_type'] == $key_type_id) {
@@ -430,7 +423,7 @@ function key_get_keys_by_type($key_type_id, $reset = FALSE) {
  */
 function key_get_keys_by_storage_method($storage_method, $reset = FALSE) {
   $filtered_keys = array();
-  $keys = key_get_keys($reset);
+  $keys = key_get_keys();
   $providers = key_get_plugins('key_provider', TRUE, $reset);
 
   foreach ($keys as $id => $key) {
@@ -455,7 +448,7 @@ function key_get_keys_by_storage_method($storage_method, $reset = FALSE) {
  */
 function key_get_keys_by_type_group($type_group, $reset = FALSE) {
   $filtered_keys = array();
-  $keys = key_get_keys($reset);
+  $keys = key_get_keys();
   $types = key_get_plugins('key_type', TRUE, $reset);
 
   foreach ($keys as $id => $key) {
@@ -481,7 +474,7 @@ function key_get_keys_by_type_group($type_group, $reset = FALSE) {
 function key_get_key_names_as_options($filters = array(), $reset = FALSE) {
   $options = array();
 
-  $keys = key_get_keys($reset);
+  $keys = key_get_keys();
 
   foreach ($filters as $index => $filter) {
     switch ($index) {
@@ -511,27 +504,12 @@ function key_get_key_names_as_options($filters = array(), $reset = FALSE) {
  *
  * @param string $id
  *   The machine name of the configuration to get.
- * @param bool $reset
- *   A flag to force the configuration to be retrieved from the database.
  *
  * @return array
  *   A key configuration.
  */
-function key_get_key($id, $reset = FALSE) {
-  $configs = &backdrop_static(__FUNCTION__);
-
-  if (!isset($configs) || $reset) {
-    $configs = key_get_keys($reset);
-  }
-
-  if (array_key_exists($id, $configs)) {
-    $config = $configs[$id];
-  }
-  else {
-    $config = NULL;
-  }
-
-  return $config;
+function key_get_key($id) {
+  return config_get('key.key.' . $id);
 }
 
 /**
@@ -550,10 +528,11 @@ function key_get_key($id, $reset = FALSE) {
 function key_save_key($fields, $original_config = array(), $messages = TRUE) {
   $save_config = config('key.key.' . $fields['id']);
   $save_config->setMultiple($fields);
+  $config_is_new = $save_config->isNew();
   $save_config->save();
 
   // Load the configuration to make sure it was saved.
-  $key_config = key_get_key($fields['id'], TRUE);
+  $key_config = key_get_key($fields['id']);
   if (empty($key_config)) {
     $key_config = NULL;
   }
@@ -571,7 +550,7 @@ function key_save_key($fields, $original_config = array(), $messages = TRUE) {
   if ($messages) {
     $t_args = array('%label' => $fields['label']);
 
-    switch ($save_config->isNew()) {
+    switch ($config_is_new) {
       case TRUE:
         backdrop_set_message(t('The key %label has been added.', $t_args));
         watchdog('key', 'Added key %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), KEY_MENU_PATH . '/list'));

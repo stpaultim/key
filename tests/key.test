@@ -110,7 +110,7 @@ class KeyBasicAdminTest extends BackdropWebTestCase {
     $this->assertText($original_label, 'The configuration/authentication key still appears on the key listing page.');
 
     // Confirm that the key was edited successfully.
-    $config = key_get_key($original_id, TRUE);
+    $config = key_get_key($original_id);
     $this->assertEqual($config, $altered_config, 'The configuration/authentication key was edited successfully.');
 
     // Confirm that the key value was set successfully.
@@ -125,7 +125,7 @@ class KeyBasicAdminTest extends BackdropWebTestCase {
     $this->assertText(t('The key @label has been deleted.', array('@label' => $original_label)), 'Confirmation text appears after deleting the configuration/authentication key.');
 
     // Confirm that the key was deleted.
-    $config = key_get_key($original_id, TRUE);
+    $config = key_get_key($original_id);
     $this->assertFalse($config, 'The configuration/authentication key was deleted successfully.');
 
     // Confirm that the key no longer appears on the listing page.
@@ -142,7 +142,7 @@ class KeyBasicAdminTest extends BackdropWebTestCase {
     $original_id = strtolower($original_label);
 
     // Define a file location for the test key.
-    $original_file_location = __DIR__ . '/tests/keys/256-bit.key';
+    $original_file_location = __DIR__ . '/keys/256-bit.key';
 
     // Define a configuration.
     $original_config = array(
@@ -196,7 +196,7 @@ class KeyBasicAdminTest extends BackdropWebTestCase {
     $this->assertEqual($key_value, file_get_contents($original_file_location), 'The file/encryption key value was retrieved successfully.');
 
     // Define a new file location.
-    $new_file_location = __DIR__ . '/tests/keys/256-bit_base64-encoded.key';
+    $new_file_location = __DIR__ . '/keys/256-bit_base64-encoded.key';
 
     // Define an altered configuration.
     $altered_config = $config;
@@ -233,7 +233,7 @@ class KeyBasicAdminTest extends BackdropWebTestCase {
     $this->assertText($original_label, 'The file/encryption key still appears on the key listing page.');
 
     // Confirm that the key was edited successfully.
-    $config = key_get_key($original_id, TRUE);
+    $config = key_get_key($original_id);
     $this->assertEqual($config, $altered_config, 'The file/encryption key was edited successfully.');
 
     // Confirm that the key value can be retrieved successfully.
@@ -248,7 +248,7 @@ class KeyBasicAdminTest extends BackdropWebTestCase {
     $this->assertText(t('The key @label has been deleted.', array('@label' => $original_label)), 'Confirmation text appears after deleting the file/encryption key.');
 
     // Confirm that the key was deleted.
-    $config = key_get_key($original_id, TRUE);
+    $config = key_get_key($original_id);
     $this->assertFalse($config, 'The file/encryption key was deleted successfully.');
 
     // Confirm that the key no longer appears on the listing page.
