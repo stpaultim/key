@@ -18,14 +18,6 @@ Web Services
 Key requires the [Plugin Manager](https://www.backdropcms.org/project/plugin_manager)
 module.
 
-## Recommended Modules
-
-The following module extends Key's functionality:
-
-* **[Townsend Security Key
-Connection](https://www.drupal.org/project/townsec_key)** Allows keys
-to be stored on a designated external key management server.
-
 ## Installation
 
 Install Key using a standard method for installing a contributed Backdrop
@@ -122,7 +114,16 @@ Alternatively, you could also create your own 32 character string and search
 online for a site that can base64 encode it. Then save it to text file that is
 outside the web root and enter the path to the key in the key settings.
 
-## Using a Key
+## Integrating Modules
+
+The following modules have not been ported to Backdrop at this time, but allow
+keys to be stored on a designated external key management server:
+
+* [Townsend Security Key
+Connection](https://www.drupal.org/project/townsec_key)
+* [Lockr](https://www.drupal.org/project/lockr)
+
+## For Developers
 
 Creating a key will have no effect unless another module makes use of
 it. That integration would typically present itself to the end user in
@@ -134,7 +135,7 @@ Modules can add a key field to a form using the key_select API element,
 which behaves like a select element, but is populated with available
 keys as options.
 
-```
+```php
 $form['secret_key'] = array(
   '#type' => 'key_select',
   '#title' => t('Secret key'),
