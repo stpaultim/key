@@ -572,12 +572,12 @@ function key_save_key($fields, $original_config = array(), $messages = TRUE) {
     $t_args = array('%label' => $fields['label']);
 
     switch ($save_config->isNew()) {
-      case MergeQuery::STATUS_INSERT:
+      case TRUE:
         backdrop_set_message(t('The key %label has been added.', $t_args));
         watchdog('key', 'Added key %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), KEY_MENU_PATH . '/list'));
         break;
 
-      case MergeQuery::STATUS_UPDATE:
+      case FALSE:
         backdrop_set_message(t('The key %label has been updated.', $t_args));
         watchdog('key', 'Updated key %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), KEY_MENU_PATH . '/list'));
         break;
