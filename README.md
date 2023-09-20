@@ -56,7 +56,7 @@ A key provider is the means by which the key value is stored and/or
 provided when needed. The following key providers are included with
 Key:
 
-* **Configuration:** Stores the key in Drupal configuration settings.
+* **Configuration:** Stores the key in Backdrop configuration settings.
 The key value can be set, edited, and viewed through the administrative
 interface, making it useful during site development. However, for
 better security on production websites, keys should not be stored in
@@ -97,14 +97,30 @@ Key inputs are Plugin Manager plugins, so new inputs can be defined easily.
 
 ## Generating a Random Encryption Key
 
-An easy way to generate a random encryption key in a Unix environment is to
+Encryption keys have options for key size. The default key size
+is 256 bits, with 8 bits per byte. For example, a string like
+`12345678901234567890123456789012` has 32 characters/bytes or 256 bits. There is
+also an option for specifying if the key was Base64-encoded. Base64 is used here
+to encode arbitrary bytes which are known to be safe to send without getting
+corrupted.
+
+One way to generate a random encryption key in a Unix environment is to
 enter the following command (changing the path and file name to suit your
 needs):
 
 `dd if=/dev/urandom bs=32 count=1 > /path/to/secret.key`
 
 This will create a binary file with a random 256-bit key. For a 128-bit key,
-change the 32 to 16 in the command.
+change the 32 to 16 in the command. For simplification, consider the "bs" (byte)
+to equal a character.
+
+To use base64 encoding when generating the key, use:
+
+`dd if=/dev/urandom bs=32 count=1 | base64 -i - > path/to/secret.key`
+
+Alternatively, you could also create your own 32 character string and search
+online for a site that can base64 encode it. Then save it to text file that is
+outside the web root and enter the path to the key in the key settings.
 
 ## Using a Key
 

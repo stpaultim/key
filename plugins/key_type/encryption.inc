@@ -7,7 +7,7 @@
 
 $plugin = array(
   'label' => t('Encryption'),
-  'description' => t('A generic key type to use for an encryption key that does not belong to any other defined key type.'),
+  'description' => t('Can be used for encrypting and decrypting data. This key type has a field for selecting a key size, which is used to validate the size of the key value.'),
   'group' => 'encryption',
   'key value' => array(
     'plugin' => 'text_field',
@@ -57,7 +57,7 @@ function key_type_encryption_build_configuration_form($form, &$form_state) {
   $form['key_size'] = array(
     '#type' => 'select',
     '#title' => t('Key size'),
-    '#description' => t('The size of the key in bits, with 8 bits per byte.'),
+    '#description' => t('The size of the key in bits, with 8 bits per byte. For example, a string like "12345678901234567890123456789012" has 32 characters/bytes or 256 bits.'),
     '#options' => $key_size_options + array('other' => t('Other')),
     '#default_value' => $key_size,
     '#required' => TRUE,

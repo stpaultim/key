@@ -409,11 +409,11 @@ function key_config_form_submit($form, &$form_state) {
     'label' => (string) $form_state['values']['label'],
     'description' => (string) $form_state['values']['description'],
     'key_type' => (string) $form_state['values']['key_type'],
-    'key_type_settings' => (isset($form_state['values']['key_type_settings'])) ? serialize($form_state['values']['key_type_settings']) : array(),
+    'key_type_settings' => (isset($form_state['values']['key_type_settings'])) ? $form_state['values']['key_type_settings'] : array(),
     'key_provider' => (string) $form_state['values']['key_provider'],
-    'key_provider_settings' => (isset($form_state['values']['key_provider_settings'])) ? serialize($form_state['values']['key_provider_settings']) : array(),
+    'key_provider_settings' => (isset($form_state['values']['key_provider_settings'])) ? $form_state['values']['key_provider_settings'] : array(),
     'key_input' => (string) $form_state['values']['key_input'],
-    'key_input_settings' => (isset($form_state['values']['key_input_settings'])) ? serialize($form_state['values']['key_input_settings']) : array(),
+    'key_input_settings' => (isset($form_state['values']['key_input_settings'])) ? $form_state['values']['key_input_settings'] : array(),
   );
 
   $save_result = key_save_key($fields, $form_state['storage']['original_key']);
