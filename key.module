@@ -24,7 +24,7 @@ function key_autoload_info() {
  */
 function key_config_info() {
   $prefixes['key.key'] = array(
-    'name_key' => 'name',
+    'name_key' => 'id',
     'label_key' => 'label',
     'group' => t('Keys'),
   );
