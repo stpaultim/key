@@ -50,7 +50,7 @@ class KeyBasicAdminTest extends BackdropWebTestCase {
       'key_type_settings' => array(),
       'key_provider' => 'config',
       'key_provider_settings' => array('key_value' => $original_key_value),
-      'key_input' => 'text_field',
+      'key_input' => 'textarea_field',
       'key_input_settings' => array(),
     );
 

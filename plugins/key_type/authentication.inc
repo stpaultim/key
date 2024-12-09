@@ -10,6 +10,6 @@ $plugin = array(
   'description' => t('Use for a password or API key. (A generic key type that does not belong to any other defined key type.)'),
   'group' => 'authentication',
   'key value' => array(
-    'plugin' => 'text_field',
+    'plugin' => 'textarea_field',
   ),
 );

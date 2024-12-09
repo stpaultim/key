@@ -33,3 +33,18 @@ function key_update_1000() {
     db_drop_table('key_config');
   }
 }
+
+/**
+ * Use textarea for authentication keys stored in config.
+ */
+function key_update_1002() {
+  $config_names = config_get_names_with_prefix('key.key.');
+  foreach ($config_names as $name) {
+    $config = config($name);
+    if ($config->get('key_type') == 'authentication' && $config->get('key_provider') == 'config' && $config->get('key_input') == 'text_field') {
+      $config->set('key_input', 'textarea_field');
+      $config->save();
+    }
+  }
+
+}

@@ -7,7 +7,7 @@
 
 $plugin = array(
   'label' => t('Configuration'),
-  'description' => t('The Configuration key provider stores the key in configuration in the database.'),
+  'description' => t('The Configuration key provider stores the key in configuration, which is likely web-accessible (and should not be).'),
   'storage method' => 'config',
   'key value' => array(
     'accepted' => TRUE,
