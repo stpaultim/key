@@ -359,7 +359,7 @@ function key_get_keys() {
     $configs[$key_config['id']] = $key_config;
   }
 
-  return is_array($configs) ? $configs : array();
+  return (isset($configs) && is_array($configs)) ? $configs : array();
 }
 
 /**
