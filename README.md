@@ -57,8 +57,9 @@ when editing, making it even more important that this provider not be
 used in a production environment.
 * **File:** Stores the key in a file, which can be anywhere in the file
 system, as long as it's readable by the user that runs the web server.
-Storing the key in a file outside of the web root is generally more
-secure than storing it in the database.
+You will be required to manually create this file with the key and place
+it on your server. Storing the key in a file outside of the web root is
+generally more secure than storing it in the database.
 
 Both the Configuration and File provider plugins support storing the
 key with Base64 encoding.
